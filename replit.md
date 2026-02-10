@@ -72,7 +72,25 @@ postcss.config.mjs      # PostCSS configuration
 ## Environment Variables
 - `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key (safe for browser)
+- `NEXT_PUBLIC_SITE_URL` - Full public URL of the app (e.g. `https://your-app.replit.dev`), used for email confirmation redirects
 - `OPENAI_API_KEY` - OpenAI API key (server-side only, stored as secret)
+
+## Supabase Dashboard Setup (Auth URL Configuration)
+To ensure email confirmation links work correctly (especially on mobile):
+
+1. Go to your **Supabase Dashboard** → **Authentication** → **URL Configuration**
+2. Set **Site URL** to your Replit public URL, e.g.:
+   `https://your-app-id.replit.dev`
+3. Under **Redirect URLs**, add:
+   `https://your-app-id.replit.dev/auth/callback`
+4. Save changes
+
+This ensures Supabase email confirmation links redirect to the correct domain instead of `localhost:3000`.
+
+### Email Confirmation Flow
+1. User signs up → Supabase sends confirmation email with link pointing to `NEXT_PUBLIC_SITE_URL/auth/callback`
+2. User clicks link → `app/auth/callback/route.ts` exchanges the auth code for a session
+3. User is redirected to `/app` (or `/login` on failure)
 
 ## Run Instructions
 - Dev: `npm run dev` (Next.js dev server on port 5000)
@@ -86,3 +104,4 @@ postcss.config.mjs      # PostCSS configuration
 - 2026-02-10: Added CSV import feature for opportunities with column mapping, validation, and error tracking
 - 2026-02-10: Added tenant-scoped analytics dashboard with KPIs and breakdowns by role, industry, source
 - 2026-02-10: Added AI-powered analysis feature using OpenAI gpt-5.2 with structured JSON insights on dashboard
+- 2026-02-10: Fixed email confirmation redirect - added NEXT_PUBLIC_SITE_URL, emailRedirectTo in signup, documented Supabase URL config

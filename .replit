@@ -37,3 +37,8 @@ author = "agent"
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
+
+[userenv]
+
+[userenv.shared]
+NEXT_PUBLIC_SITE_URL = "https://12cfc90b-fb42-4ec2-8378-9b876607ab1d-00-1ylpvmy1gna58.kirk.replit.dev"
