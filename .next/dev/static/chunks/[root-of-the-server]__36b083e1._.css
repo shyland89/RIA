@@ -782,6 +782,11 @@ body {
   padding-bottom: .75rem;
 }
 
+.py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
 .pl-2 {
   padding-left: .5rem;
 }

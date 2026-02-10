@@ -13,11 +13,26 @@ export default async function AppPage() {
     redirect("/login");
   }
 
-  const { data: membership, error: membershipError } = await supabase
+  let { data: membership } = await supabase
     .from("memberships")
     .select("role, org_id, organizations(id, name)")
     .eq("user_id", user.id)
     .maybeSingle();
+
+  if (!membership) {
+    const { error: bootstrapError } = await supabase.rpc("bootstrap_org", {
+      org_name: `${user.email}'s Organization`,
+    });
+
+    if (!bootstrapError) {
+      const { data: freshMembership } = await supabase
+        .from("memberships")
+        .select("role, org_id, organizations(id, name)")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      membership = freshMembership;
+    }
+  }
 
   const org = membership?.organizations as { id: string; name: string } | null;
 

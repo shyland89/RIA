@@ -10,6 +10,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent) {
@@ -35,27 +36,8 @@ export default function SignupPage() {
       return;
     }
 
-    try {
-      const res = await fetch("/api/bootstrap", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orgName: `${email}'s Organization` }),
-      });
-
-      if (!res.ok) {
-        const body = await res.json();
-        setError(body.error || "Failed to set up your organization");
-        setLoading(false);
-        return;
-      }
-    } catch {
-      setError("Failed to set up your organization");
-      setLoading(false);
-      return;
-    }
-
-    router.push("/app");
-    router.refresh();
+    setLoading(false);
+    setSuccess(true);
   }
 
   return (
@@ -88,7 +70,14 @@ export default function SignupPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {success && (
+          <div className="rounded-md bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 px-4 py-4 text-sm text-green-700 dark:text-green-400 text-center" data-testid="text-signup-success">
+            <p className="font-medium mb-1">Check your email</p>
+            <p className="text-xs">We sent a confirmation link to <strong>{email}</strong>. Click it to activate your account, then sign in.</p>
+          </div>
+        )}
+
+        {!success && <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
             <div
               className="rounded-md bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive"
@@ -148,7 +137,7 @@ export default function SignupPage() {
           >
             {loading ? "Creating account..." : "Create account"}
           </button>
-        </form>
+        </form>}
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Already have an account?{" "}
