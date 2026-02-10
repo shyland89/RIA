@@ -161,13 +161,22 @@ export default function ImportPage() {
               Import Opportunities
             </span>
           </div>
-          <Link
-            href="/app"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            data-testid="link-back-dashboard"
-          >
-            Back to Dashboard
-          </Link>
+          <div className="flex items-center gap-3 flex-wrap">
+            <Link
+              href="/app/dashboard"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              data-testid="link-analytics"
+            >
+              Analytics
+            </Link>
+            <Link
+              href="/app"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              data-testid="link-back-dashboard"
+            >
+              Home
+            </Link>
+          </div>
         </div>
       </header>
 

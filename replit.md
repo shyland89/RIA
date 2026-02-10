@@ -22,7 +22,9 @@ app/                    # Next.js App Router pages
   api/bootstrap/route.ts   # POST endpoint to create org + membership on signup
   api/import/upload/route.ts  # POST: parse CSV, return headers + preview
   api/import/execute/route.ts # POST: validate + insert opportunities from CSV
+  api/analytics/summary/route.ts # GET: tenant-scoped analytics summary JSON
   app/import/page.tsx      # CSV upload + column mapping + import UI
+  app/dashboard/page.tsx   # Analytics dashboard with KPIs and breakdowns
 lib/
   supabase/
     client.ts           # Browser Supabase client
@@ -73,3 +75,4 @@ postcss.config.mjs      # PostCSS configuration
 - 2026-02-10: Initial setup - Next.js App Router + Supabase auth with login, signup, and protected dashboard
 - 2026-02-10: Added multi-tenant schema with RLS, bootstrap API route, org display on dashboard
 - 2026-02-10: Added CSV import feature for opportunities with column mapping, validation, and error tracking
+- 2026-02-10: Added tenant-scoped analytics dashboard with KPIs and breakdowns by role, industry, source
