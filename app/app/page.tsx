@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "./sign-out-button";
 
@@ -147,6 +148,19 @@ export default async function AppPage() {
               </p>
             )}
           </div>
+        </div>
+
+        <div className="mt-6">
+          <Link
+            href="/app/import"
+            className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+            data-testid="link-import"
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            Import Opportunities
+          </Link>
         </div>
       </main>
     </div>

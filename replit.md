@@ -20,6 +20,9 @@ app/                    # Next.js App Router pages
   app/page.tsx          # Protected dashboard (server component)
   app/sign-out-button.tsx  # Client-side sign out button
   api/bootstrap/route.ts   # POST endpoint to create org + membership on signup
+  api/import/upload/route.ts  # POST: parse CSV, return headers + preview
+  api/import/execute/route.ts # POST: validate + insert opportunities from CSV
+  app/import/page.tsx      # CSV upload + column mapping + import UI
 lib/
   supabase/
     client.ts           # Browser Supabase client
@@ -39,6 +42,9 @@ postcss.config.mjs      # PostCSS configuration
 - **organizations**: id (uuid pk), name, created_at
 - **profiles**: id (uuid pk, FK auth.users), email, created_at
 - **memberships**: id (uuid pk), org_id (FK organizations), user_id (FK auth.users), role (admin|member|viewer), created_at
+- **opportunities**: id (uuid pk), org_id (FK organizations), name, role, industry, source, amount (numeric), outcome (open|won|lost), created_at
+- **import_jobs**: id (uuid pk), org_id (FK organizations), user_id (FK auth.users), filename, inserted_count, error_count, created_at
+- **import_errors**: id (uuid pk), job_id (FK import_jobs), row_number, error_message, raw_row_json (jsonb), created_at
 
 ## Auth & Tenant Flow
 1. Middleware intercepts all requests, refreshes session
@@ -66,3 +72,4 @@ postcss.config.mjs      # PostCSS configuration
 ## Recent Changes
 - 2026-02-10: Initial setup - Next.js App Router + Supabase auth with login, signup, and protected dashboard
 - 2026-02-10: Added multi-tenant schema with RLS, bootstrap API route, org display on dashboard
+- 2026-02-10: Added CSV import feature for opportunities with column mapping, validation, and error tracking
