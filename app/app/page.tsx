@@ -12,6 +12,14 @@ export default async function AppPage() {
     redirect("/login");
   }
 
+  const { data: membership, error: membershipError } = await supabase
+    .from("memberships")
+    .select("role, org_id, organizations(id, name)")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  const org = membership?.organizations as { id: string; name: string } | null;
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border">
@@ -65,35 +73,80 @@ export default async function AppPage() {
           </p>
         </div>
 
-        <div className="rounded-md border border-border bg-card p-6">
-          <h2 className="text-sm font-medium text-foreground mb-4">
-            Account details
-          </h2>
-          <dl className="space-y-3 text-sm">
-            <div className="flex justify-between gap-4 flex-wrap">
-              <dt className="text-muted-foreground">User ID</dt>
-              <dd
-                className="font-mono text-foreground text-xs"
-                data-testid="text-user-id"
+        <div className="grid gap-6 sm:grid-cols-2">
+          <div className="rounded-md border border-border bg-card p-6">
+            <h2 className="text-sm font-medium text-foreground mb-4">
+              Account details
+            </h2>
+            <dl className="space-y-3 text-sm">
+              <div className="flex justify-between gap-4 flex-wrap">
+                <dt className="text-muted-foreground">User ID</dt>
+                <dd
+                  className="font-mono text-foreground text-xs"
+                  data-testid="text-user-id"
+                >
+                  {user.id}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-4 flex-wrap">
+                <dt className="text-muted-foreground">Email</dt>
+                <dd
+                  className="text-foreground"
+                  data-testid="text-user-email-detail"
+                >
+                  {user.email}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-4 flex-wrap">
+                <dt className="text-muted-foreground">Last sign in</dt>
+                <dd className="text-foreground" data-testid="text-last-signin">
+                  {user.last_sign_in_at
+                    ? new Date(user.last_sign_in_at).toLocaleString()
+                    : "N/A"}
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+          <div className="rounded-md border border-border bg-card p-6">
+            <h2 className="text-sm font-medium text-foreground mb-4">
+              Organization
+            </h2>
+            {org ? (
+              <dl className="space-y-3 text-sm">
+                <div className="flex justify-between gap-4 flex-wrap">
+                  <dt className="text-muted-foreground">Name</dt>
+                  <dd className="text-foreground" data-testid="text-org-name">
+                    {org.name}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-4 flex-wrap">
+                  <dt className="text-muted-foreground">Org ID</dt>
+                  <dd
+                    className="font-mono text-foreground text-xs"
+                    data-testid="text-org-id"
+                  >
+                    {org.id}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-4 flex-wrap">
+                  <dt className="text-muted-foreground">Your role</dt>
+                  <dd className="text-foreground" data-testid="text-user-role">
+                    <span className="inline-flex items-center rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                      {membership?.role}
+                    </span>
+                  </dd>
+                </div>
+              </dl>
+            ) : (
+              <p
+                className="text-sm text-muted-foreground"
+                data-testid="text-no-org"
               >
-                {user.id}
-              </dd>
-            </div>
-            <div className="flex justify-between gap-4 flex-wrap">
-              <dt className="text-muted-foreground">Email</dt>
-              <dd className="text-foreground" data-testid="text-user-email-detail">
-                {user.email}
-              </dd>
-            </div>
-            <div className="flex justify-between gap-4 flex-wrap">
-              <dt className="text-muted-foreground">Last sign in</dt>
-              <dd className="text-foreground" data-testid="text-last-signin">
-                {user.last_sign_in_at
-                  ? new Date(user.last_sign_in_at).toLocaleString()
-                  : "N/A"}
-              </dd>
-            </div>
-          </dl>
+                No organization found. Contact support if this is unexpected.
+              </p>
+            )}
+          </div>
         </div>
       </main>
     </div>

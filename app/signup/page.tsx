@@ -35,6 +35,25 @@ export default function SignupPage() {
       return;
     }
 
+    try {
+      const res = await fetch("/api/bootstrap", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orgName: `${email}'s Organization` }),
+      });
+
+      if (!res.ok) {
+        const body = await res.json();
+        setError(body.error || "Failed to set up your organization");
+        setLoading(false);
+        return;
+      }
+    } catch {
+      setError("Failed to set up your organization");
+      setLoading(false);
+      return;
+    }
+
     router.push("/app");
     router.refresh();
   }
