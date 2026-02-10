@@ -29,6 +29,18 @@ type SummaryData = {
   bySource: BreakdownRow[];
 };
 
+type AiInsight = {
+  title: string;
+  description: string;
+  type: "positive" | "negative" | "neutral";
+};
+
+type AiAnalysis = {
+  summary: string;
+  insights: AiInsight[];
+  recommendations: string[];
+};
+
 function fmtPct(v: number | null): string {
   if (v === null) return "—";
   return `${(v * 100).toFixed(1)}%`;
@@ -48,6 +60,29 @@ export default function DashboardPage() {
   const [data, setData] = useState<SummaryData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [aiAnalysis, setAiAnalysis] = useState<AiAnalysis | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
+
+  async function runAiAnalysis() {
+    setAiLoading(true);
+    setAiError("");
+    setAiAnalysis(null);
+    try {
+      const res = await fetch("/api/ai/analyze", { method: "POST" });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setAiError(body.error || "AI analysis failed");
+        return;
+      }
+      const json = await res.json();
+      setAiAnalysis(json.analysis);
+    } catch {
+      setAiError("AI analysis failed. Please try again.");
+    } finally {
+      setAiLoading(false);
+    }
+  }
 
   useEffect(() => {
     async function load() {
@@ -187,6 +222,119 @@ export default function DashboardPage() {
               <BreakdownTable title="By Role" rows={data.byRole} testId="breakdown-role" />
               <BreakdownTable title="By Industry" rows={data.byIndustry} testId="breakdown-industry" />
               <BreakdownTable title="By Source" rows={data.bySource} testId="breakdown-source" />
+            </div>
+
+            {/* AI Analysis Section */}
+            <div className="rounded-md border border-border bg-card p-6" data-testid="ai-analysis-section">
+              <div className="flex items-center justify-between gap-4 flex-wrap mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-primary/10">
+                    <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-foreground">AI-Powered Analysis</h3>
+                    <p className="text-xs text-muted-foreground">Get actionable insights from your pipeline data</p>
+                  </div>
+                </div>
+                <button
+                  onClick={runAiAnalysis}
+                  disabled={aiLoading}
+                  className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  data-testid="button-ai-analyze"
+                >
+                  {aiLoading ? (
+                    <>
+                      <svg className="w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      Analyze with AI
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {aiError && (
+                <div className="rounded-md border border-red-300 bg-red-50 dark:bg-red-950/20 dark:border-red-800 px-4 py-3 text-sm text-red-700 dark:text-red-400 mb-4" data-testid="text-ai-error">
+                  {aiError}
+                </div>
+              )}
+
+              {!aiAnalysis && !aiLoading && !aiError && (
+                <p className="text-sm text-muted-foreground" data-testid="text-ai-placeholder">
+                  Click the button above to generate AI-powered insights based on your opportunities data.
+                </p>
+              )}
+
+              {aiAnalysis && (
+                <div className="space-y-6" data-testid="ai-results">
+                  <div data-testid="ai-summary">
+                    <p className="text-sm text-foreground leading-relaxed">{aiAnalysis.summary}</p>
+                  </div>
+
+                  <div>
+                    <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Key Insights</h4>
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      {aiAnalysis.insights.map((insight, i) => (
+                        <div
+                          key={i}
+                          className={`rounded-md border px-4 py-3 ${
+                            insight.type === "positive"
+                              ? "border-green-300 bg-green-50 dark:bg-green-950/20 dark:border-green-800"
+                              : insight.type === "negative"
+                                ? "border-red-300 bg-red-50 dark:bg-red-950/20 dark:border-red-800"
+                                : "border-border bg-muted/30"
+                          }`}
+                          data-testid={`ai-insight-${i}`}
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            {insight.type === "positive" && (
+                              <svg className="w-3.5 h-3.5 text-green-600 dark:text-green-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
+                            {insight.type === "negative" && (
+                              <svg className="w-3.5 h-3.5 text-red-600 dark:text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                              </svg>
+                            )}
+                            {insight.type === "neutral" && (
+                              <svg className="w-3.5 h-3.5 text-muted-foreground shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            )}
+                            <p className="text-xs font-medium text-foreground">{insight.title}</p>
+                          </div>
+                          <p className="text-xs text-muted-foreground leading-relaxed">{insight.description}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div data-testid="ai-recommendations">
+                    <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Recommendations</h4>
+                    <ul className="space-y-2">
+                      {aiAnalysis.recommendations.map((rec, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-foreground" data-testid={`ai-rec-${i}`}>
+                          <svg className="w-4 h-4 text-primary shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                          <span>{rec}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

@@ -23,8 +23,9 @@ app/                    # Next.js App Router pages
   api/import/upload/route.ts  # POST: parse CSV, return headers + preview
   api/import/execute/route.ts # POST: validate + insert opportunities from CSV
   api/analytics/summary/route.ts # GET: tenant-scoped analytics summary JSON
+  api/ai/analyze/route.ts  # POST: AI-powered pipeline analysis via OpenAI
   app/import/page.tsx      # CSV upload + column mapping + import UI
-  app/dashboard/page.tsx   # Analytics dashboard with KPIs and breakdowns
+  app/dashboard/page.tsx   # Analytics dashboard with KPIs, breakdowns, and AI insights
 lib/
   supabase/
     client.ts           # Browser Supabase client
@@ -61,9 +62,17 @@ postcss.config.mjs      # PostCSS configuration
 - **organizations**: members can SELECT their org; admins can UPDATE
 - `bootstrap_org` RPC uses SECURITY DEFINER to bypass RLS during signup bootstrap
 
+## AI Analysis
+- **Endpoint**: POST /api/ai/analyze - tenant-scoped analytics sent to OpenAI for structured JSON insights
+- **Model**: gpt-5.2 via OpenAI Responses API with JSON output format
+- **SDK**: openai (Node.js)
+- **Security**: API key server-side only via process.env.OPENAI_API_KEY
+- **Response**: { summary, insights[{title, description, type}], recommendations[] }
+
 ## Environment Variables
 - `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anonymous key (safe for browser)
+- `OPENAI_API_KEY` - OpenAI API key (server-side only, stored as secret)
 
 ## Run Instructions
 - Dev: `npm run dev` (Next.js dev server on port 5000)
@@ -76,3 +85,4 @@ postcss.config.mjs      # PostCSS configuration
 - 2026-02-10: Added multi-tenant schema with RLS, bootstrap API route, org display on dashboard
 - 2026-02-10: Added CSV import feature for opportunities with column mapping, validation, and error tracking
 - 2026-02-10: Added tenant-scoped analytics dashboard with KPIs and breakdowns by role, industry, source
+- 2026-02-10: Added AI-powered analysis feature using OpenAI gpt-5.2 with structured JSON insights on dashboard
