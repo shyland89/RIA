@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 export type UserOrg = {
   user: { id: string; email: string };
@@ -11,6 +12,13 @@ export type UserOrgError = {
   status: number;
 };
 
+function createAdminClient() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
+
 export async function getUserOrg(): Promise<UserOrg | UserOrgError> {
   const supabase = await createClient();
 
@@ -22,28 +30,30 @@ export async function getUserOrg(): Promise<UserOrg | UserOrgError> {
     return { error: "Unauthorized", status: 401 };
   }
 
-  const { data: membership } = await supabase
+  const admin = createAdminClient();
+
+  const { data: membership, error: memError } = await admin
     .from("memberships")
     .select("org_id, role")
     .eq("user_id", user.id)
     .limit(1)
     .maybeSingle();
 
-  if (!membership) {
+  if (memError || !membership) {
     return {
       error: "No membership found. You may need to create an organization or contact support.",
       status: 403,
     };
   }
 
-  const { data: org } = await supabase
+  const { data: org, error: orgError } = await admin
     .from("organizations")
     .select("id, name")
     .eq("id", membership.org_id)
     .limit(1)
     .maybeSingle();
 
-  if (!org) {
+  if (orgError || !org) {
     return {
       error: "Organization record not found. Please contact support.",
       status: 500,
