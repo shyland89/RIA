@@ -21,8 +21,6 @@ export default async function AppPage() {
       org_name: `${user.email}'s Organization`,
     });
 
-    console.log("[AppPage] bootstrap_org result:", bootstrapError ? bootstrapError.message : "success");
-
     if (!bootstrapError) {
       result = await getUserOrg();
     }

@@ -19,39 +19,40 @@ export async function getUserOrg(): Promise<UserOrg | UserOrgError> {
     error: authError,
   } = await supabase.auth.getUser();
 
-  console.log("[getUserOrg] auth user:", user?.id ?? "null", authError?.message ?? "ok");
-
   if (!user) {
     return { error: "Unauthorized", status: 401 };
   }
 
-  const { data: rpcResult, error: rpcError } = await supabase.rpc("get_user_org");
-
-  console.log(
-    "[getUserOrg] RPC get_user_org =>",
-    rpcResult ? JSON.stringify(rpcResult) : "null",
-    rpcError ? `error: ${rpcError.message}` : "ok"
-  );
+  const { data: rpcData, error: rpcError } = await supabase.rpc("get_user_org");
 
   if (rpcError) {
-    console.error("[getUserOrg] RPC error, falling back to direct queries:", rpcError.message);
     return await getUserOrgFallback(supabase, user);
   }
 
-  if (rpcResult?.error) {
-    if (rpcResult.error === "No membership found") {
+  const rpcResult = typeof rpcData === "string" ? JSON.parse(rpcData) : rpcData;
+
+  if (!rpcResult || rpcResult.error) {
+    if (rpcResult?.error === "No membership found") {
       return {
         error: "No membership found. You may need to create an organization or contact support.",
         status: 403,
       };
     }
-    return { error: rpcResult.error, status: 500 };
+    return { error: rpcResult?.error ?? "Unknown error", status: 500 };
+  }
+
+  const orgId = rpcResult.org_id ?? "";
+  const orgName = rpcResult.org_name ?? "";
+  const role = rpcResult.role ?? "";
+
+  if (!orgId || !orgName) {
+    return { error: "Incomplete organization data returned", status: 500 };
   }
 
   return {
     user: { id: user.id, email: user.email ?? "" },
-    membership: { org_id: rpcResult.org_id, role: rpcResult.role },
-    org: { id: rpcResult.org_id, name: rpcResult.org_name },
+    membership: { org_id: orgId, role },
+    org: { id: orgId, name: orgName },
   };
 }
 
@@ -59,17 +60,11 @@ async function getUserOrgFallback(
   supabase: Awaited<ReturnType<typeof createClient>>,
   user: { id: string; email?: string }
 ): Promise<UserOrg | UserOrgError> {
-  const { data: membership, error: memError } = await supabase
+  const { data: membership } = await supabase
     .from("memberships")
     .select("org_id, role")
     .eq("user_id", user.id)
     .maybeSingle();
-
-  console.log(
-    "[getUserOrg fallback] membership lookup =>",
-    membership ? JSON.stringify(membership) : "null",
-    memError ? `error: ${memError.message}` : "ok"
-  );
 
   if (!membership) {
     return {
@@ -78,17 +73,11 @@ async function getUserOrgFallback(
     };
   }
 
-  const { data: org, error: orgError } = await supabase
+  const { data: org } = await supabase
     .from("organizations")
     .select("id, name")
     .eq("id", membership.org_id)
     .maybeSingle();
-
-  console.log(
-    "[getUserOrg fallback] org lookup =>",
-    org ? JSON.stringify(org) : "null",
-    orgError ? `error: ${orgError.message}` : "ok"
-  );
 
   if (!org) {
     return {
