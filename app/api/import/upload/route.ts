@@ -1,28 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
+import { getUserOrg, isUserOrgError } from "@/lib/get-user-org";
 import { NextResponse } from "next/server";
 import { parse } from "csv-parse/sync";
 
 export async function POST(request: Request) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const result = await getUserOrg();
 
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { data: membership } = await supabase
-    .from("memberships")
-    .select("org_id")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (!membership) {
-    return NextResponse.json(
-      { error: "No organization found" },
-      { status: 403 }
-    );
+  if (isUserOrgError(result)) {
+    return NextResponse.json({ error: result.error }, { status: result.status });
   }
 
   const formData = await request.formData();

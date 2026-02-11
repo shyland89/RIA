@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getUserOrg, isUserOrgError } from "@/lib/get-user-org";
 import { NextResponse } from "next/server";
 
 type Opportunity = {
@@ -55,32 +56,18 @@ function buildBreakdown(opps: Opportunity[], field: keyof Opportunity): Breakdow
 }
 
 export async function GET() {
+  const result = await getUserOrg();
+
+  if (isUserOrgError(result)) {
+    return NextResponse.json({ error: result.error }, { status: result.status });
+  }
+
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { data: membership } = await supabase
-    .from("memberships")
-    .select("org_id")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (!membership) {
-    return NextResponse.json(
-      { error: "No organization found" },
-      { status: 403 }
-    );
-  }
 
   const { data: opportunities, error } = await supabase
     .from("opportunities")
     .select("name, role, industry, source, amount, outcome")
-    .eq("org_id", membership.org_id);
+    .eq("org_id", result.membership.org_id);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

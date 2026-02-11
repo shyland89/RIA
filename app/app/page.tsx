@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { getUserOrg, isUserOrgError } from "@/lib/get-user-org";
 import { SignOutButton } from "./sign-out-button";
 
 export default async function AppPage() {
@@ -13,28 +14,23 @@ export default async function AppPage() {
     redirect("/login");
   }
 
-  let { data: membership } = await supabase
-    .from("memberships")
-    .select("role, org_id, organizations(id, name)")
-    .eq("user_id", user.id)
-    .maybeSingle();
+  let result = await getUserOrg();
 
-  if (!membership) {
+  if (isUserOrgError(result) && result.status === 403) {
     const { error: bootstrapError } = await supabase.rpc("bootstrap_org", {
       org_name: `${user.email}'s Organization`,
     });
 
+    console.log("[AppPage] bootstrap_org result:", bootstrapError ? bootstrapError.message : "success");
+
     if (!bootstrapError) {
-      const { data: freshMembership } = await supabase
-        .from("memberships")
-        .select("role, org_id, organizations(id, name)")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      membership = freshMembership;
+      result = await getUserOrg();
     }
   }
 
-  const org = membership?.organizations as { id: string; name: string } | null;
+  const hasOrg = !isUserOrgError(result);
+  const org = hasOrg ? result.org : null;
+  const role = hasOrg ? result.membership.role : null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -149,18 +145,24 @@ export default async function AppPage() {
                   <dt className="text-muted-foreground">Your role</dt>
                   <dd className="text-foreground" data-testid="text-user-role">
                     <span className="inline-flex items-center rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                      {membership?.role}
+                      {role}
                     </span>
                   </dd>
                 </div>
               </dl>
             ) : (
-              <p
-                className="text-sm text-muted-foreground"
-                data-testid="text-no-org"
-              >
-                No organization found. Contact support if this is unexpected.
-              </p>
+              <div data-testid="text-no-org">
+                <p className="text-sm text-muted-foreground mb-3">
+                  {isUserOrgError(result) ? result.error : "No organization found."}
+                </p>
+                <Link
+                  href="/app"
+                  className="inline-flex items-center rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground"
+                  data-testid="link-retry-org"
+                >
+                  Retry
+                </Link>
+              </div>
             )}
           </div>
         </div>
