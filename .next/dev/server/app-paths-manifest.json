@@ -1,1 +1,5 @@
-{}
+{
+  "/api/analytics/dimensions/route": "app/api/analytics/dimensions/route.js",
+  "/api/analytics/summary/route": "app/api/analytics/summary/route.js",
+  "/app/dashboard/page": "app/app/dashboard/page.js"
+}
