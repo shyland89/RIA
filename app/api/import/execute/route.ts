@@ -100,6 +100,8 @@ export async function POST(request: Request) {
     const createdAtStr = mapping.created_at ? row[mapping.created_at]?.trim() : undefined;
     const closedDateStr = mapping.closed_date ? row[mapping.closed_date]?.trim() : undefined;
     const pipelineDateStr = mapping.pipeline_accepted_date ? row[mapping.pipeline_accepted_date]?.trim() : undefined;
+    const segmentStr = mapping.segment ? row[mapping.segment]?.trim() : undefined;
+    const countryStr = mapping.country ? row[mapping.country]?.trim() : undefined;
 
     if (!name) rowErrors.push("name is required");
     if (!role) rowErrors.push("role is required");
@@ -154,14 +156,21 @@ export async function POST(request: Request) {
       continue;
     }
 
+    const normalizeDimension = (val: string | undefined): string | null => {
+      if (!val || val === "") return null;
+      return val;
+    };
+
     const insertData: any = {
       org_id: orgId,
-      name,
-      role,
-      industry,
-      source,
+      name: name || null,
+      role: normalizeDimension(role) ?? role,
+      industry: normalizeDimension(industry) ?? industry,
+      source: normalizeDimension(source) ?? source,
       amount,
       outcome,
+      segment: normalizeDimension(segmentStr),
+      country: normalizeDimension(countryStr),
     };
     if (createdAt) insertData.created_at = createdAt;
     if (closedDate) insertData.closed_date = closedDate;

@@ -1,5 +1,12 @@
 import { getUserOrg, isUserOrgError } from "@/lib/get-user-org";
 import { resolveDateFilter, DATE_MODE_LABELS, type DateFilterParams, type DateMode, type Period, DATE_MODES, PERIODS } from "@/lib/date-filter";
+import {
+  parseDimensionFiltersFromBody,
+  applyDimensionFiltersInMemory,
+  hasActiveDimensionFilters,
+  describeDimensionFilters,
+  UNKNOWN_VALUE,
+} from "@/lib/dimension-filter";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
@@ -9,6 +16,8 @@ type Opportunity = {
   role: string;
   industry: string;
   source: string;
+  segment: string | null;
+  country: string | null;
   amount: number;
   outcome: string;
 };
@@ -29,7 +38,8 @@ function buildBreakdown(
 ): BreakdownRow[] {
   const groups = new Map<string, Opportunity[]>();
   for (const opp of opps) {
-    const key = (opp[field] as string) || "(empty)";
+    const rawVal = opp[field];
+    const key = (rawVal === null || rawVal === undefined || rawVal === "") ? UNKNOWN_VALUE : String(rawVal);
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key)!.push(opp);
   }
@@ -87,11 +97,12 @@ export async function POST(request: Request) {
   };
 
   const filter = resolveDateFilter(filterParams);
+  const dimFilters = parseDimensionFiltersFromBody(body);
   const admin = createAdminClient();
 
   let query = admin
     .from("opportunities")
-    .select("name, role, industry, source, amount, outcome")
+    .select("name, role, industry, source, segment, country, amount, outcome")
     .eq("org_id", result.membership.org_id)
     .not(filter.dateField, "is", null)
     .gte(filter.dateField, filter.dateFrom)
@@ -103,7 +114,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const opps = (opportunities || []) as Opportunity[];
+  let opps = (opportunities || []) as Opportunity[];
 
   const { count: nullDateCount } = await admin
     .from("opportunities")
@@ -111,9 +122,14 @@ export async function POST(request: Request) {
     .eq("org_id", result.membership.org_id)
     .is(filter.dateField, null);
 
+  const hasDimFilters = hasActiveDimensionFilters(dimFilters);
+  if (hasDimFilters) {
+    opps = applyDimensionFiltersInMemory(opps, dimFilters);
+  }
+
   if (opps.length === 0) {
     return NextResponse.json(
-      { error: "No opportunities found for the selected date mode and time period. Try a different filter or import data first." },
+      { error: "No opportunities found for the selected filters. Try adjusting the date range or dimension filters, or import data first." },
       { status: 400 }
     );
   }
@@ -141,6 +157,8 @@ export async function POST(request: Request) {
     byRole: buildBreakdown(opps, "role"),
     byIndustry: buildBreakdown(opps, "industry"),
     bySource: buildBreakdown(opps, "source"),
+    bySegment: buildBreakdown(opps, "segment"),
+    byCountry: buildBreakdown(opps, "country"),
   };
 
   const apiKey = process.env.OPENAI_API_KEY;
@@ -154,15 +172,25 @@ export async function POST(request: Request) {
   const openai = new OpenAI({ apiKey });
 
   const dateModeLabel = DATE_MODE_LABELS[filter.dateField];
-  const dateContext = `Date Mode: ${dateModeLabel}\nTime Window: ${filter.periodLabel} (${new Date(filter.dateFrom).toLocaleDateString()} to ${new Date(filter.dateTo).toLocaleDateString()})\nOpportunities analyzed: ${total}\nExcluded (missing ${dateModeLabel}): ${nullDateCount ?? 0}`;
+  const dimFilterDesc = hasDimFilters ? describeDimensionFilters(dimFilters) : null;
+
+  let dateContext = `Date Mode: ${dateModeLabel}\nTime Window: ${filter.periodLabel} (${new Date(filter.dateFrom).toLocaleDateString()} to ${new Date(filter.dateTo).toLocaleDateString()})\nOpportunities analyzed: ${total}\nExcluded (missing ${dateModeLabel}): ${nullDateCount ?? 0}`;
+
+  if (dimFilterDesc) {
+    dateContext += `\nActive Dimension Filters: ${dimFilterDesc}`;
+  }
+
+  const filterMentionRule = dimFilterDesc
+    ? `- Your summary MUST mention: the date mode (${dateModeLabel}), the time window (${filter.periodLabel}), the number of opportunities (${total}), and the active dimension filters (${dimFilterDesc})`
+    : `- Your summary MUST mention: the date mode (${dateModeLabel}), the time window (${filter.periodLabel}), and the number of opportunities (${total})`;
 
   const systemPrompt = `You are a senior sales analytics consultant. You receive JSON data about a company's sales opportunities pipeline and provide actionable insights.
 
-The data has been filtered by a specific date mode and time window. Always state which date mode and time window you are analyzing in your summary.
+The data has been filtered by a specific date mode and time window.${hasDimFilters ? " Additionally, dimension filters have been applied to narrow the dataset." : ""} Always state which date mode and time window you are analyzing in your summary.${hasDimFilters ? " Also mention the active dimension filters." : ""}
 
 Respond ONLY with a valid JSON object matching this exact structure:
 {
-  "summary": "A 2-3 sentence executive summary of the overall pipeline health. Must mention the date mode, time window, and number of opportunities analyzed.",
+  "summary": "A 2-3 sentence executive summary of the overall pipeline health. Must mention the date mode, time window, and number of opportunities analyzed.${hasDimFilters ? " Must also mention the active dimension filters." : ""}",
   "insights": [
     {
       "title": "Short insight title",
@@ -180,7 +208,7 @@ Rules:
 - Provide exactly 2-4 recommendations
 - Reference specific numbers, percentages, and labels from the data
 - Keep language professional and concise
-- Your summary MUST mention: the date mode (${dateModeLabel}), the time window (${filter.periodLabel}), and the number of opportunities (${total})
+${filterMentionRule}
 - Do NOT include any text outside the JSON object`;
 
   const userPrompt = `${dateContext}\n\nAnalyze this sales pipeline data and provide insights:\n\n${JSON.stringify(analyticsPayload)}`;
@@ -223,6 +251,7 @@ Rules:
         periodLabel: filter.periodLabel,
         analyzedCount: total,
         excludedNullCount: nullDateCount ?? 0,
+        activeDimensionFilters: dimFilterDesc,
       },
     });
   } catch (err: unknown) {

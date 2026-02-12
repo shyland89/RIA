@@ -1,6 +1,1 @@
-{
-  "/api/analytics/summary/route": "app/api/analytics/summary/route.js",
-  "/app/dashboard/page": "app/app/dashboard/page.js",
-  "/login/page": "app/login/page.js",
-  "/page": "app/page.js"
-}
+{}
