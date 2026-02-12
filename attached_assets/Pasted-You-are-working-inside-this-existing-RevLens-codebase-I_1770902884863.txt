@@ -1,0 +1,55 @@
+You are working inside this existing RevLens codebase. Implement Date Mode + Time Period filtering across Analytics + AI analysis.
+
+CONTEXT
+- We have an app with: CSV Import -> opportunities table, analytics dashboard, AI-powered analysis.
+- We need to run analytics based on different “date anchors”:
+  1) Closed Date
+  2) Pipeline Accepted Date
+  3) Fallback: Created/Inserted date (whatever exists)
+- We also need a selectable time window:
+  - Last 7 / 30 / 90 days
+  - Month-to-date (MTD)
+  - Quarter-to-date (QTD)
+  - Custom date range
+- The selected date mode + time window must affect ALL analytics numbers and the AI analysis.
+
+DO NOW
+1) Database / schema
+   - Confirm what date fields exist on opportunities today.
+   - Add columns if missing:
+     - closed_date (date or timestamptz)
+     - pipeline_accepted_date (date or timestamptz)
+   - Ensure created_at exists (or use inserted_at).
+   - Add indexes for performance on org_id + each date field.
+
+2) Backend query layer
+   - Introduce a single query helper that builds:
+     - selected date_field based on user selection
+     - date_from/date_to based on preset selection (7/30/90, MTD, QTD, custom)
+   - Update ALL analytics queries to use:
+     WHERE opportunities.<date_field> between date_from and date_to
+     AND org_id = current org
+   - Ensure NULL dates are handled consistently:
+     - If the chosen date field is NULL, exclude that row (don’t fallback silently unless explicitly configured).
+
+3) Frontend UI
+   - Add a filter bar at top of Analytics:
+     - Date Mode dropdown: Closed Date / Pipeline Accepted Date / Created Date
+     - Time Period dropdown: 7/30/90/MTD/QTD/Custom
+     - If Custom selected: show from + to inputs
+   - Persist filter selections in URL query params.
+
+4) AI analysis
+   - When “Analyze with AI” runs, include:
+     - date_mode
+     - date_from/date_to
+     - counts of included rows
+     - excluded rows due to missing date in chosen date field
+   - AI output should state what window and date mode it analyzed.
+
+VERIFY
+- Upload CSV and confirm analytics default loads (e.g., last 30 days, closed date).
+- Switch to pipeline accepted date; counts change accordingly.
+- Switch to custom date range; dashboard updates.
+- AI analysis summary explicitly mentions: date mode + time window + number of opportunities analyzed.
+- URL reflects selections and reload preserves state.
