@@ -11,6 +11,13 @@ import {
   type DateMode,
   type Period,
 } from "@/lib/date-filter";
+import {
+  DIMENSION_KEYS,
+  DIMENSION_LABELS,
+  UNKNOWN_VALUE,
+  type DimensionKey,
+  type DimensionFilters,
+} from "@/lib/dimension-filter";
 
 type Totals = {
   count: number;
@@ -40,6 +47,7 @@ type FilterMeta = {
   includedCount: number;
   excludedNullCount: number;
   totalOrgCount: number;
+  activeDimensionFilters: string | null;
 };
 
 type SummaryData = {
@@ -47,6 +55,8 @@ type SummaryData = {
   byRole: BreakdownRow[];
   byIndustry: BreakdownRow[];
   bySource: BreakdownRow[];
+  bySegment: BreakdownRow[];
+  byCountry: BreakdownRow[];
   filter: FilterMeta;
 };
 
@@ -77,14 +87,6 @@ function fmtCurrency(v: number | null): string {
   }).format(v);
 }
 
-function toDateInputValue(iso: string): string {
-  try {
-    return new Date(iso).toISOString().slice(0, 10);
-  } catch {
-    return "";
-  }
-}
-
 export default function DashboardPage() {
   return (
     <Suspense fallback={
@@ -111,12 +113,24 @@ function DashboardContent() {
   const customFrom = searchParams.get("from") || "";
   const customTo = searchParams.get("to") || "";
 
+  const initialDimFilters: DimensionFilters = {};
+  for (const key of DIMENSION_KEYS) {
+    const vals = searchParams.getAll(key);
+    if (vals.length > 0) initialDimFilters[key] = vals;
+  }
+
   const [data, setData] = useState<SummaryData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [aiAnalysis, setAiAnalysis] = useState<AiAnalysis | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
+
+  const [dimFilters, setDimFilters] = useState<DimensionFilters>(initialDimFilters);
+  const [dimOptions, setDimOptions] = useState<Record<string, string[]>>({});
+  const [filtersOpen, setFiltersOpen] = useState(() => {
+    return Object.values(initialDimFilters).some((v) => v && v.length > 0);
+  });
 
   function updateFilter(updates: Record<string, string>) {
     const params = new URLSearchParams(searchParams.toString());
@@ -131,8 +145,69 @@ function DashboardContent() {
       params.delete("from");
       params.delete("to");
     }
+    for (const key of DIMENSION_KEYS) {
+      params.delete(key);
+      const vals = dimFilters[key];
+      if (vals) {
+        for (const v of vals) params.append(key, v);
+      }
+    }
     router.replace(`?${params.toString()}`, { scroll: false });
   }
+
+  function syncDimFiltersToUrl(newFilters: DimensionFilters) {
+    const params = new URLSearchParams(searchParams.toString());
+    for (const key of DIMENSION_KEYS) {
+      params.delete(key);
+      const vals = newFilters[key];
+      if (vals && vals.length > 0) {
+        for (const v of vals) params.append(key, v);
+      }
+    }
+    router.replace(`?${params.toString()}`, { scroll: false });
+  }
+
+  function toggleDimValue(dim: DimensionKey, value: string) {
+    setDimFilters((prev) => {
+      const current = prev[dim] || [];
+      const next = current.includes(value)
+        ? current.filter((v) => v !== value)
+        : [...current, value];
+      const updated = { ...prev, [dim]: next.length > 0 ? next : undefined };
+      if (next.length === 0) delete updated[dim];
+      syncDimFiltersToUrl(updated);
+      return updated;
+    });
+  }
+
+  function clearAllDimFilters() {
+    setDimFilters({});
+    const params = new URLSearchParams(searchParams.toString());
+    for (const key of DIMENSION_KEYS) params.delete(key);
+    router.replace(`?${params.toString()}`, { scroll: false });
+  }
+
+  const activeDimFilterCount = Object.values(dimFilters).reduce(
+    (sum, vals) => sum + (vals?.length || 0),
+    0
+  );
+
+  const fetchDimensions = useCallback(async () => {
+    try {
+      const params = new URLSearchParams();
+      params.set("date_mode", dateMode);
+      params.set("period", period);
+      if (period === "custom") {
+        if (customFrom) params.set("from", customFrom);
+        if (customTo) params.set("to", customTo);
+      }
+      const res = await fetch(`/api/analytics/dimensions?${params.toString()}`);
+      if (res.ok) {
+        const json = await res.json();
+        setDimOptions(json.dimensions || {});
+      }
+    } catch {}
+  }, [dateMode, period, customFrom, customTo]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -144,6 +219,12 @@ function DashboardContent() {
       if (period === "custom") {
         if (customFrom) params.set("from", customFrom);
         if (customTo) params.set("to", customTo);
+      }
+      for (const key of DIMENSION_KEYS) {
+        const vals = dimFilters[key];
+        if (vals && vals.length > 0) {
+          for (const v of vals) params.append(key, v);
+        }
       }
       const res = await fetch(`/api/analytics/summary?${params.toString()}`);
       if (!res.ok) {
@@ -157,7 +238,11 @@ function DashboardContent() {
     } finally {
       setLoading(false);
     }
-  }, [dateMode, period, customFrom, customTo]);
+  }, [dateMode, period, customFrom, customTo, dimFilters]);
+
+  useEffect(() => {
+    fetchDimensions();
+  }, [fetchDimensions]);
 
   useEffect(() => {
     fetchData();
@@ -168,13 +253,19 @@ function DashboardContent() {
     setAiError("");
     setAiAnalysis(null);
     try {
-      const body: Record<string, string> = {
+      const body: Record<string, any> = {
         date_mode: dateMode,
         period: period,
       };
       if (period === "custom") {
         if (customFrom) body.from = customFrom;
         if (customTo) body.to = customTo;
+      }
+      for (const key of DIMENSION_KEYS) {
+        const vals = dimFilters[key];
+        if (vals && vals.length > 0) {
+          body[key] = vals;
+        }
       }
       const res = await fetch("/api/ai/analyze", {
         method: "POST",
@@ -230,7 +321,7 @@ function DashboardContent() {
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Filter Bar */}
-        <div className="rounded-md border border-border bg-card p-4 mb-8" data-testid="filter-bar">
+        <div className="rounded-md border border-border bg-card p-4 mb-4" data-testid="filter-bar">
           <div className="flex flex-wrap items-end gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-medium text-muted-foreground" htmlFor="date-mode">
@@ -300,6 +391,29 @@ function DashboardContent() {
                 </div>
               </>
             )}
+
+            <button
+              onClick={() => setFiltersOpen((v) => !v)}
+              className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
+                activeDimFilterCount > 0
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border bg-background text-foreground"
+              }`}
+              data-testid="button-toggle-filters"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+              Filters
+              {activeDimFilterCount > 0 && (
+                <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-primary text-primary-foreground text-[10px] font-semibold px-1">
+                  {activeDimFilterCount}
+                </span>
+              )}
+              <svg className={`w-3 h-3 transition-transform ${filtersOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
           </div>
 
           {data?.filter && (
@@ -315,9 +429,73 @@ function DashboardContent() {
                   ({data.filter.excludedNullCount} excluded &mdash; missing {data.filter.dateModeLabel.toLowerCase()})
                 </span>
               )}
+              {data.filter.activeDimensionFilters && (
+                <span data-testid="text-active-dim-filters">
+                  Filtered by: {data.filter.activeDimensionFilters}
+                </span>
+              )}
             </div>
           )}
         </div>
+
+        {/* Dimension Filters Panel */}
+        {filtersOpen && (
+          <div className="rounded-md border border-border bg-card p-4 mb-8" data-testid="dimension-filters-panel">
+            <div className="flex items-center justify-between gap-4 flex-wrap mb-3">
+              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Dimension Filters
+              </h3>
+              {activeDimFilterCount > 0 && (
+                <button
+                  onClick={clearAllDimFilters}
+                  className="text-xs text-primary hover:underline"
+                  data-testid="button-clear-all-filters"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+              {DIMENSION_KEYS.map((dim) => {
+                const options = dimOptions[dim] || [];
+                const selected = dimFilters[dim] || [];
+                return (
+                  <div key={dim} data-testid={`dim-filter-${dim}`}>
+                    <p className="text-xs font-medium text-foreground mb-2">{DIMENSION_LABELS[dim]}</p>
+                    {options.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No values</p>
+                    ) : (
+                      <div className="space-y-1 max-h-40 overflow-y-auto pr-1">
+                        {options.map((val) => {
+                          const isChecked = selected.includes(val);
+                          return (
+                            <label
+                              key={val}
+                              className="flex items-center gap-2 cursor-pointer text-xs text-foreground hover:bg-muted/40 rounded px-1 py-0.5"
+                              data-testid={`dim-option-${dim}-${val}`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() => toggleDimValue(dim, val)}
+                                className="rounded border-border text-primary focus:ring-primary/30 h-3.5 w-3.5"
+                              />
+                              <span className={val === UNKNOWN_VALUE ? "italic text-muted-foreground" : ""}>
+                                {val}
+                              </span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {!filtersOpen && <div className="mb-8" />}
 
         {loading && (
           <div className="flex items-center justify-center py-20" data-testid="loading-state">
@@ -345,7 +523,7 @@ function DashboardContent() {
             </div>
             <h2 className="text-lg font-semibold text-foreground mb-1">No opportunities found</h2>
             <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
-              No data matches the selected filters. Try adjusting the date mode or time period, or import opportunities from CSV.
+              No data matches the selected filters. Try adjusting the date mode, time period, or dimension filters, or import opportunities from CSV.
             </p>
             <Link
               href="/app/import"
@@ -401,9 +579,13 @@ function DashboardContent() {
 
             {/* Breakdown Tables */}
             <div className="grid gap-6 lg:grid-cols-3">
-              <BreakdownTable title="By Role" rows={data.byRole} testId="breakdown-role" />
+              <BreakdownTable title="By Champion Role" rows={data.byRole} testId="breakdown-role" />
               <BreakdownTable title="By Industry" rows={data.byIndustry} testId="breakdown-industry" />
               <BreakdownTable title="By Source" rows={data.bySource} testId="breakdown-source" />
+            </div>
+            <div className="grid gap-6 lg:grid-cols-2">
+              <BreakdownTable title="By Segment" rows={data.bySegment} testId="breakdown-segment" />
+              <BreakdownTable title="By Country" rows={data.byCountry} testId="breakdown-country" />
             </div>
 
             {/* AI Analysis Section */}
@@ -419,6 +601,7 @@ function DashboardContent() {
                     <h3 className="text-sm font-medium text-foreground">AI-Powered Analysis</h3>
                     <p className="text-xs text-muted-foreground">
                       Analyzing with {DATE_MODE_LABELS[dateMode]} &middot; {PERIOD_LABELS[period]}
+                      {activeDimFilterCount > 0 && ` \u00B7 ${activeDimFilterCount} filter${activeDimFilterCount > 1 ? "s" : ""} active`}
                     </p>
                   </div>
                 </div>
@@ -455,7 +638,7 @@ function DashboardContent() {
 
               {!aiAnalysis && !aiLoading && !aiError && (
                 <p className="text-sm text-muted-foreground" data-testid="text-ai-placeholder">
-                  Click the button above to generate AI-powered insights for the current date filter.
+                  Click the button above to generate AI-powered insights for the current filters.
                 </p>
               )}
 
@@ -557,7 +740,9 @@ function BreakdownTable({ title, rows, testId }: { title: string; rows: Breakdow
             <tbody>
               {rows.map((row) => (
                 <tr key={row.label} className="border-b border-border/50">
-                  <td className="py-2 pr-3 text-foreground font-medium whitespace-nowrap">{row.label}</td>
+                  <td className={`py-2 pr-3 font-medium whitespace-nowrap ${row.label === UNKNOWN_VALUE ? "text-muted-foreground italic" : "text-foreground"}`}>
+                    {row.label}
+                  </td>
                   <td className="py-2 px-2 text-right text-foreground">{row.count}</td>
                   <td className="py-2 px-2 text-right text-foreground">{fmtPct(row.winRate)}</td>
                   <td className="py-2 pl-2 text-right text-foreground">{fmtCurrency(row.avgAmountWon)}</td>
