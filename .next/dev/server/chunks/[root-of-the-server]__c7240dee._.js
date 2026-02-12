@@ -244,6 +244,8 @@ async function POST(request) {
         const amountStr = row[mapping.amount]?.trim() || "";
         const outcome = row[mapping.outcome]?.trim()?.toLowerCase() || "";
         const createdAtStr = mapping.created_at ? row[mapping.created_at]?.trim() : undefined;
+        const closedDateStr = mapping.closed_date ? row[mapping.closed_date]?.trim() : undefined;
+        const pipelineDateStr = mapping.pipeline_accepted_date ? row[mapping.pipeline_accepted_date]?.trim() : undefined;
         if (!name) rowErrors.push("name is required");
         if (!role) rowErrors.push("role is required");
         if (!industry) rowErrors.push("industry is required");
@@ -264,6 +266,24 @@ async function POST(request) {
                 createdAt = d.toISOString();
             }
         }
+        let closedDate;
+        if (closedDateStr) {
+            const d = new Date(closedDateStr);
+            if (isNaN(d.getTime())) {
+                rowErrors.push("closed_date is not a valid date");
+            } else {
+                closedDate = d.toISOString();
+            }
+        }
+        let pipelineAcceptedDate;
+        if (pipelineDateStr) {
+            const d = new Date(pipelineDateStr);
+            if (isNaN(d.getTime())) {
+                rowErrors.push("pipeline_accepted_date is not a valid date");
+            } else {
+                pipelineAcceptedDate = d.toISOString();
+            }
+        }
         if (rowErrors.length > 0) {
             errors.push({
                 row_number: rowNum,
@@ -281,9 +301,9 @@ async function POST(request) {
             amount,
             outcome
         };
-        if (createdAt) {
-            insertData.created_at = createdAt;
-        }
+        if (createdAt) insertData.created_at = createdAt;
+        if (closedDate) insertData.closed_date = closedDate;
+        if (pipelineAcceptedDate) insertData.pipeline_accepted_date = pipelineAcceptedDate;
         const { error: insertError } = await supabase.from("opportunities").insert(insertData);
         if (insertError) {
             errors.push({
