@@ -1,5 +1,6 @@
-import { createClient } from "@/lib/supabase/server";
 import { getUserOrg, isUserOrgError } from "@/lib/get-user-org";
+import { resolveDateFilter, DATE_MODE_LABELS, type DateFilterParams, type DateMode, type Period, DATE_MODES, PERIODS } from "@/lib/date-filter";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
@@ -59,19 +60,44 @@ function buildBreakdown(
   return rows.sort((a, b) => b.count - a.count);
 }
 
-export async function POST() {
+function createAdminClient() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
+
+export async function POST(request: Request) {
   const result = await getUserOrg();
 
   if (isUserOrgError(result)) {
     return NextResponse.json({ error: result.error }, { status: result.status });
   }
 
-  const supabase = await createClient();
+  let body: any = {};
+  try {
+    body = await request.json();
+  } catch {}
 
-  const { data: opportunities, error } = await supabase
+  const filterParams: DateFilterParams = {
+    dateMode: (DATE_MODES.includes(body.date_mode) ? body.date_mode : "created_at") as DateMode,
+    period: (PERIODS.includes(body.period) ? body.period : "30d") as Period,
+    from: body.from,
+    to: body.to,
+  };
+
+  const filter = resolveDateFilter(filterParams);
+  const admin = createAdminClient();
+
+  let query = admin
     .from("opportunities")
     .select("name, role, industry, source, amount, outcome")
-    .eq("org_id", result.membership.org_id);
+    .eq("org_id", result.membership.org_id)
+    .not(filter.dateField, "is", null)
+    .gte(filter.dateField, filter.dateFrom)
+    .lte(filter.dateField, filter.dateTo);
+
+  const { data: opportunities, error } = await query;
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -79,9 +105,15 @@ export async function POST() {
 
   const opps = (opportunities || []) as Opportunity[];
 
+  const { count: nullDateCount } = await admin
+    .from("opportunities")
+    .select("id", { count: "exact", head: true })
+    .eq("org_id", result.membership.org_id)
+    .is(filter.dateField, null);
+
   if (opps.length === 0) {
     return NextResponse.json(
-      { error: "No opportunities to analyze. Import data first." },
+      { error: "No opportunities found for the selected date mode and time period. Try a different filter or import data first." },
       { status: 400 }
     );
   }
@@ -121,11 +153,16 @@ export async function POST() {
 
   const openai = new OpenAI({ apiKey });
 
+  const dateModeLabel = DATE_MODE_LABELS[filter.dateField];
+  const dateContext = `Date Mode: ${dateModeLabel}\nTime Window: ${filter.periodLabel} (${new Date(filter.dateFrom).toLocaleDateString()} to ${new Date(filter.dateTo).toLocaleDateString()})\nOpportunities analyzed: ${total}\nExcluded (missing ${dateModeLabel}): ${nullDateCount ?? 0}`;
+
   const systemPrompt = `You are a senior sales analytics consultant. You receive JSON data about a company's sales opportunities pipeline and provide actionable insights.
+
+The data has been filtered by a specific date mode and time window. Always state which date mode and time window you are analyzing in your summary.
 
 Respond ONLY with a valid JSON object matching this exact structure:
 {
-  "summary": "A 2-3 sentence executive summary of the overall pipeline health.",
+  "summary": "A 2-3 sentence executive summary of the overall pipeline health. Must mention the date mode, time window, and number of opportunities analyzed.",
   "insights": [
     {
       "title": "Short insight title",
@@ -143,9 +180,10 @@ Rules:
 - Provide exactly 2-4 recommendations
 - Reference specific numbers, percentages, and labels from the data
 - Keep language professional and concise
+- Your summary MUST mention: the date mode (${dateModeLabel}), the time window (${filter.periodLabel}), and the number of opportunities (${total})
 - Do NOT include any text outside the JSON object`;
 
-  const userPrompt = `Analyze this sales pipeline data and provide insights:\n\n${JSON.stringify(analyticsPayload)}`;
+  const userPrompt = `${dateContext}\n\nAnalyze this sales pipeline data and provide insights:\n\n${JSON.stringify(analyticsPayload)}`;
 
   try {
     const response = await openai.responses.create({
@@ -175,7 +213,18 @@ Rules:
       );
     }
 
-    return NextResponse.json({ analysis: parsed });
+    return NextResponse.json({
+      analysis: parsed,
+      filter: {
+        dateMode: filter.dateField,
+        dateModeLabel,
+        dateFrom: filter.dateFrom,
+        dateTo: filter.dateTo,
+        periodLabel: filter.periodLabel,
+        analyzedCount: total,
+        excludedNullCount: nullDateCount ?? 0,
+      },
+    });
   } catch (err: unknown) {
     const message =
       err instanceof Error ? err.message : "AI analysis failed";

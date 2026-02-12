@@ -1,6 +1,7 @@
-import { createClient } from "@/lib/supabase/server";
 import { getUserOrg, isUserOrgError } from "@/lib/get-user-org";
-import { NextResponse } from "next/server";
+import { parseDateFilterFromSearchParams, resolveDateFilter, DATE_MODE_LABELS } from "@/lib/date-filter";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { NextRequest, NextResponse } from "next/server";
 
 type Opportunity = {
   name: string;
@@ -9,6 +10,9 @@ type Opportunity = {
   source: string;
   amount: number;
   outcome: string;
+  closed_date: string | null;
+  pipeline_accepted_date: string | null;
+  created_at: string;
 };
 
 type BreakdownRow = {
@@ -55,23 +59,56 @@ function buildBreakdown(opps: Opportunity[], field: keyof Opportunity): Breakdow
   return rows.sort((a, b) => b.count - a.count);
 }
 
-export async function GET() {
+function createAdminClient() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
+
+export async function GET(request: NextRequest) {
   const result = await getUserOrg();
 
   if (isUserOrgError(result)) {
     return NextResponse.json({ error: result.error }, { status: result.status });
   }
 
-  const supabase = await createClient();
+  const filterParams = parseDateFilterFromSearchParams(request.nextUrl.searchParams);
+  const filter = resolveDateFilter(filterParams);
 
-  const { data: opportunities, error } = await supabase
+  const admin = createAdminClient();
+
+  const { data: allOpps, error: countError } = await admin
     .from("opportunities")
-    .select("name, role, industry, source, amount, outcome")
+    .select("id", { count: "exact", head: true })
     .eq("org_id", result.membership.org_id);
+
+  const totalOrgCount = countError ? 0 : (allOpps as any)?.length ?? 0;
+
+  let query = admin
+    .from("opportunities")
+    .select("name, role, industry, source, amount, outcome, closed_date, pipeline_accepted_date, created_at")
+    .eq("org_id", result.membership.org_id)
+    .not(filter.dateField, "is", null)
+    .gte(filter.dateField, filter.dateFrom)
+    .lte(filter.dateField, filter.dateTo);
+
+  const { data: opportunities, error, count } = await query;
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  const { count: totalWithDateCount } = await admin
+    .from("opportunities")
+    .select("id", { count: "exact", head: true })
+    .eq("org_id", result.membership.org_id);
+
+  const { count: nullDateCount } = await admin
+    .from("opportunities")
+    .select("id", { count: "exact", head: true })
+    .eq("org_id", result.membership.org_id)
+    .is(filter.dateField, null);
 
   const opps = (opportunities || []) as Opportunity[];
   const total = opps.length;
@@ -96,5 +133,15 @@ export async function GET() {
     byRole: buildBreakdown(opps, "role"),
     byIndustry: buildBreakdown(opps, "industry"),
     bySource: buildBreakdown(opps, "source"),
+    filter: {
+      dateMode: filter.dateField,
+      dateModeLabel: DATE_MODE_LABELS[filter.dateField],
+      dateFrom: filter.dateFrom,
+      dateTo: filter.dateTo,
+      periodLabel: filter.periodLabel,
+      includedCount: total,
+      excludedNullCount: nullDateCount ?? 0,
+      totalOrgCount: totalWithDateCount ?? 0,
+    },
   });
 }
