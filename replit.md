@@ -23,6 +23,7 @@ app/                    # Next.js App Router pages
   api/import/upload/route.ts  # POST: parse CSV, return headers + preview
   api/import/execute/route.ts # POST: validate + insert opportunities from CSV
   api/analytics/summary/route.ts # GET: tenant-scoped analytics summary JSON
+  api/analytics/dimensions/route.ts # GET: distinct dimension values for filter UI
   api/ai/analyze/route.ts  # POST: AI-powered pipeline analysis via OpenAI
   app/import/page.tsx      # CSV upload + column mapping + import UI
   app/dashboard/page.tsx   # Analytics dashboard with KPIs, breakdowns, and AI insights
@@ -45,7 +46,7 @@ postcss.config.mjs      # PostCSS configuration
 - **organizations**: id (uuid pk), name, created_at
 - **profiles**: id (uuid pk, FK auth.users), email, created_at
 - **memberships**: id (uuid pk), org_id (FK organizations), user_id (FK auth.users), role (admin|member|viewer), created_at
-- **opportunities**: id (uuid pk), org_id (FK organizations), name, role, industry, source, amount (numeric), outcome (open|won|lost), created_at, closed_date (timestamptz nullable), pipeline_accepted_date (timestamptz nullable)
+- **opportunities**: id (uuid pk), org_id (FK organizations), name, role, industry, source, amount (numeric), outcome (open|won|lost), created_at, closed_date (timestamptz nullable), pipeline_accepted_date (timestamptz nullable), segment (text nullable), country (text nullable)
 - **import_jobs**: id (uuid pk), org_id (FK organizations), user_id (FK auth.users), filename, inserted_count, error_count, created_at
 - **import_errors**: id (uuid pk), job_id (FK import_jobs), row_number, error_message, raw_row_json (jsonb), created_at
 
@@ -69,14 +70,24 @@ postcss.config.mjs      # PostCSS configuration
 - **Dashboard UI**: Filter bar with Date Mode dropdown, Time Period dropdown, optional custom date inputs; selections sync to URL query params
 - **Migration**: supabase/migrations/003_date_columns.sql adds closed_date, pipeline_accepted_date columns + composite indexes
 
+## Dimension Filtering
+- **Dimensions**: segment, country, source, industry, role (labeled "Champion Role" in UI)
+- **Shared Logic**: lib/dimension-filter.ts - parse/apply/describe dimension filters with "Unknown" for NULL values
+- **Dimensions Endpoint**: GET /api/analytics/dimensions - returns distinct values per dimension scoped to org_id + current date window
+- **Analytics Integration**: GET /api/analytics/summary accepts dimension filter arrays in query params (e.g. segment=SaaS&segment=Enterprise); filters applied in-memory after date+org fetch
+- **AI Integration**: POST /api/ai/analyze accepts dimension filter arrays in body; AI prompt includes active filter context
+- **Dashboard UI**: Collapsible "Filters" panel with multi-select checkboxes per dimension, "Unknown" option for nulls, Clear All button; selections persist in URL query params
+- **Import Normalization**: All dimension fields trimmed; empty strings stored as NULL; segment and country are optional CSV mapping fields
+- **Migration**: supabase/migrations/004_segment_country.sql adds segment, country columns + composite indexes
+
 ## AI Analysis
 - **Endpoint**: POST /api/ai/analyze - tenant-scoped analytics sent to OpenAI for structured JSON insights
 - **Model**: gpt-5.2 via OpenAI Responses API with JSON output format
 - **SDK**: openai (Node.js)
 - **Security**: API key server-side only via process.env.OPENAI_API_KEY
 - **Date Context**: AI prompt includes date mode, time window, and opportunity count; summary must mention these
-- **Request Body**: { date_mode, period, from?, to? } - same filter params as analytics
-- **Response**: { analysis: { summary, insights[], recommendations[] }, filter: { dateMode, dateModeLabel, dateFrom, dateTo, periodLabel, analyzedCount, excludedNullCount } }
+- **Request Body**: { date_mode, period, from?, to?, segment?[], country?[], source?[], industry?[], role?[] } - date + dimension filter params
+- **Response**: { analysis: { summary, insights[], recommendations[] }, filter: { dateMode, dateModeLabel, dateFrom, dateTo, periodLabel, analyzedCount, excludedNullCount, activeDimensionFilters } }
 
 ## Environment Variables
 - `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
@@ -115,3 +126,4 @@ This ensures Supabase email confirmation links redirect to the correct domain in
 - 2026-02-10: Added AI-powered analysis feature using OpenAI gpt-5.2 with structured JSON insights on dashboard
 - 2026-02-10: Fixed email confirmation redirect - added NEXT_PUBLIC_SITE_URL, emailRedirectTo in signup, documented Supabase URL config
 - 2026-02-12: Added date filtering - closed_date/pipeline_accepted_date columns, date mode + time period filter bar on dashboard, URL param sync, date-aware analytics API and AI analysis with temporal context
+- 2026-02-12: Added dimension filtering - segment/country columns, collapsible multi-select filter panel, dimension-aware analytics + AI analysis, URL param persistence, import normalization
