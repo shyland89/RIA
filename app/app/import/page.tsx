@@ -30,6 +30,8 @@ const TARGET_FIELDS = [
   { key: "amount", label: "Amount", required: true },
   { key: "outcome", label: "Outcome", required: true },
   { key: "created_at", label: "Created At", required: false },
+  { key: "closed_date", label: "Closed Date", required: false },
+  { key: "pipeline_accepted_date", label: "Pipeline Accepted Date", required: false },
 ];
 
 type Step = "upload" | "mapping" | "importing" | "results";

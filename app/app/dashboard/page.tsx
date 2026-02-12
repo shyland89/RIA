@@ -1,7 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import {
+  DATE_MODES,
+  PERIODS,
+  DATE_MODE_LABELS,
+  PERIOD_LABELS,
+  type DateMode,
+  type Period,
+} from "@/lib/date-filter";
 
 type Totals = {
   count: number;
@@ -22,11 +31,23 @@ type BreakdownRow = {
   avgAmountWon: number | null;
 };
 
+type FilterMeta = {
+  dateMode: string;
+  dateModeLabel: string;
+  dateFrom: string;
+  dateTo: string;
+  periodLabel: string;
+  includedCount: number;
+  excludedNullCount: number;
+  totalOrgCount: number;
+};
+
 type SummaryData = {
   totals: Totals;
   byRole: BreakdownRow[];
   byIndustry: BreakdownRow[];
   bySource: BreakdownRow[];
+  filter: FilterMeta;
 };
 
 type AiInsight = {
@@ -42,12 +63,12 @@ type AiAnalysis = {
 };
 
 function fmtPct(v: number | null): string {
-  if (v === null) return "—";
+  if (v === null) return "\u2014";
   return `${(v * 100).toFixed(1)}%`;
 }
 
 function fmtCurrency(v: number | null): string {
-  if (v === null) return "—";
+  if (v === null) return "\u2014";
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -56,7 +77,40 @@ function fmtCurrency(v: number | null): string {
   }).format(v);
 }
 
+function toDateInputValue(iso: string): string {
+  try {
+    return new Date(iso).toISOString().slice(0, 10);
+  } catch {
+    return "";
+  }
+}
+
 export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
+          <svg className="w-5 h-5 text-primary animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+        </div>
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
+  );
+}
+
+function DashboardContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const dateMode = (searchParams.get("date_mode") as DateMode) || "created_at";
+  const period = (searchParams.get("period") as Period) || "30d";
+  const customFrom = searchParams.get("from") || "";
+  const customTo = searchParams.get("to") || "";
+
   const [data, setData] = useState<SummaryData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -64,15 +118,72 @@ export default function DashboardPage() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
 
+  function updateFilter(updates: Record<string, string>) {
+    const params = new URLSearchParams(searchParams.toString());
+    for (const [k, v] of Object.entries(updates)) {
+      if (v) {
+        params.set(k, v);
+      } else {
+        params.delete(k);
+      }
+    }
+    if (params.get("period") !== "custom") {
+      params.delete("from");
+      params.delete("to");
+    }
+    router.replace(`?${params.toString()}`, { scroll: false });
+  }
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const params = new URLSearchParams();
+      params.set("date_mode", dateMode);
+      params.set("period", period);
+      if (period === "custom") {
+        if (customFrom) params.set("from", customFrom);
+        if (customTo) params.set("to", customTo);
+      }
+      const res = await fetch(`/api/analytics/summary?${params.toString()}`);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setError(body.error || "Failed to load analytics");
+        return;
+      }
+      setData(await res.json());
+    } catch {
+      setError("Failed to load analytics");
+    } finally {
+      setLoading(false);
+    }
+  }, [dateMode, period, customFrom, customTo]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
   async function runAiAnalysis() {
     setAiLoading(true);
     setAiError("");
     setAiAnalysis(null);
     try {
-      const res = await fetch("/api/ai/analyze", { method: "POST" });
+      const body: Record<string, string> = {
+        date_mode: dateMode,
+        period: period,
+      };
+      if (period === "custom") {
+        if (customFrom) body.from = customFrom;
+        if (customTo) body.to = customTo;
+      }
+      const res = await fetch("/api/ai/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
       if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        setAiError(body.error || "AI analysis failed");
+        const json = await res.json().catch(() => ({}));
+        setAiError(json.error || "AI analysis failed");
         return;
       }
       const json = await res.json();
@@ -83,25 +194,6 @@ export default function DashboardPage() {
       setAiLoading(false);
     }
   }
-
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch("/api/analytics/summary");
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          setError(body.error || "Failed to load analytics");
-          return;
-        }
-        setData(await res.json());
-      } catch {
-        setError("Failed to load analytics");
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -137,6 +229,96 @@ export default function DashboardPage() {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        {/* Filter Bar */}
+        <div className="rounded-md border border-border bg-card p-4 mb-8" data-testid="filter-bar">
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground" htmlFor="date-mode">
+                Date Mode
+              </label>
+              <select
+                id="date-mode"
+                value={dateMode}
+                onChange={(e) => updateFilter({ date_mode: e.target.value })}
+                className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                data-testid="select-date-mode"
+              >
+                {DATE_MODES.map((m) => (
+                  <option key={m} value={m}>
+                    {DATE_MODE_LABELS[m]}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground" htmlFor="period">
+                Time Period
+              </label>
+              <select
+                id="period"
+                value={period}
+                onChange={(e) => updateFilter({ period: e.target.value })}
+                className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                data-testid="select-period"
+              >
+                {PERIODS.map((p) => (
+                  <option key={p} value={p}>
+                    {PERIOD_LABELS[p]}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {period === "custom" && (
+              <>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-medium text-muted-foreground" htmlFor="custom-from">
+                    From
+                  </label>
+                  <input
+                    type="date"
+                    id="custom-from"
+                    value={customFrom}
+                    onChange={(e) => updateFilter({ from: e.target.value })}
+                    className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    data-testid="input-date-from"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-medium text-muted-foreground" htmlFor="custom-to">
+                    To
+                  </label>
+                  <input
+                    type="date"
+                    id="custom-to"
+                    value={customTo}
+                    onChange={(e) => updateFilter({ to: e.target.value })}
+                    className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    data-testid="input-date-to"
+                  />
+                </div>
+              </>
+            )}
+          </div>
+
+          {data?.filter && (
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground" data-testid="filter-meta">
+              <span>
+                Showing <strong className="text-foreground">{data.filter.includedCount}</strong> opportunities
+              </span>
+              <span>
+                {data.filter.dateModeLabel}: {new Date(data.filter.dateFrom).toLocaleDateString()} &ndash; {new Date(data.filter.dateTo).toLocaleDateString()}
+              </span>
+              {data.filter.excludedNullCount > 0 && (
+                <span>
+                  ({data.filter.excludedNullCount} excluded &mdash; missing {data.filter.dateModeLabel.toLowerCase()})
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
         {loading && (
           <div className="flex items-center justify-center py-20" data-testid="loading-state">
             <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
@@ -161,9 +343,9 @@ export default function DashboardPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-foreground mb-1">No opportunities yet</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-1">No opportunities found</h2>
             <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
-              Import opportunities from a CSV file to see analytics and breakdowns here.
+              No data matches the selected filters. Try adjusting the date mode or time period, or import opportunities from CSV.
             </p>
             <Link
               href="/app/import"
@@ -194,7 +376,7 @@ export default function DashboardPage() {
               <KpiCard
                 label="Total Opportunities"
                 value={String(data.totals.count)}
-                sub={`${data.totals.open} open · ${data.totals.won} won · ${data.totals.lost} lost`}
+                sub={`${data.totals.open} open \u00B7 ${data.totals.won} won \u00B7 ${data.totals.lost} lost`}
                 testId="kpi-total"
               />
               <KpiCard
@@ -235,7 +417,9 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-foreground">AI-Powered Analysis</h3>
-                    <p className="text-xs text-muted-foreground">Get actionable insights from your pipeline data</p>
+                    <p className="text-xs text-muted-foreground">
+                      Analyzing with {DATE_MODE_LABELS[dateMode]} &middot; {PERIOD_LABELS[period]}
+                    </p>
                   </div>
                 </div>
                 <button
@@ -271,7 +455,7 @@ export default function DashboardPage() {
 
               {!aiAnalysis && !aiLoading && !aiError && (
                 <p className="text-sm text-muted-foreground" data-testid="text-ai-placeholder">
-                  Click the button above to generate AI-powered insights based on your opportunities data.
+                  Click the button above to generate AI-powered insights for the current date filter.
                 </p>
               )}
 
