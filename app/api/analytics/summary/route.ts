@@ -87,27 +87,37 @@ export async function GET(request: NextRequest) {
   const filterParams = parseDateFilterFromSearchParams(request.nextUrl.searchParams);
   const filter = resolveDateFilter(filterParams);
   const dimFilters = parseDimensionFiltersFromSearchParams(request.nextUrl.searchParams);
+  const datasetId = request.nextUrl.searchParams.get("dataset") || null;
 
   const admin = createAdminClient();
+  const orgId = result.membership.org_id;
 
-  const { count: totalWithDateCount } = await admin
+  let baseQuery = admin
     .from("opportunities")
     .select("id", { count: "exact", head: true })
-    .eq("org_id", result.membership.org_id);
+    .eq("org_id", orgId);
+  if (datasetId) baseQuery = baseQuery.eq("import_job_id", datasetId);
 
-  const { count: nullDateCount } = await admin
+  const { count: totalWithDateCount } = await baseQuery;
+
+  let nullQuery = admin
     .from("opportunities")
     .select("id", { count: "exact", head: true })
-    .eq("org_id", result.membership.org_id)
+    .eq("org_id", orgId)
     .is(filter.dateField, null);
+  if (datasetId) nullQuery = nullQuery.eq("import_job_id", datasetId);
+
+  const { count: nullDateCount } = await nullQuery;
 
   let query = admin
     .from("opportunities")
     .select("name, role, industry, source, segment, country, amount, outcome, closed_date, pipeline_accepted_date, created_at")
-    .eq("org_id", result.membership.org_id)
+    .eq("org_id", orgId)
     .not(filter.dateField, "is", null)
     .gte(filter.dateField, filter.dateFrom)
     .lte(filter.dateField, filter.dateTo);
+
+  if (datasetId) query = query.eq("import_job_id", datasetId);
 
   const { data: opportunities, error } = await query;
 
@@ -154,6 +164,7 @@ export async function GET(request: NextRequest) {
       includedCount: total,
       excludedNullCount: nullDateCount ?? 0,
       totalOrgCount: totalWithDateCount ?? 0,
+      datasetId,
       activeDimensionFilters: hasActiveDimensionFilters(dimFilters)
         ? describeDimensionFilters(dimFilters)
         : null,

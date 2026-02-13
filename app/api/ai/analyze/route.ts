@@ -98,6 +98,7 @@ export async function POST(request: Request) {
 
   const filter = resolveDateFilter(filterParams);
   const dimFilters = parseDimensionFiltersFromBody(body);
+  const datasetId = body.dataset || null;
   const admin = createAdminClient();
 
   let query = admin
@@ -108,6 +109,8 @@ export async function POST(request: Request) {
     .gte(filter.dateField, filter.dateFrom)
     .lte(filter.dateField, filter.dateTo);
 
+  if (datasetId) query = query.eq("import_job_id", datasetId);
+
   const { data: opportunities, error } = await query;
 
   if (error) {
@@ -116,11 +119,14 @@ export async function POST(request: Request) {
 
   let opps = (opportunities || []) as Opportunity[];
 
-  const { count: nullDateCount } = await admin
+  let nullQuery = admin
     .from("opportunities")
     .select("id", { count: "exact", head: true })
     .eq("org_id", result.membership.org_id)
     .is(filter.dateField, null);
+  if (datasetId) nullQuery = nullQuery.eq("import_job_id", datasetId);
+
+  const { count: nullDateCount } = await nullQuery;
 
   const hasDimFilters = hasActiveDimensionFilters(dimFilters);
   if (hasDimFilters) {
@@ -176,6 +182,10 @@ export async function POST(request: Request) {
 
   let dateContext = `Date Mode: ${dateModeLabel}\nTime Window: ${filter.periodLabel} (${new Date(filter.dateFrom).toLocaleDateString()} to ${new Date(filter.dateTo).toLocaleDateString()})\nOpportunities analyzed: ${total}\nExcluded (missing ${dateModeLabel}): ${nullDateCount ?? 0}`;
 
+  if (datasetId) {
+    dateContext += `\nDataset: Import job ${datasetId}`;
+  }
+
   if (dimFilterDesc) {
     dateContext += `\nActive Dimension Filters: ${dimFilterDesc}`;
   }
@@ -186,7 +196,7 @@ export async function POST(request: Request) {
 
   const systemPrompt = `You are a senior sales analytics consultant. You receive JSON data about a company's sales opportunities pipeline and provide actionable insights.
 
-The data has been filtered by a specific date mode and time window.${hasDimFilters ? " Additionally, dimension filters have been applied to narrow the dataset." : ""} Always state which date mode and time window you are analyzing in your summary.${hasDimFilters ? " Also mention the active dimension filters." : ""}
+The data has been filtered by a specific date mode and time window.${hasDimFilters ? " Additionally, dimension filters have been applied to narrow the dataset." : ""}${datasetId ? " The data comes from a specific imported dataset." : ""} Always state which date mode and time window you are analyzing in your summary.${hasDimFilters ? " Also mention the active dimension filters." : ""}
 
 Respond ONLY with a valid JSON object matching this exact structure:
 {
@@ -251,6 +261,7 @@ ${filterMentionRule}
         periodLabel: filter.periodLabel,
         analyzedCount: total,
         excludedNullCount: nullDateCount ?? 0,
+        datasetId,
         activeDimensionFilters: dimFilterDesc,
       },
     });

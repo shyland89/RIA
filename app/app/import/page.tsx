@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 
 type UploadResult = {
@@ -14,12 +14,28 @@ type ImportResult = {
   jobId: string;
   insertedCount: number;
   errorCount: number;
+  skippedCount: number;
   totalRows: number;
   errors: {
     row_number: number;
     error_message: string;
     raw_row_json: Record<string, string>;
   }[];
+};
+
+type ImportJob = {
+  id: string;
+  filename: string;
+  status: string;
+  row_count: number;
+  inserted_count: number;
+  error_count: number;
+  skipped_count: number;
+  is_active: boolean;
+  import_mode: string;
+  created_at: string;
+  started_at: string | null;
+  completed_at: string | null;
 };
 
 const TARGET_FIELDS = [
@@ -47,7 +63,27 @@ export default function ImportPage() {
   const [error, setError] = useState<string>("");
   const [uploading, setUploading] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [importMode, setImportMode] = useState<"append" | "replace">("append");
+  const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
+  const [importHistory, setImportHistory] = useState<ImportJob[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetchHistory();
+  }, []);
+
+  async function fetchHistory() {
+    setHistoryLoading(true);
+    try {
+      const res = await fetch("/api/import/jobs");
+      if (res.ok) {
+        const data = await res.json();
+        setImportHistory(data.jobs || []);
+      }
+    } catch {}
+    setHistoryLoading(false);
+  }
 
   async function handleUpload() {
     if (!file) return;
@@ -104,16 +140,26 @@ export default function ImportPage() {
     );
   }
 
-  async function handleImport() {
+  function handleImportClick() {
+    if (importMode === "replace") {
+      setShowReplaceConfirm(true);
+    } else {
+      doImport();
+    }
+  }
+
+  async function doImport() {
     if (!file || !uploadResult) return;
     setError("");
     setImporting(true);
     setStep("importing");
+    setShowReplaceConfirm(false);
 
     try {
       const formData = new FormData();
       formData.append("file", file);
       formData.append("mapping", JSON.stringify(mapping));
+      formData.append("mode", importMode);
 
       const res = await fetch("/api/import/execute", {
         method: "POST",
@@ -131,6 +177,7 @@ export default function ImportPage() {
 
       setImportResult(data);
       setStep("results");
+      fetchHistory();
     } catch {
       setError("Import failed. Please try again.");
       setStep("mapping");
@@ -146,6 +193,7 @@ export default function ImportPage() {
     setMapping({});
     setImportResult(null);
     setError("");
+    setImportMode("append");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -214,7 +262,10 @@ export default function ImportPage() {
           <div className="rounded-md border border-border bg-card p-6" data-testid="section-upload">
             <h2 className="text-sm font-medium text-foreground mb-4">Select CSV file</h2>
             <p className="text-sm text-muted-foreground mb-4">
-              Your CSV should include columns for: name, role, industry, source, amount, outcome. Optionally include created_at.
+              Your CSV should include columns for: name, role, industry, source, amount, outcome. Optionally include created_at, closed_date, pipeline_accepted_date, segment, country.
+            </p>
+            <p className="text-xs text-muted-foreground mb-4">
+              Values like &quot;NA&quot;, &quot;N/A&quot;, &quot;null&quot;, &quot;none&quot;, or empty cells are treated as missing data.
             </p>
             <div className="space-y-4">
               <div>
@@ -279,6 +330,41 @@ export default function ImportPage() {
               </div>
             </div>
 
+            {/* Import Mode */}
+            <div className="rounded-md border border-border bg-card p-6" data-testid="section-import-mode">
+              <h2 className="text-sm font-medium text-foreground mb-3">Import Mode</h2>
+              <div className="flex flex-col gap-3">
+                <label className="flex items-start gap-3 cursor-pointer" data-testid="radio-mode-append">
+                  <input
+                    type="radio"
+                    name="importMode"
+                    value="append"
+                    checked={importMode === "append"}
+                    onChange={() => setImportMode("append")}
+                    className="mt-0.5 text-primary focus:ring-primary/30"
+                  />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Append</p>
+                    <p className="text-xs text-muted-foreground">Add this data alongside your existing opportunities. Previous imports are preserved.</p>
+                  </div>
+                </label>
+                <label className="flex items-start gap-3 cursor-pointer" data-testid="radio-mode-replace">
+                  <input
+                    type="radio"
+                    name="importMode"
+                    value="replace"
+                    checked={importMode === "replace"}
+                    onChange={() => setImportMode("replace")}
+                    className="mt-0.5 text-primary focus:ring-primary/30"
+                  />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Replace</p>
+                    <p className="text-xs text-muted-foreground">Remove all existing opportunities and replace with this file. Previous import history is kept for reference but marked inactive.</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
             {/* Preview */}
             <div className="rounded-md border border-border bg-card p-6" data-testid="section-preview">
               <h2 className="text-sm font-medium text-foreground mb-4">
@@ -321,13 +407,52 @@ export default function ImportPage() {
                 Back
               </button>
               <button
-                onClick={handleImport}
+                onClick={handleImportClick}
                 disabled={!isMappingValid()}
-                className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`inline-flex items-center rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed ${
+                  importMode === "replace"
+                    ? "bg-red-600 text-white hover:bg-red-700"
+                    : "bg-primary text-primary-foreground"
+                }`}
                 data-testid="button-import"
               >
-                Import {uploadResult.totalRows} Rows
+                {importMode === "replace" ? "Replace & Import" : "Import"} {uploadResult.totalRows} Rows
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Replace Confirmation Modal */}
+        {showReplaceConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" data-testid="modal-replace-confirm">
+            <div className="rounded-lg border border-border bg-card p-6 shadow-xl max-w-md mx-4">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-red-100 dark:bg-red-950/30">
+                  <svg className="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-foreground">Replace Existing Data?</h3>
+              </div>
+              <p className="text-sm text-muted-foreground mb-6">
+                This will remove all existing opportunities and replace them with the data from this file. Previous import history will be kept for reference but marked inactive. This action cannot be undone.
+              </p>
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  onClick={() => setShowReplaceConfirm(false)}
+                  className="inline-flex items-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground"
+                  data-testid="button-cancel-replace"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={doImport}
+                  className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                  data-testid="button-confirm-replace"
+                >
+                  Yes, Replace All Data
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -416,17 +541,116 @@ export default function ImportPage() {
                 Import Another File
               </button>
               <Link
-                href="/app"
+                href={`/app/dashboard${importResult.jobId ? `?dataset=${importResult.jobId}` : ""}`}
                 className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-                data-testid="link-back-dashboard-results"
+                data-testid="link-view-analytics"
               >
-                Back to Dashboard
+                View Analytics
               </Link>
             </div>
           </div>
         )}
+
+        {/* Import History */}
+        <div className="mt-12" data-testid="section-import-history">
+          <h2 className="text-lg font-semibold text-foreground mb-4">Import History</h2>
+          {historyLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <svg className="w-5 h-5 text-primary animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            </div>
+          ) : importHistory.length === 0 ? (
+            <div className="rounded-md border border-border bg-card p-6 text-center">
+              <p className="text-sm text-muted-foreground">No imports yet. Upload a CSV file above to get started.</p>
+            </div>
+          ) : (
+            <div className="rounded-md border border-border bg-card overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border bg-muted/30">
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">File</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Mode</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Status</th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">Rows</th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">Inserted</th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">Errors</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Date</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {importHistory.map((job) => (
+                      <tr key={job.id} className={`border-b border-border/50 ${!job.is_active ? "opacity-50" : ""}`} data-testid={`import-job-${job.id}`}>
+                        <td className="px-4 py-3 text-foreground font-medium whitespace-nowrap max-w-[200px] truncate">
+                          {job.filename}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                            job.import_mode === "replace"
+                              ? "bg-amber-100 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400"
+                              : "bg-blue-100 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400"
+                          }`}>
+                            {job.import_mode}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <StatusBadge status={job.status} isActive={job.is_active} />
+                        </td>
+                        <td className="px-4 py-3 text-right text-foreground">{job.row_count}</td>
+                        <td className="px-4 py-3 text-right text-green-600 dark:text-green-400">{job.inserted_count}</td>
+                        <td className={`px-4 py-3 text-right ${job.error_count > 0 ? "text-red-600 dark:text-red-400" : "text-foreground"}`}>
+                          {job.error_count}
+                        </td>
+                        <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
+                          {new Date(job.created_at).toLocaleDateString()} {new Date(job.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </td>
+                        <td className="px-4 py-3">
+                          {job.status === "completed" && job.is_active && (
+                            <Link
+                              href={`/app/dashboard?dataset=${job.id}`}
+                              className="text-xs text-primary hover:underline"
+                              data-testid={`link-analytics-${job.id}`}
+                            >
+                              View Analytics
+                            </Link>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
       </main>
     </div>
+  );
+}
+
+function StatusBadge({ status, isActive }: { status: string; isActive: boolean }) {
+  if (!isActive) {
+    return (
+      <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium bg-muted text-muted-foreground">
+        inactive
+      </span>
+    );
+  }
+
+  const styles: Record<string, string> = {
+    completed: "bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400",
+    running: "bg-blue-100 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400",
+    pending: "bg-yellow-100 dark:bg-yellow-950/30 text-yellow-700 dark:text-yellow-400",
+    failed: "bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400",
+  };
+
+  return (
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${styles[status] || styles.pending}`}>
+      {status}
+    </span>
   );
 }
 

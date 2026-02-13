@@ -1040,6 +1040,10 @@ body {
   }
 }
 
+.running {
+  animation-play-state: running;
+}
+
 :root {
   --radius: .5rem;
   --background: 0 0% 100%;

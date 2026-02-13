@@ -20,19 +20,24 @@ export async function GET(request: NextRequest) {
 
   const filterParams = parseDateFilterFromSearchParams(request.nextUrl.searchParams);
   const filter = resolveDateFilter(filterParams);
+  const datasetId = request.nextUrl.searchParams.get("dataset") || null;
   const admin = createAdminClient();
   const orgId = result.membership.org_id;
 
   const dimensions: Record<string, string[]> = {};
 
   for (const key of DIMENSION_KEYS) {
-    const { data, error } = await admin
+    let query = admin
       .from("opportunities")
       .select(key)
       .eq("org_id", orgId)
       .not(filter.dateField, "is", null)
       .gte(filter.dateField, filter.dateFrom)
       .lte(filter.dateField, filter.dateTo);
+
+    if (datasetId) query = query.eq("import_job_id", datasetId);
+
+    const { data, error } = await query;
 
     if (error) {
       dimensions[key] = [];
