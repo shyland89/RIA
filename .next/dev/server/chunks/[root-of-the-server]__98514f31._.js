@@ -389,16 +389,23 @@ async function GET(request) {
     const filterParams = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$date$2d$filter$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["parseDateFilterFromSearchParams"])(request.nextUrl.searchParams);
     const filter = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$date$2d$filter$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["resolveDateFilter"])(filterParams);
     const dimFilters = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$dimension$2d$filter$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["parseDimensionFiltersFromSearchParams"])(request.nextUrl.searchParams);
+    const datasetId = request.nextUrl.searchParams.get("dataset") || null;
     const admin = createAdminClient();
-    const { count: totalWithDateCount } = await admin.from("opportunities").select("id", {
+    const orgId = result.membership.org_id;
+    let baseQuery = admin.from("opportunities").select("id", {
         count: "exact",
         head: true
-    }).eq("org_id", result.membership.org_id);
-    const { count: nullDateCount } = await admin.from("opportunities").select("id", {
+    }).eq("org_id", orgId);
+    if (datasetId) baseQuery = baseQuery.eq("import_job_id", datasetId);
+    const { count: totalWithDateCount } = await baseQuery;
+    let nullQuery = admin.from("opportunities").select("id", {
         count: "exact",
         head: true
-    }).eq("org_id", result.membership.org_id).is(filter.dateField, null);
-    let query = admin.from("opportunities").select("name, role, industry, source, segment, country, amount, outcome, closed_date, pipeline_accepted_date, created_at").eq("org_id", result.membership.org_id).not(filter.dateField, "is", null).gte(filter.dateField, filter.dateFrom).lte(filter.dateField, filter.dateTo);
+    }).eq("org_id", orgId).is(filter.dateField, null);
+    if (datasetId) nullQuery = nullQuery.eq("import_job_id", datasetId);
+    const { count: nullDateCount } = await nullQuery;
+    let query = admin.from("opportunities").select("name, role, industry, source, segment, country, amount, outcome, closed_date, pipeline_accepted_date, created_at").eq("org_id", orgId).not(filter.dateField, "is", null).gte(filter.dateField, filter.dateFrom).lte(filter.dateField, filter.dateTo);
+    if (datasetId) query = query.eq("import_job_id", datasetId);
     const { data: opportunities, error } = await query;
     if (error) {
         return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
@@ -440,6 +447,7 @@ async function GET(request) {
             includedCount: total,
             excludedNullCount: nullDateCount ?? 0,
             totalOrgCount: totalWithDateCount ?? 0,
+            datasetId,
             activeDimensionFilters: (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$dimension$2d$filter$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["hasActiveDimensionFilters"])(dimFilters) ? (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$dimension$2d$filter$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["describeDimensionFilters"])(dimFilters) : null
         }
     });

@@ -360,11 +360,14 @@ async function GET(request) {
     }
     const filterParams = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$date$2d$filter$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["parseDateFilterFromSearchParams"])(request.nextUrl.searchParams);
     const filter = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$date$2d$filter$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["resolveDateFilter"])(filterParams);
+    const datasetId = request.nextUrl.searchParams.get("dataset") || null;
     const admin = createAdminClient();
     const orgId = result.membership.org_id;
     const dimensions = {};
     for (const key of __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$dimension$2d$filter$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["DIMENSION_KEYS"]){
-        const { data, error } = await admin.from("opportunities").select(key).eq("org_id", orgId).not(filter.dateField, "is", null).gte(filter.dateField, filter.dateFrom).lte(filter.dateField, filter.dateTo);
+        let query = admin.from("opportunities").select(key).eq("org_id", orgId).not(filter.dateField, "is", null).gte(filter.dateField, filter.dateFrom).lte(filter.dateField, filter.dateTo);
+        if (datasetId) query = query.eq("import_job_id", datasetId);
+        const { data, error } = await query;
         if (error) {
             dimensions[key] = [];
             continue;

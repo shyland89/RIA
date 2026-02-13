@@ -104,6 +104,13 @@ export default function DashboardPage() {
   );
 }
 
+type DatasetOption = {
+  id: string;
+  filename: string;
+  inserted_count: number;
+  created_at: string;
+};
+
 function DashboardContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -112,6 +119,7 @@ function DashboardContent() {
   const period = (searchParams.get("period") as Period) || "30d";
   const customFrom = searchParams.get("from") || "";
   const customTo = searchParams.get("to") || "";
+  const datasetParam = searchParams.get("dataset") || "";
 
   const initialDimFilters: DimensionFilters = {};
   for (const key of DIMENSION_KEYS) {
@@ -131,6 +139,40 @@ function DashboardContent() {
   const [filtersOpen, setFiltersOpen] = useState(() => {
     return Object.values(initialDimFilters).some((v) => v && v.length > 0);
   });
+  const [datasets, setDatasets] = useState<DatasetOption[]>([]);
+  const [selectedDataset, setSelectedDataset] = useState(datasetParam);
+
+  useEffect(() => {
+    async function loadDatasets() {
+      try {
+        const res = await fetch("/api/import/jobs");
+        if (res.ok) {
+          const json = await res.json();
+          const activeCompleted = (json.jobs || [])
+            .filter((j: any) => j.is_active && j.status === "completed" && j.inserted_count > 0)
+            .map((j: any) => ({
+              id: j.id,
+              filename: j.filename,
+              inserted_count: j.inserted_count,
+              created_at: j.created_at,
+            }));
+          setDatasets(activeCompleted);
+        }
+      } catch {}
+    }
+    loadDatasets();
+  }, []);
+
+  function handleDatasetChange(newDataset: string) {
+    setSelectedDataset(newDataset);
+    const params = new URLSearchParams(searchParams.toString());
+    if (newDataset) {
+      params.set("dataset", newDataset);
+    } else {
+      params.delete("dataset");
+    }
+    router.replace(`?${params.toString()}`, { scroll: false });
+  }
 
   function updateFilter(updates: Record<string, string>) {
     const params = new URLSearchParams(searchParams.toString());
@@ -144,6 +186,9 @@ function DashboardContent() {
     if (params.get("period") !== "custom") {
       params.delete("from");
       params.delete("to");
+    }
+    if (selectedDataset) {
+      params.set("dataset", selectedDataset);
     }
     for (const key of DIMENSION_KEYS) {
       params.delete(key);
@@ -201,13 +246,14 @@ function DashboardContent() {
         if (customFrom) params.set("from", customFrom);
         if (customTo) params.set("to", customTo);
       }
+      if (selectedDataset) params.set("dataset", selectedDataset);
       const res = await fetch(`/api/analytics/dimensions?${params.toString()}`);
       if (res.ok) {
         const json = await res.json();
         setDimOptions(json.dimensions || {});
       }
     } catch {}
-  }, [dateMode, period, customFrom, customTo]);
+  }, [dateMode, period, customFrom, customTo, selectedDataset]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -220,6 +266,7 @@ function DashboardContent() {
         if (customFrom) params.set("from", customFrom);
         if (customTo) params.set("to", customTo);
       }
+      if (selectedDataset) params.set("dataset", selectedDataset);
       for (const key of DIMENSION_KEYS) {
         const vals = dimFilters[key];
         if (vals && vals.length > 0) {
@@ -238,7 +285,7 @@ function DashboardContent() {
     } finally {
       setLoading(false);
     }
-  }, [dateMode, period, customFrom, customTo, dimFilters]);
+  }, [dateMode, period, customFrom, customTo, dimFilters, selectedDataset]);
 
   useEffect(() => {
     fetchDimensions();
@@ -261,6 +308,7 @@ function DashboardContent() {
         if (customFrom) body.from = customFrom;
         if (customTo) body.to = customTo;
       }
+      if (selectedDataset) body.dataset = selectedDataset;
       for (const key of DIMENSION_KEYS) {
         const vals = dimFilters[key];
         if (vals && vals.length > 0) {
@@ -323,6 +371,28 @@ function DashboardContent() {
         {/* Filter Bar */}
         <div className="rounded-md border border-border bg-card p-4 mb-4" data-testid="filter-bar">
           <div className="flex flex-wrap items-end gap-4">
+            {datasets.length > 0 && (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-medium text-muted-foreground" htmlFor="dataset-select">
+                  Dataset
+                </label>
+                <select
+                  id="dataset-select"
+                  value={selectedDataset}
+                  onChange={(e) => handleDatasetChange(e.target.value)}
+                  className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  data-testid="select-dataset"
+                >
+                  <option value="">All Data</option>
+                  {datasets.map((ds) => (
+                    <option key={ds.id} value={ds.id}>
+                      {ds.filename} ({ds.inserted_count} rows)
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-medium text-muted-foreground" htmlFor="date-mode">
                 Date Mode
@@ -427,6 +497,11 @@ function DashboardContent() {
               {data.filter.excludedNullCount > 0 && (
                 <span>
                   ({data.filter.excludedNullCount} excluded &mdash; missing {data.filter.dateModeLabel.toLowerCase()})
+                </span>
+              )}
+              {selectedDataset && datasets.length > 0 && (
+                <span data-testid="text-active-dataset">
+                  Dataset: {datasets.find((d) => d.id === selectedDataset)?.filename || "Selected"}
                 </span>
               )}
               {data.filter.activeDimensionFilters && (
