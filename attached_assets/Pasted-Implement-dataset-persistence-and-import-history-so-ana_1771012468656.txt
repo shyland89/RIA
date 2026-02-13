@@ -1,0 +1,56 @@
+Implement dataset persistence and import history so analytics can be reloaded later and multiple uploads can be switched.
+
+CONTEXT
+- User uploads CSV and it imports into opportunities.
+- We need each upload treated as a dataset/import run:
+  - Stored server-side
+  - User can log out and come back and still see last dataset
+  - User can view previous imports and switch analytics between them
+- Also support: “Replace existing” vs “Append”
+
+DO NOW
+1) Database
+   - Confirm import_jobs table exists.
+   - Ensure opportunities rows can link to an import job:
+     - add import_job_id column to opportunities if missing (foreign key to import_jobs.id)
+   - Add to import_jobs:
+     - file_name
+     - row_count
+     - inserted_count
+     - error_count
+     - status (pending/running/completed/failed)
+     - created_at
+     - org_id
+
+2) Import pipeline
+   - When CSV import starts:
+     - create import_jobs row (status=pending/running)
+   - When done:
+     - update inserted_count, error_count, status
+   - Insert imported opportunities with import_job_id set.
+
+3) “Replace vs Append”
+   - Add a toggle on Import screen:
+     - Replace existing data (soft delete or mark previous datasets inactive)
+     - Append as new dataset
+   - If Replace:
+     - Do not destroy historical data; instead mark prior datasets inactive OR mark opportunities archived.
+
+4) Analytics selection
+   - Add “Dataset” selector dropdown on Analytics:
+     - Default = latest successful import job for org
+     - List recent import_jobs (file_name + created_at)
+   - All analytics queries must include:
+     - org_id
+     - AND import_job_id = selected dataset
+     - plus date filters + dimension filters
+
+5) Import History page/section
+   - Show table of import runs with status + counts + errors
+   - Allow selecting an import to open analytics for that dataset
+
+VERIFY
+- Upload CSV -> dataset created.
+- Refresh / log out & in -> analytics still show the last dataset.
+- Upload second CSV with Append -> you can switch between dataset A and dataset B.
+- Replace option does not delete history; it just changes what is active/default.

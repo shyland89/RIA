@@ -59,6 +59,16 @@ const TARGET_FIELDS = [
         key: "pipeline_accepted_date",
         label: "Pipeline Accepted Date",
         required: false
+    },
+    {
+        key: "segment",
+        label: "Segment",
+        required: false
+    },
+    {
+        key: "country",
+        label: "Country",
+        required: false
     }
 ];
 function ImportPage() {
@@ -179,17 +189,17 @@ function ImportPage() {
                                             d: "M13 10V3L4 14h7v7l9-11h-7z"
                                         }, void 0, false, {
                                             fileName: "[project]/app/app/import/page.tsx",
-                                            lineNumber: 159,
+                                            lineNumber: 161,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 158,
+                                        lineNumber: 160,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/app/app/import/page.tsx",
-                                    lineNumber: 157,
+                                    lineNumber: 159,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -198,13 +208,13 @@ function ImportPage() {
                                     children: "Import Opportunities"
                                 }, void 0, false, {
                                     fileName: "[project]/app/app/import/page.tsx",
-                                    lineNumber: 162,
+                                    lineNumber: 164,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/app/import/page.tsx",
-                            lineNumber: 156,
+                            lineNumber: 158,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -217,7 +227,7 @@ function ImportPage() {
                                     children: "Analytics"
                                 }, void 0, false, {
                                     fileName: "[project]/app/app/import/page.tsx",
-                                    lineNumber: 167,
+                                    lineNumber: 169,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -227,24 +237,24 @@ function ImportPage() {
                                     children: "Home"
                                 }, void 0, false, {
                                     fileName: "[project]/app/app/import/page.tsx",
-                                    lineNumber: 174,
+                                    lineNumber: 176,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/app/import/page.tsx",
-                            lineNumber: 166,
+                            lineNumber: 168,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/app/app/import/page.tsx",
-                    lineNumber: 155,
+                    lineNumber: 157,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/app/app/import/page.tsx",
-                lineNumber: 154,
+                lineNumber: 156,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("main", {
@@ -258,7 +268,7 @@ function ImportPage() {
                                 children: "CSV Import"
                             }, void 0, false, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 187,
+                                lineNumber: 189,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -266,13 +276,13 @@ function ImportPage() {
                                 children: "Upload a CSV file to import opportunities into your organization."
                             }, void 0, false, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 190,
+                                lineNumber: 192,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/app/import/page.tsx",
-                        lineNumber: 186,
+                        lineNumber: 188,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -286,21 +296,6 @@ function ImportPage() {
                                 num: 1
                             }, void 0, false, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 197,
-                                columnNumber: 11
-                            }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(StepDivider, {}, void 0, false, {
-                                fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 198,
-                                columnNumber: 11
-                            }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(StepIndicator, {
-                                label: "Map Columns",
-                                active: step === "mapping",
-                                done: step === "importing" || step === "results",
-                                num: 2
-                            }, void 0, false, {
-                                fileName: "[project]/app/app/import/page.tsx",
                                 lineNumber: 199,
                                 columnNumber: 11
                             }, this),
@@ -310,19 +305,34 @@ function ImportPage() {
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(StepIndicator, {
+                                label: "Map Columns",
+                                active: step === "mapping",
+                                done: step === "importing" || step === "results",
+                                num: 2
+                            }, void 0, false, {
+                                fileName: "[project]/app/app/import/page.tsx",
+                                lineNumber: 201,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(StepDivider, {}, void 0, false, {
+                                fileName: "[project]/app/app/import/page.tsx",
+                                lineNumber: 202,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(StepIndicator, {
                                 label: "Import",
                                 active: step === "importing" || step === "results",
                                 done: step === "results",
                                 num: 3
                             }, void 0, false, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 201,
+                                lineNumber: 203,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/app/import/page.tsx",
-                        lineNumber: 196,
+                        lineNumber: 198,
                         columnNumber: 9
                     }, this),
                     error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -331,7 +341,7 @@ function ImportPage() {
                         children: error
                     }, void 0, false, {
                         fileName: "[project]/app/app/import/page.tsx",
-                        lineNumber: 205,
+                        lineNumber: 207,
                         columnNumber: 11
                     }, this),
                     step === "upload" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -343,7 +353,7 @@ function ImportPage() {
                                 children: "Select CSV file"
                             }, void 0, false, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 213,
+                                lineNumber: 215,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -351,7 +361,7 @@ function ImportPage() {
                                 children: "Your CSV should include columns for: name, role, industry, source, amount, outcome. Optionally include created_at."
                             }, void 0, false, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 214,
+                                lineNumber: 216,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -367,12 +377,12 @@ function ImportPage() {
                                             "data-testid": "input-file"
                                         }, void 0, false, {
                                             fileName: "[project]/app/app/import/page.tsx",
-                                            lineNumber: 219,
+                                            lineNumber: 221,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 218,
+                                        lineNumber: 220,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -383,19 +393,19 @@ function ImportPage() {
                                         children: uploading ? "Parsing..." : "Upload & Preview"
                                     }, void 0, false, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 228,
+                                        lineNumber: 230,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 217,
+                                lineNumber: 219,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/app/import/page.tsx",
-                        lineNumber: 212,
+                        lineNumber: 214,
                         columnNumber: 11
                     }, this),
                     step === "mapping" && uploadResult && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -413,7 +423,7 @@ function ImportPage() {
                                                 children: "Column Mapping"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                lineNumber: 245,
+                                                lineNumber: 247,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -427,13 +437,13 @@ function ImportPage() {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                lineNumber: 248,
+                                                lineNumber: 250,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 244,
+                                        lineNumber: 246,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -441,7 +451,7 @@ function ImportPage() {
                                         children: "Map each CSV column to the corresponding opportunity field."
                                     }, void 0, false, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 252,
+                                        lineNumber: 254,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -458,13 +468,13 @@ function ImportPage() {
                                                                 children: "*"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 260,
+                                                                lineNumber: 262,
                                                                 columnNumber: 42
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 258,
+                                                        lineNumber: 260,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -478,7 +488,7 @@ function ImportPage() {
                                                                 children: "— Select column —"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 268,
+                                                                lineNumber: 270,
                                                                 columnNumber: 23
                                                             }, this),
                                                             uploadResult.headers.map((h)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -486,30 +496,30 @@ function ImportPage() {
                                                                     children: h
                                                                 }, h, false, {
                                                                     fileName: "[project]/app/app/import/page.tsx",
-                                                                    lineNumber: 270,
+                                                                    lineNumber: 272,
                                                                     columnNumber: 25
                                                                 }, this))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 262,
+                                                        lineNumber: 264,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, field.key, true, {
                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                lineNumber: 257,
+                                                lineNumber: 259,
                                                 columnNumber: 19
                                             }, this))
                                     }, void 0, false, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 255,
+                                        lineNumber: 257,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 243,
+                                lineNumber: 245,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -525,7 +535,7 @@ function ImportPage() {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 282,
+                                        lineNumber: 284,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -542,7 +552,7 @@ function ImportPage() {
                                                                 children: "#"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 289,
+                                                                lineNumber: 291,
                                                                 columnNumber: 23
                                                             }, this),
                                                             uploadResult.headers.map((h)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -550,18 +560,18 @@ function ImportPage() {
                                                                     children: h
                                                                 }, h, false, {
                                                                     fileName: "[project]/app/app/import/page.tsx",
-                                                                    lineNumber: 291,
+                                                                    lineNumber: 293,
                                                                     columnNumber: 25
                                                                 }, this))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 288,
+                                                        lineNumber: 290,
                                                         columnNumber: 21
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/app/import/page.tsx",
-                                                    lineNumber: 287,
+                                                    lineNumber: 289,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
@@ -573,7 +583,7 @@ function ImportPage() {
                                                                     children: i + 1
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/app/import/page.tsx",
-                                                                    lineNumber: 300,
+                                                                    lineNumber: 302,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 uploadResult.headers.map((h)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -581,35 +591,35 @@ function ImportPage() {
                                                                         children: row[h] || ""
                                                                     }, h, false, {
                                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                                        lineNumber: 302,
+                                                                        lineNumber: 304,
                                                                         columnNumber: 27
                                                                     }, this))
                                                             ]
                                                         }, i, true, {
                                                             fileName: "[project]/app/app/import/page.tsx",
-                                                            lineNumber: 299,
+                                                            lineNumber: 301,
                                                             columnNumber: 23
                                                         }, this))
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/app/import/page.tsx",
-                                                    lineNumber: 297,
+                                                    lineNumber: 299,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/app/app/import/page.tsx",
-                                            lineNumber: 286,
+                                            lineNumber: 288,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 285,
+                                        lineNumber: 287,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 281,
+                                lineNumber: 283,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -622,7 +632,7 @@ function ImportPage() {
                                         children: "Back"
                                     }, void 0, false, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 314,
+                                        lineNumber: 316,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -637,19 +647,19 @@ function ImportPage() {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 321,
+                                        lineNumber: 323,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 313,
+                                lineNumber: 315,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/app/import/page.tsx",
-                        lineNumber: 242,
+                        lineNumber: 244,
                         columnNumber: 11
                     }, this),
                     step === "importing" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -672,7 +682,7 @@ function ImportPage() {
                                             strokeWidth: "4"
                                         }, void 0, false, {
                                             fileName: "[project]/app/app/import/page.tsx",
-                                            lineNumber: 338,
+                                            lineNumber: 340,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
@@ -681,18 +691,18 @@ function ImportPage() {
                                             d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                                         }, void 0, false, {
                                             fileName: "[project]/app/app/import/page.tsx",
-                                            lineNumber: 339,
+                                            lineNumber: 341,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/app/app/import/page.tsx",
-                                    lineNumber: 337,
+                                    lineNumber: 339,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 336,
+                                lineNumber: 338,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -700,7 +710,7 @@ function ImportPage() {
                                 children: "Importing opportunities..."
                             }, void 0, false, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 342,
+                                lineNumber: 344,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -708,13 +718,13 @@ function ImportPage() {
                                 children: "This may take a moment."
                             }, void 0, false, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 343,
+                                lineNumber: 345,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/app/import/page.tsx",
-                        lineNumber: 335,
+                        lineNumber: 337,
                         columnNumber: 11
                     }, this),
                     step === "results" && importResult && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -729,7 +739,7 @@ function ImportPage() {
                                         children: "Import Complete"
                                     }, void 0, false, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 351,
+                                        lineNumber: 353,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -743,7 +753,7 @@ function ImportPage() {
                                                         children: "Total Rows"
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 354,
+                                                        lineNumber: 356,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -752,13 +762,13 @@ function ImportPage() {
                                                         children: importResult.totalRows
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 355,
+                                                        lineNumber: 357,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                lineNumber: 353,
+                                                lineNumber: 355,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -769,7 +779,7 @@ function ImportPage() {
                                                         children: "Inserted"
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 360,
+                                                        lineNumber: 362,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -778,13 +788,13 @@ function ImportPage() {
                                                         children: importResult.insertedCount
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 361,
+                                                        lineNumber: 363,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                lineNumber: 359,
+                                                lineNumber: 361,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -795,7 +805,7 @@ function ImportPage() {
                                                         children: "Errors"
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 366,
+                                                        lineNumber: 368,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -804,25 +814,25 @@ function ImportPage() {
                                                         children: importResult.errorCount
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 367,
+                                                        lineNumber: 369,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                lineNumber: 365,
+                                                lineNumber: 367,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 352,
+                                        lineNumber: 354,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 350,
+                                lineNumber: 352,
                                 columnNumber: 13
                             }, this),
                             importResult.errors.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -837,7 +847,7 @@ function ImportPage() {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 376,
+                                        lineNumber: 378,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -854,7 +864,7 @@ function ImportPage() {
                                                                 children: "Row"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 383,
+                                                                lineNumber: 385,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -862,7 +872,7 @@ function ImportPage() {
                                                                 children: "Error"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 384,
+                                                                lineNumber: 386,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -870,18 +880,18 @@ function ImportPage() {
                                                                 children: "Data"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 385,
+                                                                lineNumber: 387,
                                                                 columnNumber: 25
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 382,
+                                                        lineNumber: 384,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/app/import/page.tsx",
-                                                    lineNumber: 381,
+                                                    lineNumber: 383,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
@@ -894,7 +904,7 @@ function ImportPage() {
                                                                     children: err.row_number
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/app/import/page.tsx",
-                                                                    lineNumber: 391,
+                                                                    lineNumber: 393,
                                                                     columnNumber: 27
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -903,7 +913,7 @@ function ImportPage() {
                                                                     children: err.error_message
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/app/import/page.tsx",
-                                                                    lineNumber: 394,
+                                                                    lineNumber: 396,
                                                                     columnNumber: 27
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -911,35 +921,35 @@ function ImportPage() {
                                                                     children: JSON.stringify(err.raw_row_json)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/app/import/page.tsx",
-                                                                    lineNumber: 397,
+                                                                    lineNumber: 399,
                                                                     columnNumber: 27
                                                                 }, this)
                                                             ]
                                                         }, i, true, {
                                                             fileName: "[project]/app/app/import/page.tsx",
-                                                            lineNumber: 390,
+                                                            lineNumber: 392,
                                                             columnNumber: 25
                                                         }, this))
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/app/import/page.tsx",
-                                                    lineNumber: 388,
+                                                    lineNumber: 390,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/app/app/import/page.tsx",
-                                            lineNumber: 380,
+                                            lineNumber: 382,
                                             columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 379,
+                                        lineNumber: 381,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 375,
+                                lineNumber: 377,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -952,7 +962,7 @@ function ImportPage() {
                                         children: "Import Another File"
                                     }, void 0, false, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 409,
+                                        lineNumber: 411,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -962,31 +972,31 @@ function ImportPage() {
                                         children: "Back to Dashboard"
                                     }, void 0, false, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 416,
+                                        lineNumber: 418,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 408,
+                                lineNumber: 410,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/app/import/page.tsx",
-                        lineNumber: 349,
+                        lineNumber: 351,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/app/app/import/page.tsx",
-                lineNumber: 185,
+                lineNumber: 187,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/app/app/import/page.tsx",
-        lineNumber: 153,
+        lineNumber: 155,
         columnNumber: 5
     }, this);
 }
@@ -1010,17 +1020,17 @@ function StepIndicator({ label, active, done, num }) {
                         d: "M5 13l4 4L19 7"
                     }, void 0, false, {
                         fileName: "[project]/app/app/import/page.tsx",
-                        lineNumber: 445,
+                        lineNumber: 447,
                         columnNumber: 13
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/app/app/import/page.tsx",
-                    lineNumber: 444,
+                    lineNumber: 446,
                     columnNumber: 11
                 }, this) : num
             }, void 0, false, {
                 fileName: "[project]/app/app/import/page.tsx",
-                lineNumber: 434,
+                lineNumber: 436,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1028,13 +1038,13 @@ function StepIndicator({ label, active, done, num }) {
                 children: label
             }, void 0, false, {
                 fileName: "[project]/app/app/import/page.tsx",
-                lineNumber: 451,
+                lineNumber: 453,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/app/app/import/page.tsx",
-        lineNumber: 433,
+        lineNumber: 435,
         columnNumber: 5
     }, this);
 }
@@ -1044,7 +1054,7 @@ function StepDivider() {
         className: "flex-1 h-px bg-border max-w-[60px]"
     }, void 0, false, {
         fileName: "[project]/app/app/import/page.tsx",
-        lineNumber: 459,
+        lineNumber: 461,
         columnNumber: 10
     }, this);
 }
