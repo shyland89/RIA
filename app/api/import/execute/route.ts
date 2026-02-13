@@ -1,10 +1,31 @@
 import { createClient } from "@/lib/supabase/server";
 import { getUserOrg, isUserOrgError } from "@/lib/get-user-org";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { parse } from "csv-parse/sync";
 
 const REQUIRED_FIELDS = ["name", "role", "industry", "source", "amount", "outcome"] as const;
 const VALID_OUTCOMES = ["open", "won", "lost"];
+const NULL_TOKENS = ["", "na", "n/a", "null", "none", "-"];
+
+function isNullish(val: string | undefined): boolean {
+  if (!val) return true;
+  return NULL_TOKENS.includes(val.trim().toLowerCase());
+}
+
+function normalizeDimension(val: string | undefined): string | null {
+  if (!val) return null;
+  const trimmed = val.trim();
+  if (NULL_TOKENS.includes(trimmed.toLowerCase())) return null;
+  return trimmed;
+}
+
+function createAdminClient() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 export async function POST(request: Request) {
   const result = await getUserOrg();
@@ -14,12 +35,14 @@ export async function POST(request: Request) {
   }
 
   const supabase = await createClient();
+  const admin = createAdminClient();
   const user = result.user;
   const orgId = result.membership.org_id;
 
   const formData = await request.formData();
   const file = formData.get("file") as File | null;
   const mappingJson = formData.get("mapping") as string | null;
+  const importMode = (formData.get("mode") as string) || "append";
 
   if (!file || !mappingJson) {
     return NextResponse.json(
@@ -63,7 +86,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { data: job, error: jobError } = await supabase
+  const { data: job, error: jobError } = await admin
     .from("import_jobs")
     .insert({
       org_id: orgId,
@@ -71,6 +94,13 @@ export async function POST(request: Request) {
       filename: file.name,
       inserted_count: 0,
       error_count: 0,
+      skipped_count: 0,
+      row_count: records.length,
+      status: "running",
+      is_active: true,
+      import_mode: importMode === "replace" ? "replace" : "append",
+      mapping_config: mapping,
+      started_at: new Date().toISOString(),
     })
     .select("id")
     .single();
@@ -83,7 +113,43 @@ export async function POST(request: Request) {
   }
 
   const jobId = job.id;
+
+  if (importMode === "replace") {
+    await admin
+      .from("import_jobs")
+      .update({ is_active: false })
+      .eq("org_id", orgId)
+      .neq("id", jobId);
+
+    const { error: deleteError } = await admin
+      .from("opportunities")
+      .delete()
+      .eq("org_id", orgId)
+      .is("import_job_id", null);
+
+    if (deleteError) {
+      console.error("Failed to delete unlinked opportunities:", deleteError.message);
+    }
+
+    const { data: priorJobs } = await admin
+      .from("import_jobs")
+      .select("id")
+      .eq("org_id", orgId)
+      .eq("is_active", false);
+
+    if (priorJobs && priorJobs.length > 0) {
+      for (const pj of priorJobs) {
+        await admin
+          .from("opportunities")
+          .delete()
+          .eq("org_id", orgId)
+          .eq("import_job_id", pj.id);
+      }
+    }
+  }
+
   let insertedCount = 0;
+  let skippedCount = 0;
   const errors: { row_number: number; error_message: string; raw_row_json: any }[] = [];
 
   for (let i = 0; i < records.length; i++) {
@@ -118,7 +184,7 @@ export async function POST(request: Request) {
     }
 
     let createdAt: string | undefined;
-    if (createdAtStr) {
+    if (createdAtStr && !isNullish(createdAtStr)) {
       const d = new Date(createdAtStr);
       if (isNaN(d.getTime())) {
         rowErrors.push("created_at is not a valid date");
@@ -128,7 +194,7 @@ export async function POST(request: Request) {
     }
 
     let closedDate: string | undefined;
-    if (closedDateStr) {
+    if (closedDateStr && !isNullish(closedDateStr)) {
       const d = new Date(closedDateStr);
       if (isNaN(d.getTime())) {
         rowErrors.push("closed_date is not a valid date");
@@ -138,7 +204,7 @@ export async function POST(request: Request) {
     }
 
     let pipelineAcceptedDate: string | undefined;
-    if (pipelineDateStr) {
+    if (pipelineDateStr && !isNullish(pipelineDateStr)) {
       const d = new Date(pipelineDateStr);
       if (isNaN(d.getTime())) {
         rowErrors.push("pipeline_accepted_date is not a valid date");
@@ -156,13 +222,9 @@ export async function POST(request: Request) {
       continue;
     }
 
-    const normalizeDimension = (val: string | undefined): string | null => {
-      if (!val || val === "") return null;
-      return val;
-    };
-
     const insertData: any = {
       org_id: orgId,
+      import_job_id: jobId,
       name: name || null,
       role: normalizeDimension(role) ?? role,
       industry: normalizeDimension(industry) ?? industry,
@@ -176,7 +238,7 @@ export async function POST(request: Request) {
     if (closedDate) insertData.closed_date = closedDate;
     if (pipelineAcceptedDate) insertData.pipeline_accepted_date = pipelineAcceptedDate;
 
-    const { error: insertError } = await supabase
+    const { error: insertError } = await admin
       .from("opportunities")
       .insert(insertData);
 
@@ -198,14 +260,19 @@ export async function POST(request: Request) {
       error_message: e.error_message,
       raw_row_json: e.raw_row_json,
     }));
-    await supabase.from("import_errors").insert(errorInserts);
+    await admin.from("import_errors").insert(errorInserts);
   }
 
-  await supabase
+  const finalStatus = insertedCount > 0 ? "completed" : (errors.length > 0 ? "failed" : "completed");
+
+  await admin
     .from("import_jobs")
     .update({
       inserted_count: insertedCount,
       error_count: errors.length,
+      skipped_count: skippedCount,
+      status: finalStatus,
+      completed_at: new Date().toISOString(),
     })
     .eq("id", jobId);
 
@@ -213,6 +280,7 @@ export async function POST(request: Request) {
     jobId,
     insertedCount,
     errorCount: errors.length,
+    skippedCount,
     totalRows: records.length,
     errors: errors.slice(0, 50),
   });
