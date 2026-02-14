@@ -438,6 +438,42 @@ async function POST(request) {
     const decided = won.length + lost.length;
     const winRate = decided > 0 ? won.length / decided : null;
     const avgAmountWon = won.length > 0 ? won.reduce((sum, o)=>sum + Number(o.amount), 0) / won.length : null;
+    const COVERAGE_MIN_COUNT = 5;
+    const COVERAGE_MIN_PCT = 0.2;
+    function hasSufficientCoverage(field) {
+        const nonNull = opps.filter((o)=>o[field] !== null && o[field] !== undefined && o[field] !== "").length;
+        const pct = total > 0 ? nonNull / total : 0;
+        return nonNull >= COVERAGE_MIN_COUNT && pct >= COVERAGE_MIN_PCT;
+    }
+    const allDims = [
+        {
+            key: "byRole",
+            field: "role",
+            label: "Champion Role"
+        },
+        {
+            key: "byIndustry",
+            field: "industry",
+            label: "Industry"
+        },
+        {
+            key: "bySource",
+            field: "source",
+            label: "Source"
+        },
+        {
+            key: "bySegment",
+            field: "segment",
+            label: "Segment"
+        },
+        {
+            key: "byCountry",
+            field: "country",
+            label: "Country"
+        }
+    ];
+    const includedDims = allDims.filter((d)=>hasSufficientCoverage(d.field));
+    const excludedDims = allDims.filter((d)=>!hasSufficientCoverage(d.field));
     const analyticsPayload = {
         totals: {
             count: total,
@@ -446,13 +482,11 @@ async function POST(request) {
             open: openCount,
             winRate,
             avgAmountWon
-        },
-        byRole: buildBreakdown(opps, "role"),
-        byIndustry: buildBreakdown(opps, "industry"),
-        bySource: buildBreakdown(opps, "source"),
-        bySegment: buildBreakdown(opps, "segment"),
-        byCountry: buildBreakdown(opps, "country")
+        }
     };
+    for (const dim of includedDims){
+        analyticsPayload[dim.key] = buildBreakdown(opps, dim.field);
+    }
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
         return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
@@ -472,6 +506,12 @@ async function POST(request) {
     }
     if (dimFilterDesc) {
         dateContext += `\nActive Dimension Filters: ${dimFilterDesc}`;
+    }
+    if (excludedDims.length > 0) {
+        dateContext += `\nNote: The following dimensions have insufficient data coverage and are excluded from the analysis: ${excludedDims.map((d)=>d.label).join(", ")}. Do NOT analyze or reference these dimensions.`;
+    }
+    if (includedDims.length > 0) {
+        dateContext += `\nAvailable breakdown dimensions: ${includedDims.map((d)=>d.label).join(", ")}`;
     }
     const filterMentionRule = dimFilterDesc ? `- Your summary MUST mention: the date mode (${dateModeLabel}), the time window (${filter.periodLabel}), the number of opportunities (${total}), and the active dimension filters (${dimFilterDesc})` : `- Your summary MUST mention: the date mode (${dateModeLabel}), the time window (${filter.periodLabel}), and the number of opportunities (${total})`;
     const systemPrompt = `You are a senior sales analytics consultant. You receive JSON data about a company's sales opportunities pipeline and provide actionable insights.
@@ -498,7 +538,7 @@ Rules:
 - Provide exactly 2-4 recommendations
 - Reference specific numbers, percentages, and labels from the data
 - Keep language professional and concise
-${filterMentionRule}
+${filterMentionRule}${excludedDims.length > 0 ? `\n- Do NOT mention or analyze these excluded dimensions (insufficient data): ${excludedDims.map((d)=>d.label).join(", ")}` : ""}
 - Do NOT include any text outside the JSON object`;
     const userPrompt = `${dateContext}\n\nAnalyze this sales pipeline data and provide insights:\n\n${JSON.stringify(analyticsPayload)}`;
     try {
