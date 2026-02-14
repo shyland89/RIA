@@ -140,8 +140,10 @@ __turbopack_context__.s([
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2f$server$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/lib/supabase/server.ts [app-route] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$get$2d$user$2d$org$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/lib/get-user-org.ts [app-route] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$supabase$2f$supabase$2d$js$2f$dist$2f$index$2e$mjs__$5b$app$2d$route$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_context__.i("[project]/node_modules/@supabase/supabase-js/dist/index.mjs [app-route] (ecmascript) <locals>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/server.js [app-route] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$csv$2d$parse$2f$lib$2f$sync$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_context__.i("[project]/node_modules/csv-parse/lib/sync.js [app-route] (ecmascript) <locals>");
+;
 ;
 ;
 ;
@@ -159,6 +161,27 @@ const VALID_OUTCOMES = [
     "won",
     "lost"
 ];
+const NULL_TOKENS = [
+    "",
+    "na",
+    "n/a",
+    "null",
+    "none",
+    "-"
+];
+function isNullish(val) {
+    if (!val) return true;
+    return NULL_TOKENS.includes(val.trim().toLowerCase());
+}
+function normalizeDimension(val) {
+    if (!val) return null;
+    const trimmed = val.trim();
+    if (NULL_TOKENS.includes(trimmed.toLowerCase())) return null;
+    return trimmed;
+}
+function createAdminClient() {
+    return (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$supabase$2f$supabase$2d$js$2f$dist$2f$index$2e$mjs__$5b$app$2d$route$5d$__$28$ecmascript$29$__$3c$locals$3e$__["createClient"])(("TURBOPACK compile-time value", "https://hlzlrcutddjaiioaepef.supabase.co"), process.env.SUPABASE_SERVICE_ROLE_KEY);
+}
 async function POST(request) {
     const result = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$get$2d$user$2d$org$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["getUserOrg"])();
     if ((0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$get$2d$user$2d$org$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["isUserOrgError"])(result)) {
@@ -169,11 +192,13 @@ async function POST(request) {
         });
     }
     const supabase = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2f$server$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["createClient"])();
+    const admin = createAdminClient();
     const user = result.user;
     const orgId = result.membership.org_id;
     const formData = await request.formData();
     const file = formData.get("file");
     const mappingJson = formData.get("mapping");
+    const importMode = formData.get("mode") || "append";
     if (!file || !mappingJson) {
         return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
             error: "File and column mapping are required"
@@ -216,12 +241,19 @@ async function POST(request) {
             status: 400
         });
     }
-    const { data: job, error: jobError } = await supabase.from("import_jobs").insert({
+    const { data: job, error: jobError } = await admin.from("import_jobs").insert({
         org_id: orgId,
         user_id: user.id,
         filename: file.name,
         inserted_count: 0,
-        error_count: 0
+        error_count: 0,
+        skipped_count: 0,
+        row_count: records.length,
+        status: "running",
+        is_active: true,
+        import_mode: importMode === "replace" ? "replace" : "append",
+        mapping_config: mapping,
+        started_at: new Date().toISOString()
     }).select("id").single();
     if (jobError || !job) {
         return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
@@ -231,7 +263,23 @@ async function POST(request) {
         });
     }
     const jobId = job.id;
+    if (importMode === "replace") {
+        await admin.from("import_jobs").update({
+            is_active: false
+        }).eq("org_id", orgId).neq("id", jobId);
+        const { error: deleteError } = await admin.from("opportunities").delete().eq("org_id", orgId).is("import_job_id", null);
+        if (deleteError) {
+            console.error("Failed to delete unlinked opportunities:", deleteError.message);
+        }
+        const { data: priorJobs } = await admin.from("import_jobs").select("id").eq("org_id", orgId).eq("is_active", false);
+        if (priorJobs && priorJobs.length > 0) {
+            for (const pj of priorJobs){
+                await admin.from("opportunities").delete().eq("org_id", orgId).eq("import_job_id", pj.id);
+            }
+        }
+    }
     let insertedCount = 0;
+    let skippedCount = 0;
     const errors = [];
     for(let i = 0; i < records.length; i++){
         const row = records[i];
@@ -260,7 +308,7 @@ async function POST(request) {
             rowErrors.push(`outcome must be one of: ${VALID_OUTCOMES.join(", ")} (got "${outcome}")`);
         }
         let createdAt;
-        if (createdAtStr) {
+        if (createdAtStr && !isNullish(createdAtStr)) {
             const d = new Date(createdAtStr);
             if (isNaN(d.getTime())) {
                 rowErrors.push("created_at is not a valid date");
@@ -269,7 +317,7 @@ async function POST(request) {
             }
         }
         let closedDate;
-        if (closedDateStr) {
+        if (closedDateStr && !isNullish(closedDateStr)) {
             const d = new Date(closedDateStr);
             if (isNaN(d.getTime())) {
                 rowErrors.push("closed_date is not a valid date");
@@ -278,7 +326,7 @@ async function POST(request) {
             }
         }
         let pipelineAcceptedDate;
-        if (pipelineDateStr) {
+        if (pipelineDateStr && !isNullish(pipelineDateStr)) {
             const d = new Date(pipelineDateStr);
             if (isNaN(d.getTime())) {
                 rowErrors.push("pipeline_accepted_date is not a valid date");
@@ -294,12 +342,9 @@ async function POST(request) {
             });
             continue;
         }
-        const normalizeDimension = (val)=>{
-            if (!val || val === "") return null;
-            return val;
-        };
         const insertData = {
             org_id: orgId,
+            import_job_id: jobId,
             name: name || null,
             role: normalizeDimension(role) ?? role,
             industry: normalizeDimension(industry) ?? industry,
@@ -312,7 +357,7 @@ async function POST(request) {
         if (createdAt) insertData.created_at = createdAt;
         if (closedDate) insertData.closed_date = closedDate;
         if (pipelineAcceptedDate) insertData.pipeline_accepted_date = pipelineAcceptedDate;
-        const { error: insertError } = await supabase.from("opportunities").insert(insertData);
+        const { error: insertError } = await admin.from("opportunities").insert(insertData);
         if (insertError) {
             errors.push({
                 row_number: rowNum,
@@ -330,16 +375,21 @@ async function POST(request) {
                 error_message: e.error_message,
                 raw_row_json: e.raw_row_json
             }));
-        await supabase.from("import_errors").insert(errorInserts);
+        await admin.from("import_errors").insert(errorInserts);
     }
-    await supabase.from("import_jobs").update({
+    const finalStatus = insertedCount > 0 ? "completed" : errors.length > 0 ? "failed" : "completed";
+    await admin.from("import_jobs").update({
         inserted_count: insertedCount,
-        error_count: errors.length
+        error_count: errors.length,
+        skipped_count: skippedCount,
+        status: finalStatus,
+        completed_at: new Date().toISOString()
     }).eq("id", jobId);
     return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
         jobId,
         insertedCount,
         errorCount: errors.length,
+        skippedCount,
         totalRows: records.length,
         errors: errors.slice(0, 50)
     });

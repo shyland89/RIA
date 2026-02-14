@@ -401,8 +401,10 @@ async function POST(request) {
     };
     const filter = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$date$2d$filter$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["resolveDateFilter"])(filterParams);
     const dimFilters = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$dimension$2d$filter$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["parseDimensionFiltersFromBody"])(body);
+    const datasetId = body.dataset || null;
     const admin = createAdminClient();
     let query = admin.from("opportunities").select("name, role, industry, source, segment, country, amount, outcome").eq("org_id", result.membership.org_id).not(filter.dateField, "is", null).gte(filter.dateField, filter.dateFrom).lte(filter.dateField, filter.dateTo);
+    if (datasetId) query = query.eq("import_job_id", datasetId);
     const { data: opportunities, error } = await query;
     if (error) {
         return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
@@ -412,10 +414,12 @@ async function POST(request) {
         });
     }
     let opps = opportunities || [];
-    const { count: nullDateCount } = await admin.from("opportunities").select("id", {
+    let nullQuery = admin.from("opportunities").select("id", {
         count: "exact",
         head: true
     }).eq("org_id", result.membership.org_id).is(filter.dateField, null);
+    if (datasetId) nullQuery = nullQuery.eq("import_job_id", datasetId);
+    const { count: nullDateCount } = await nullQuery;
     const hasDimFilters = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$dimension$2d$filter$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["hasActiveDimensionFilters"])(dimFilters);
     if (hasDimFilters) {
         opps = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$dimension$2d$filter$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["applyDimensionFiltersInMemory"])(opps, dimFilters);
@@ -463,13 +467,16 @@ async function POST(request) {
     const dateModeLabel = __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$date$2d$filter$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["DATE_MODE_LABELS"][filter.dateField];
     const dimFilterDesc = hasDimFilters ? (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$dimension$2d$filter$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["describeDimensionFilters"])(dimFilters) : null;
     let dateContext = `Date Mode: ${dateModeLabel}\nTime Window: ${filter.periodLabel} (${new Date(filter.dateFrom).toLocaleDateString()} to ${new Date(filter.dateTo).toLocaleDateString()})\nOpportunities analyzed: ${total}\nExcluded (missing ${dateModeLabel}): ${nullDateCount ?? 0}`;
+    if (datasetId) {
+        dateContext += `\nDataset: Import job ${datasetId}`;
+    }
     if (dimFilterDesc) {
         dateContext += `\nActive Dimension Filters: ${dimFilterDesc}`;
     }
     const filterMentionRule = dimFilterDesc ? `- Your summary MUST mention: the date mode (${dateModeLabel}), the time window (${filter.periodLabel}), the number of opportunities (${total}), and the active dimension filters (${dimFilterDesc})` : `- Your summary MUST mention: the date mode (${dateModeLabel}), the time window (${filter.periodLabel}), and the number of opportunities (${total})`;
     const systemPrompt = `You are a senior sales analytics consultant. You receive JSON data about a company's sales opportunities pipeline and provide actionable insights.
 
-The data has been filtered by a specific date mode and time window.${hasDimFilters ? " Additionally, dimension filters have been applied to narrow the dataset." : ""} Always state which date mode and time window you are analyzing in your summary.${hasDimFilters ? " Also mention the active dimension filters." : ""}
+The data has been filtered by a specific date mode and time window.${hasDimFilters ? " Additionally, dimension filters have been applied to narrow the dataset." : ""}${datasetId ? " The data comes from a specific imported dataset." : ""} Always state which date mode and time window you are analyzing in your summary.${hasDimFilters ? " Also mention the active dimension filters." : ""}
 
 Respond ONLY with a valid JSON object matching this exact structure:
 {
@@ -532,6 +539,7 @@ ${filterMentionRule}
                 periodLabel: filter.periodLabel,
                 analyzedCount: total,
                 excludedNullCount: nullDateCount ?? 0,
+                datasetId,
                 activeDimensionFilters: dimFilterDesc
             }
         });
