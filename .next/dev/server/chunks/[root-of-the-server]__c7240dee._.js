@@ -150,11 +150,20 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$csv$2d$parse
 ;
 const REQUIRED_FIELDS = [
     "name",
+    "amount",
+    "outcome"
+];
+const OPTIONAL_DIMENSION_FIELDS = [
     "role",
     "industry",
     "source",
-    "amount",
-    "outcome"
+    "segment",
+    "country"
+];
+const DATE_FIELDS = [
+    "created_at",
+    "closed_date",
+    "pipeline_accepted_date"
 ];
 const VALID_OUTCOMES = [
     "open",
@@ -225,6 +234,14 @@ async function POST(request) {
             });
         }
     }
+    const hasAtLeastOneDate = DATE_FIELDS.some((df)=>!!mapping[df]);
+    if (!hasAtLeastOneDate) {
+        return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
+            error: "At least one date field must be mapped (created_at, closed_date, or pipeline_accepted_date)"
+        }, {
+            status: 400
+        });
+    }
     const text = await file.text();
     let records;
     try {
@@ -286,20 +303,17 @@ async function POST(request) {
         const rowNum = i + 2;
         const rowErrors = [];
         const name = row[mapping.name]?.trim() || "";
-        const role = row[mapping.role]?.trim() || "";
-        const industry = row[mapping.industry]?.trim() || "";
-        const source = row[mapping.source]?.trim() || "";
         const amountStr = row[mapping.amount]?.trim() || "";
         const outcome = row[mapping.outcome]?.trim()?.toLowerCase() || "";
+        const roleStr = mapping.role ? row[mapping.role]?.trim() : undefined;
+        const industryStr = mapping.industry ? row[mapping.industry]?.trim() : undefined;
+        const sourceStr = mapping.source ? row[mapping.source]?.trim() : undefined;
         const createdAtStr = mapping.created_at ? row[mapping.created_at]?.trim() : undefined;
         const closedDateStr = mapping.closed_date ? row[mapping.closed_date]?.trim() : undefined;
         const pipelineDateStr = mapping.pipeline_accepted_date ? row[mapping.pipeline_accepted_date]?.trim() : undefined;
         const segmentStr = mapping.segment ? row[mapping.segment]?.trim() : undefined;
         const countryStr = mapping.country ? row[mapping.country]?.trim() : undefined;
         if (!name) rowErrors.push("name is required");
-        if (!role) rowErrors.push("role is required");
-        if (!industry) rowErrors.push("industry is required");
-        if (!source) rowErrors.push("source is required");
         const amount = parseFloat(amountStr);
         if (!amountStr || isNaN(amount)) {
             rowErrors.push("amount must be a valid number");
@@ -346,9 +360,9 @@ async function POST(request) {
             org_id: orgId,
             import_job_id: jobId,
             name: name || null,
-            role: normalizeDimension(role) ?? role,
-            industry: normalizeDimension(industry) ?? industry,
-            source: normalizeDimension(source) ?? source,
+            role: normalizeDimension(roleStr),
+            industry: normalizeDimension(industryStr),
+            source: normalizeDimension(sourceStr),
             amount,
             outcome,
             segment: normalizeDimension(segmentStr),

@@ -81,6 +81,15 @@ postcss.config.mjs      # PostCSS configuration
 - **Import Normalization**: All dimension fields trimmed; empty strings stored as NULL; segment and country are optional CSV mapping fields
 - **Migration**: supabase/migrations/004_segment_country.sql adds segment, country columns + composite indexes
 
+## Resilient CSV Import
+- **Minimum Required Fields**: name, amount, outcome + at least one date (created_at, closed_date, or pipeline_accepted_date)
+- **Optional Fields**: role, industry, source, segment, country — all can be set to "Not provided" in mapping UI
+- **Mapping UI**: "Not provided" option for all optional fields; warnings if no date field mapped; help text explains requirements
+- **NULL Storage**: "Not provided" fields stored as NULL; NA/N-A/empty/null/none/- strings also converted to NULL
+- **Coverage Threshold**: Breakdown dimensions hidden on dashboard if <5 non-null values or <20% coverage
+- **Graceful Degradation**: Hidden breakdowns show note explaining why; AI analysis excludes low-coverage dimensions from prompt
+- **Dashboard Layout**: Visible breakdowns auto-arrange in responsive grid; hidden note lists all unavailable dimensions
+
 ## Dataset Persistence
 - **Import Job Lifecycle**: pending → running → completed/failed; each job tracks row_count, inserted_count, error_count, skipped_count, mapping_config, import_mode
 - **Opportunity Tagging**: Every imported opportunity is stamped with import_job_id FK linking to import_jobs
@@ -140,3 +149,4 @@ This ensures Supabase email confirmation links redirect to the correct domain in
 - 2026-02-12: Added date filtering - closed_date/pipeline_accepted_date columns, date mode + time period filter bar on dashboard, URL param sync, date-aware analytics API and AI analysis with temporal context
 - 2026-02-12: Added dimension filtering - segment/country columns, collapsible multi-select filter panel, dimension-aware analytics + AI analysis, URL param persistence, import normalization
 - 2026-02-13: Added dataset persistence - import_job_id FK on opportunities, job lifecycle tracking, replace/append modes with confirmation modal, import history table, dataset selector on dashboard, analytics scoping by dataset
+- 2026-02-14: Made CSV import resilient - optional columns (role/industry/source/segment/country) with "Not provided" mapping, minimum required fields validation (name/amount/outcome + 1 date), coverage-based breakdown hiding on dashboard, AI analysis excludes low-coverage dimensions

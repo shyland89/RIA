@@ -424,6 +424,24 @@ async function GET(request) {
     const decided = won.length + lost.length;
     const winRate = decided > 0 ? won.length / decided : null;
     const avgAmountWon = won.length > 0 ? won.reduce((sum, o)=>sum + Number(o.amount), 0) / won.length : null;
+    const COVERAGE_MIN_COUNT = 5;
+    const COVERAGE_MIN_PCT = 0.2;
+    function computeCoverage(field) {
+        const nonNull = opps.filter((o)=>o[field] !== null && o[field] !== undefined && o[field] !== "").length;
+        const pct = total > 0 ? nonNull / total : 0;
+        return {
+            nonNullCount: nonNull,
+            percentage: pct,
+            sufficient: nonNull >= COVERAGE_MIN_COUNT && pct >= COVERAGE_MIN_PCT
+        };
+    }
+    const coverage = {
+        role: computeCoverage("role"),
+        industry: computeCoverage("industry"),
+        source: computeCoverage("source"),
+        segment: computeCoverage("segment"),
+        country: computeCoverage("country")
+    };
     return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
         totals: {
             count: total,
@@ -438,6 +456,7 @@ async function GET(request) {
         bySource: buildBreakdown(opps, "source"),
         bySegment: buildBreakdown(opps, "segment"),
         byCountry: buildBreakdown(opps, "country"),
+        coverage,
         filter: {
             dateMode: filter.dateField,
             dateModeLabel: __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$date$2d$filter$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["DATE_MODE_LABELS"][filter.dateField],
