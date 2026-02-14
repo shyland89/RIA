@@ -38,16 +38,18 @@ type ImportJob = {
   completed_at: string | null;
 };
 
+const NOT_PROVIDED = "__not_provided__";
+
 const TARGET_FIELDS = [
   { key: "name", label: "Name", required: true },
-  { key: "role", label: "Role", required: true },
-  { key: "industry", label: "Industry", required: true },
-  { key: "source", label: "Source", required: true },
   { key: "amount", label: "Amount", required: true },
   { key: "outcome", label: "Outcome", required: true },
-  { key: "created_at", label: "Created At", required: false },
-  { key: "closed_date", label: "Closed Date", required: false },
-  { key: "pipeline_accepted_date", label: "Pipeline Accepted Date", required: false },
+  { key: "role", label: "Champion Role", required: false },
+  { key: "industry", label: "Industry", required: false },
+  { key: "source", label: "Source", required: false },
+  { key: "created_at", label: "Created At", required: false, isDate: true },
+  { key: "closed_date", label: "Closed Date", required: false, isDate: true },
+  { key: "pipeline_accepted_date", label: "Pipeline Accepted Date", required: false, isDate: true },
   { key: "segment", label: "Segment", required: false },
   { key: "country", label: "Country", required: false },
 ];
@@ -135,9 +137,26 @@ export default function ImportPage() {
   }
 
   function isMappingValid(): boolean {
-    return TARGET_FIELDS.filter((f) => f.required).every(
-      (f) => mapping[f.key] && mapping[f.key] !== ""
+    const requiredOk = TARGET_FIELDS.filter((f) => f.required).every(
+      (f) => mapping[f.key] && mapping[f.key] !== "" && mapping[f.key] !== NOT_PROVIDED
     );
+    const dateFields = TARGET_FIELDS.filter((f) => (f as any).isDate);
+    const hasAtLeastOneDate = dateFields.some(
+      (f) => mapping[f.key] && mapping[f.key] !== "" && mapping[f.key] !== NOT_PROVIDED
+    );
+    return requiredOk && hasAtLeastOneDate;
+  }
+
+  function getMappingWarnings(): string[] {
+    const warnings: string[] = [];
+    const dateFields = TARGET_FIELDS.filter((f) => (f as any).isDate);
+    const hasDate = dateFields.some(
+      (f) => mapping[f.key] && mapping[f.key] !== "" && mapping[f.key] !== NOT_PROVIDED
+    );
+    if (!hasDate) {
+      warnings.push("At least one date field (Created At, Closed Date, or Pipeline Accepted Date) is required.");
+    }
+    return warnings;
   }
 
   function handleImportClick() {
@@ -156,9 +175,15 @@ export default function ImportPage() {
     setShowReplaceConfirm(false);
 
     try {
+      const cleanMapping: Record<string, string> = {};
+      for (const [key, val] of Object.entries(mapping)) {
+        if (val && val !== "" && val !== NOT_PROVIDED) {
+          cleanMapping[key] = val;
+        }
+      }
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("mapping", JSON.stringify(mapping));
+      formData.append("mapping", JSON.stringify(cleanMapping));
       formData.append("mode", importMode);
 
       const res = await fetch("/api/import/execute", {
@@ -262,7 +287,7 @@ export default function ImportPage() {
           <div className="rounded-md border border-border bg-card p-6" data-testid="section-upload">
             <h2 className="text-sm font-medium text-foreground mb-4">Select CSV file</h2>
             <p className="text-sm text-muted-foreground mb-4">
-              Your CSV should include columns for: name, role, industry, source, amount, outcome. Optionally include created_at, closed_date, pipeline_accepted_date, segment, country.
+              Your CSV must include columns for: name, amount, outcome, and at least one date (created_at, closed_date, or pipeline_accepted_date). Other columns (role, industry, source, segment, country) are optional.
             </p>
             <p className="text-xs text-muted-foreground mb-4">
               Values like &quot;NA&quot;, &quot;N/A&quot;, &quot;null&quot;, &quot;none&quot;, or empty cells are treated as missing data.
@@ -302,15 +327,24 @@ export default function ImportPage() {
                   {uploadResult.filename} — {uploadResult.totalRows} rows
                 </span>
               </div>
-              <p className="text-sm text-muted-foreground mb-4">
-                Map each CSV column to the corresponding opportunity field.
+              <p className="text-sm text-muted-foreground mb-2">
+                Map each CSV column to the corresponding opportunity field. Only Name, Amount, and Outcome are required. At least one date field must also be mapped.
               </p>
+              <p className="text-xs text-muted-foreground mb-4">
+                Optional fields can be set to &quot;Not provided&quot; if your CSV doesn&apos;t include them.
+              </p>
+              {getMappingWarnings().map((w, i) => (
+                <div key={i} className="mb-3 rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 px-3 py-2 text-xs text-amber-700 dark:text-amber-400" data-testid={`mapping-warning-${i}`}>
+                  {w}
+                </div>
+              ))}
               <div className="grid gap-3 sm:grid-cols-2">
                 {TARGET_FIELDS.map((field) => (
                   <div key={field.key} className="flex flex-col gap-1">
                     <label className="text-xs font-medium text-foreground">
                       {field.label}
                       {field.required && <span className="text-red-500 ml-0.5">*</span>}
+                      {!field.required && <span className="text-muted-foreground ml-1 font-normal">(optional)</span>}
                     </label>
                     <select
                       value={mapping[field.key] || ""}
@@ -319,6 +353,9 @@ export default function ImportPage() {
                       data-testid={`select-mapping-${field.key}`}
                     >
                       <option value="">— Select column —</option>
+                      {!field.required && (
+                        <option value={NOT_PROVIDED}>Not provided</option>
+                      )}
                       {uploadResult.headers.map((h) => (
                         <option key={h} value={h}>
                           {h}
