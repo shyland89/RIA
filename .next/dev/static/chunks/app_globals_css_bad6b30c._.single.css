@@ -345,6 +345,10 @@ body {
   margin-top: 3rem;
 }
 
+.mt-2 {
+  margin-top: .5rem;
+}
+
 .mt-3 {
   margin-top: .75rem;
 }
@@ -479,6 +483,10 @@ body {
 
 .w-full {
   width: 100%;
+}
+
+.min-w-0 {
+  min-width: 0;
 }
 
 .min-w-\[18px\] {
@@ -645,6 +653,16 @@ body {
   margin-bottom: calc(2rem * var(--tw-space-y-reverse));
 }
 
+.divide-y > :not([hidden]) ~ :not([hidden]) {
+  --tw-divide-y-reverse: 0;
+  border-top-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
+  border-bottom-width: calc(1px * var(--tw-divide-y-reverse));
+}
+
+.divide-border\/50 > :not([hidden]) ~ :not([hidden]) {
+  border-color: hsl(var(--border) / .5);
+}
+
 .overflow-hidden {
   overflow: hidden;
 }
@@ -665,6 +683,10 @@ body {
 
 .whitespace-nowrap {
   white-space: nowrap;
+}
+
+.whitespace-pre-wrap {
+  white-space: pre-wrap;
 }
 
 .rounded {
@@ -789,6 +811,10 @@ body {
   background-color: hsl(var(--muted) / .3);
 }
 
+.bg-muted\/50 {
+  background-color: hsl(var(--muted) / .5);
+}
+
 .bg-primary {
   background-color: hsl(var(--primary));
 }
@@ -821,6 +847,10 @@ body {
   background-color: rgb(254 249 195 / var(--tw-bg-opacity, 1));
 }
 
+.p-3 {
+  padding: .75rem;
+}
+
 .p-4 {
   padding: 1rem;
 }
@@ -851,6 +881,11 @@ body {
 .px-4 {
   padding-left: 1rem;
   padding-right: 1rem;
+}
+
+.px-5 {
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
 }
 
 .py-0\.5 {
@@ -930,6 +965,11 @@ body {
   font-size: 10px;
 }
 
+.text-base {
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
 .text-lg {
   font-size: 1.125rem;
   line-height: 1.75rem;
@@ -1005,6 +1045,11 @@ body {
   color: rgb(21 128 61 / var(--tw-text-opacity, 1));
 }
 
+.text-green-800 {
+  --tw-text-opacity: 1;
+  color: rgb(22 101 52 / var(--tw-text-opacity, 1));
+}
+
 .text-muted-foreground {
   color: hsl(var(--muted-foreground));
 }
@@ -1030,6 +1075,11 @@ body {
 .text-red-700 {
   --tw-text-opacity: 1;
   color: rgb(185 28 28 / var(--tw-text-opacity, 1));
+}
+
+.text-red-800 {
+  --tw-text-opacity: 1;
+  color: rgb(153 27 27 / var(--tw-text-opacity, 1));
 }
 
 .text-white {
@@ -1303,9 +1353,19 @@ body {
   color: rgb(96 165 250 / var(--tw-text-opacity, 1));
 }
 
+.dark\:text-green-300:is(.dark *) {
+  --tw-text-opacity: 1;
+  color: rgb(134 239 172 / var(--tw-text-opacity, 1));
+}
+
 .dark\:text-green-400:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(74 222 128 / var(--tw-text-opacity, 1));
+}
+
+.dark\:text-red-300:is(.dark *) {
+  --tw-text-opacity: 1;
+  color: rgb(252 165 165 / var(--tw-text-opacity, 1));
 }
 
 .dark\:text-red-400:is(.dark *) {

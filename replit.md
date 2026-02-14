@@ -28,6 +28,8 @@ app/                    # Next.js App Router pages
   api/ai/analyze/route.ts  # POST: AI-powered pipeline analysis via OpenAI
   app/import/page.tsx      # CSV upload + column mapping + import UI
   app/dashboard/page.tsx   # Analytics dashboard with KPIs, breakdowns, and AI insights
+  app/status/page.tsx      # Admin-only system status page
+  api/admin/status/route.ts # GET: admin-only system health checks
 lib/
   supabase/
     client.ts           # Browser Supabase client
