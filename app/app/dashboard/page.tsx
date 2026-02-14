@@ -50,6 +50,20 @@ type FilterMeta = {
   activeDimensionFilters: string | null;
 };
 
+type CoverageInfo = {
+  nonNullCount: number;
+  percentage: number;
+  sufficient: boolean;
+};
+
+type CoverageData = {
+  role: CoverageInfo;
+  industry: CoverageInfo;
+  source: CoverageInfo;
+  segment: CoverageInfo;
+  country: CoverageInfo;
+};
+
 type SummaryData = {
   totals: Totals;
   byRole: BreakdownRow[];
@@ -57,6 +71,7 @@ type SummaryData = {
   bySource: BreakdownRow[];
   bySegment: BreakdownRow[];
   byCountry: BreakdownRow[];
+  coverage?: CoverageData;
   filter: FilterMeta;
 };
 
@@ -653,15 +668,46 @@ function DashboardContent() {
             </div>
 
             {/* Breakdown Tables */}
-            <div className="grid gap-6 lg:grid-cols-3">
-              <BreakdownTable title="By Champion Role" rows={data.byRole} testId="breakdown-role" />
-              <BreakdownTable title="By Industry" rows={data.byIndustry} testId="breakdown-industry" />
-              <BreakdownTable title="By Source" rows={data.bySource} testId="breakdown-source" />
-            </div>
-            <div className="grid gap-6 lg:grid-cols-2">
-              <BreakdownTable title="By Segment" rows={data.bySegment} testId="breakdown-segment" />
-              <BreakdownTable title="By Country" rows={data.byCountry} testId="breakdown-country" />
-            </div>
+            {(() => {
+              const c = data.coverage;
+              const breakdowns = [
+                { title: "By Champion Role", rows: data.byRole, testId: "breakdown-role", dim: "role" as const, label: "champion role" },
+                { title: "By Industry", rows: data.byIndustry, testId: "breakdown-industry", dim: "industry" as const, label: "industry" },
+                { title: "By Source", rows: data.bySource, testId: "breakdown-source", dim: "source" as const, label: "source" },
+                { title: "By Segment", rows: data.bySegment, testId: "breakdown-segment", dim: "segment" as const, label: "segment" },
+                { title: "By Country", rows: data.byCountry, testId: "breakdown-country", dim: "country" as const, label: "country" },
+              ];
+              const visible = breakdowns.filter((b) => !c || c[b.dim]?.sufficient !== false);
+              const hidden = breakdowns.filter((b) => c && c[b.dim]?.sufficient === false);
+              const topRow = visible.slice(0, 3);
+              const bottomRow = visible.slice(3);
+              return (
+                <>
+                  {topRow.length > 0 && (
+                    <div className={`grid gap-6 ${topRow.length === 1 ? "" : topRow.length === 2 ? "lg:grid-cols-2" : "lg:grid-cols-3"}`}>
+                      {topRow.map((b) => (
+                        <BreakdownTable key={b.testId} title={b.title} rows={b.rows} testId={b.testId} />
+                      ))}
+                    </div>
+                  )}
+                  {bottomRow.length > 0 && (
+                    <div className={`grid gap-6 ${bottomRow.length === 1 ? "" : "lg:grid-cols-2"}`}>
+                      {bottomRow.map((b) => (
+                        <BreakdownTable key={b.testId} title={b.title} rows={b.rows} testId={b.testId} />
+                      ))}
+                    </div>
+                  )}
+                  {hidden.length > 0 && (
+                    <div className="rounded-md border border-border bg-muted/30 p-4" data-testid="hidden-breakdowns-note">
+                      <p className="text-xs text-muted-foreground">
+                        {hidden.map((b) => b.title).join(", ")} breakdown{hidden.length > 1 ? "s" : ""} hidden:{" "}
+                        {hidden.map((b) => `${b.label} not provided in this dataset`).join("; ")}.
+                      </p>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
 
             {/* AI Analysis Section */}
             <div className="rounded-md border border-border bg-card p-6" data-testid="ai-analysis-section">

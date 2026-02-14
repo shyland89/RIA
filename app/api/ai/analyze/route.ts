@@ -151,7 +151,28 @@ export async function POST(request: Request) {
       ? won.reduce((sum, o) => sum + Number(o.amount), 0) / won.length
       : null;
 
-  const analyticsPayload = {
+  const COVERAGE_MIN_COUNT = 5;
+  const COVERAGE_MIN_PCT = 0.2;
+
+  function hasSufficientCoverage(field: keyof Opportunity): boolean {
+    const nonNull = opps.filter((o) => o[field] !== null && o[field] !== undefined && o[field] !== "").length;
+    const pct = total > 0 ? nonNull / total : 0;
+    return nonNull >= COVERAGE_MIN_COUNT && pct >= COVERAGE_MIN_PCT;
+  }
+
+  type DimEntry = { key: string; field: keyof Opportunity; label: string };
+  const allDims: DimEntry[] = [
+    { key: "byRole", field: "role", label: "Champion Role" },
+    { key: "byIndustry", field: "industry", label: "Industry" },
+    { key: "bySource", field: "source", label: "Source" },
+    { key: "bySegment", field: "segment", label: "Segment" },
+    { key: "byCountry", field: "country", label: "Country" },
+  ];
+
+  const includedDims = allDims.filter((d) => hasSufficientCoverage(d.field));
+  const excludedDims = allDims.filter((d) => !hasSufficientCoverage(d.field));
+
+  const analyticsPayload: Record<string, any> = {
     totals: {
       count: total,
       won: won.length,
@@ -160,12 +181,11 @@ export async function POST(request: Request) {
       winRate,
       avgAmountWon,
     },
-    byRole: buildBreakdown(opps, "role"),
-    byIndustry: buildBreakdown(opps, "industry"),
-    bySource: buildBreakdown(opps, "source"),
-    bySegment: buildBreakdown(opps, "segment"),
-    byCountry: buildBreakdown(opps, "country"),
   };
+
+  for (const dim of includedDims) {
+    analyticsPayload[dim.key] = buildBreakdown(opps, dim.field);
+  }
 
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
@@ -188,6 +208,14 @@ export async function POST(request: Request) {
 
   if (dimFilterDesc) {
     dateContext += `\nActive Dimension Filters: ${dimFilterDesc}`;
+  }
+
+  if (excludedDims.length > 0) {
+    dateContext += `\nNote: The following dimensions have insufficient data coverage and are excluded from the analysis: ${excludedDims.map((d) => d.label).join(", ")}. Do NOT analyze or reference these dimensions.`;
+  }
+
+  if (includedDims.length > 0) {
+    dateContext += `\nAvailable breakdown dimensions: ${includedDims.map((d) => d.label).join(", ")}`;
   }
 
   const filterMentionRule = dimFilterDesc
@@ -218,7 +246,7 @@ Rules:
 - Provide exactly 2-4 recommendations
 - Reference specific numbers, percentages, and labels from the data
 - Keep language professional and concise
-${filterMentionRule}
+${filterMentionRule}${excludedDims.length > 0 ? `\n- Do NOT mention or analyze these excluded dimensions (insufficient data): ${excludedDims.map((d) => d.label).join(", ")}` : ""}
 - Do NOT include any text outside the JSON object`;
 
   const userPrompt = `${dateContext}\n\nAnalyze this sales pipeline data and provide insights:\n\n${JSON.stringify(analyticsPayload)}`;

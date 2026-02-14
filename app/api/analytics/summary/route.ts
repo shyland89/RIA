@@ -141,6 +141,23 @@ export async function GET(request: NextRequest) {
       ? won.reduce((sum, o) => sum + Number(o.amount), 0) / won.length
       : null;
 
+  const COVERAGE_MIN_COUNT = 5;
+  const COVERAGE_MIN_PCT = 0.2;
+
+  function computeCoverage(field: keyof Opportunity) {
+    const nonNull = opps.filter((o) => o[field] !== null && o[field] !== undefined && o[field] !== "").length;
+    const pct = total > 0 ? nonNull / total : 0;
+    return { nonNullCount: nonNull, percentage: pct, sufficient: nonNull >= COVERAGE_MIN_COUNT && pct >= COVERAGE_MIN_PCT };
+  }
+
+  const coverage = {
+    role: computeCoverage("role"),
+    industry: computeCoverage("industry"),
+    source: computeCoverage("source"),
+    segment: computeCoverage("segment"),
+    country: computeCoverage("country"),
+  };
+
   return NextResponse.json({
     totals: {
       count: total,
@@ -155,6 +172,7 @@ export async function GET(request: NextRequest) {
     bySource: buildBreakdown(opps, "source"),
     bySegment: buildBreakdown(opps, "segment"),
     byCountry: buildBreakdown(opps, "country"),
+    coverage,
     filter: {
       dateMode: filter.dateField,
       dateModeLabel: DATE_MODE_LABELS[filter.dateField],
