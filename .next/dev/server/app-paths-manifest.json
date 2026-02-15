@@ -1,5 +1,4 @@
 {
-  "/api/ai/analyze/route": "app/api/ai/analyze/route.js",
   "/api/analytics/dimensions/route": "app/api/analytics/dimensions/route.js",
   "/api/analytics/summary/route": "app/api/analytics/summary/route.js",
   "/api/import/jobs/route": "app/api/import/jobs/route.js",
