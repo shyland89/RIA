@@ -391,10 +391,6 @@ body {
   margin-bottom: 1rem;
 }
 
-.mb-5 {
-  margin-bottom: 1.25rem;
-}
-
 .mb-6 {
   margin-bottom: 1.5rem;
 }
@@ -423,10 +419,6 @@ body {
   margin-top: .25rem;
 }
 
-.mt-1\.5 {
-  margin-top: .375rem;
-}
-
 .mt-12 {
   margin-top: 3rem;
 }
@@ -435,16 +427,24 @@ body {
   margin-top: .5rem;
 }
 
-.mt-4 {
-  margin-top: 1rem;
+.mt-3 {
+  margin-top: .75rem;
 }
 
 .mt-6 {
   margin-top: 1.5rem;
 }
 
-.mt-3 {
-  margin-top: .75rem;
+.mb-5 {
+  margin-bottom: 1.25rem;
+}
+
+.mt-1\.5 {
+  margin-top: .375rem;
+}
+
+.mt-4 {
+  margin-top: 1rem;
 }
 
 .block {
@@ -575,12 +575,12 @@ body {
   width: 2rem;
 }
 
-.w-\[18px\] {
-  width: 18px;
-}
-
 .w-full {
   width: 100%;
+}
+
+.w-\[18px\] {
+  width: 18px;
 }
 
 .w-px {
@@ -591,16 +591,20 @@ body {
   min-width: 0;
 }
 
-.min-w-full {
-  min-width: 100%;
-}
-
 .min-w-\[18px\] {
   min-width: 18px;
 }
 
+.min-w-full {
+  min-width: 100%;
+}
+
 .max-w-5xl {
   max-width: 64rem;
+}
+
+.max-w-6xl {
+  max-width: 72rem;
 }
 
 .max-w-\[200px\] {
@@ -625,10 +629,6 @@ body {
 
 .max-w-\[280px\] {
   max-width: 280px;
-}
-
-.max-w-6xl {
-  max-width: 72rem;
 }
 
 .flex-1 {
@@ -978,12 +978,12 @@ body {
   padding: 1rem;
 }
 
-.p-6 {
-  padding: 1.5rem;
-}
-
 .p-5 {
   padding: 1.25rem;
+}
+
+.p-6 {
+  padding: 1.5rem;
 }
 
 .px-1 {
@@ -1056,14 +1056,14 @@ body {
   padding-bottom: 2rem;
 }
 
-.py-\[7px\] {
-  padding-top: 7px;
-  padding-bottom: 7px;
-}
-
 .py-1 {
   padding-top: .25rem;
   padding-bottom: .25rem;
+}
+
+.py-\[7px\] {
+  padding-top: 7px;
+  padding-bottom: 7px;
 }
 
 .pl-2 {
@@ -1078,12 +1078,12 @@ body {
   padding-right: .75rem;
 }
 
-.pt-4 {
-  padding-top: 1rem;
-}
-
 .pt-2 {
   padding-top: .5rem;
+}
+
+.pt-4 {
+  padding-top: 1rem;
 }
 
 .text-left {
@@ -1111,22 +1111,6 @@ body {
   font-size: 10px;
 }
 
-.text-\[11px\] {
-  font-size: 11px;
-}
-
-.text-\[13px\] {
-  font-size: 13px;
-}
-
-.text-\[22px\] {
-  font-size: 22px;
-}
-
-.text-\[32px\] {
-  font-size: 32px;
-}
-
 .text-base {
   font-size: 1rem;
   line-height: 1.5rem;
@@ -1147,12 +1131,28 @@ body {
   line-height: 1rem;
 }
 
+.text-\[13px\] {
+  font-size: 13px;
+}
+
+.text-\[22px\] {
+  font-size: 22px;
+}
+
+.text-\[11px\] {
+  font-size: 11px;
+}
+
 .text-\[15px\] {
   font-size: 15px;
 }
 
 .text-\[28px\] {
   font-size: 28px;
+}
+
+.text-\[32px\] {
+  font-size: 32px;
 }
 
 .font-bold {
@@ -1418,6 +1418,10 @@ body {
   background-color: hsl(var(--accent));
 }
 
+.hover\:bg-muted\/40:hover {
+  background-color: hsl(var(--muted) / .4);
+}
+
 .hover\:bg-primary\/90:hover {
   background-color: hsl(var(--primary) / .9);
 }
@@ -1425,10 +1429,6 @@ body {
 .hover\:bg-red-700:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(185 28 28 / var(--tw-bg-opacity, 1));
-}
-
-.hover\:bg-muted\/40:hover {
-  background-color: hsl(var(--muted) / .4);
 }
 
 .hover\:text-foreground:hover {

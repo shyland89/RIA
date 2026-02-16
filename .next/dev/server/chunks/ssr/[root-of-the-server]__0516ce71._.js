@@ -61,7 +61,13 @@ function SignOutButton() {
     }
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
         onClick: handleSignOut,
-        className: "rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground hover:bg-accent transition-colors",
+        className: "px-3 py-1.5 text-sm font-medium transition-colors",
+        style: {
+            background: "#fff",
+            color: "var(--stone-700)",
+            border: "1px solid var(--stone-200)",
+            borderRadius: "var(--radius-sm, 6px)"
+        },
         "data-testid": "button-signout",
         children: "Sign out"
     }, void 0, false, {

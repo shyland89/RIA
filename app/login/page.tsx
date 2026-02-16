@@ -16,120 +16,49 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-      return;
-    }
-
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) { setError(error.message); setLoading(false); return; }
     router.push("/app");
     router.refresh();
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "var(--stone-50)" }}>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-md bg-primary mb-4">
-            <svg
-              className="w-6 h-6 text-primary-foreground"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 10V3L4 14h7v7l9-11h-7z"
-              />
-            </svg>
-          </div>
-          <h1
-            className="text-2xl font-semibold tracking-tight text-foreground"
-            data-testid="text-login-title"
+          <div
+            className="inline-flex items-center justify-center w-12 h-12 mb-4 text-white text-lg font-bold"
+            style={{ background: "linear-gradient(135deg, var(--teal-500, #14B8A6), var(--teal-700, #0F766E))", borderRadius: "var(--radius-md, 10px)" }}
           >
-            Welcome back
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Sign in to your account to continue
-          </p>
+            R
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight" style={{ color: "var(--stone-900)" }} data-testid="text-login-title">Welcome back</h1>
+          <p className="text-sm mt-1" style={{ color: "var(--stone-500)" }}>Sign in to your account to continue</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div
-              className="rounded-md bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive"
-              data-testid="text-login-error"
-            >
-              {error}
+        <div className="bg-white p-6" style={{ border: "1px solid var(--stone-200)", borderRadius: "var(--radius-lg, 14px)" }}>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="px-4 py-3 text-sm" style={{ background: "var(--error-bg)", border: "1px solid #fca5a5", color: "var(--error)", borderRadius: "var(--radius-sm, 6px)" }} data-testid="text-login-error">{error}</div>
+            )}
+            <div className="space-y-2">
+              <label htmlFor="email" className="block text-sm font-medium" style={{ color: "var(--stone-700)" }}>Email</label>
+              <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required className="w-full px-3 py-2 text-sm focus:outline-none" style={{ border: "1px solid var(--stone-200)", borderRadius: "var(--radius-sm, 6px)", color: "var(--stone-900)", background: "#fff" }} data-testid="input-email" />
             </div>
-          )}
+            <div className="space-y-2">
+              <label htmlFor="password" className="block text-sm font-medium" style={{ color: "var(--stone-700)" }}>Password</label>
+              <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required className="w-full px-3 py-2 text-sm focus:outline-none" style={{ border: "1px solid var(--stone-200)", borderRadius: "var(--radius-sm, 6px)", color: "var(--stone-900)", background: "#fff" }} data-testid="input-password" />
+            </div>
+            <button type="submit" disabled={loading} className="w-full px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors" style={{ background: "var(--teal-600)", borderRadius: "var(--radius-sm, 6px)" }} data-testid="button-login">
+              {loading ? "Signing in..." : "Sign in"}
+            </button>
+          </form>
+        </div>
 
-          <div className="space-y-2">
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-foreground"
-            >
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              required
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-              data-testid="input-email"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-foreground"
-            >
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-              data-testid="input-password"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            data-testid="button-login"
-          >
-            {loading ? "Signing in..." : "Sign in"}
-          </button>
-        </form>
-
-        <p className="mt-6 text-center text-sm text-muted-foreground">
+        <p className="mt-6 text-center text-sm" style={{ color: "var(--stone-500)" }}>
           Don&apos;t have an account?{" "}
-          <Link
-            href="/signup"
-            className="font-medium text-primary hover:underline"
-            data-testid="link-signup"
-          >
-            Sign up
-          </Link>
+          <Link href="/signup" className="font-semibold" style={{ color: "var(--teal-600)" }} data-testid="link-signup">Sign up</Link>
         </p>
       </div>
     </div>

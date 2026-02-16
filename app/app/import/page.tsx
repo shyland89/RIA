@@ -91,49 +91,28 @@ export default function ImportPage() {
     if (!file) return;
     setError("");
     setUploading(true);
-
     try {
       const formData = new FormData();
       formData.append("file", file);
-
-      const res = await fetch("/api/import/upload", {
-        method: "POST",
-        body: formData,
-      });
-
+      const res = await fetch("/api/import/upload", { method: "POST", body: formData });
       const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "Upload failed");
-        setUploading(false);
-        return;
-      }
-
+      if (!res.ok) { setError(data.error || "Upload failed"); setUploading(false); return; }
       setUploadResult(data);
-
       const autoMapping: Record<string, string> = {};
       for (const field of TARGET_FIELDS) {
         const match = data.headers.find(
           (h: string) => h.toLowerCase().replace(/[_\s-]/g, "") === field.key.replace(/_/g, "")
         );
-        if (match) {
-          autoMapping[field.key] = match;
-        }
+        if (match) autoMapping[field.key] = match;
       }
       setMapping(autoMapping);
       setStep("mapping");
-    } catch {
-      setError("Failed to upload file. Please try again.");
-    } finally {
-      setUploading(false);
-    }
+    } catch { setError("Failed to upload file. Please try again."); }
+    finally { setUploading(false); }
   }
 
   function handleMappingChange(targetField: string, csvHeader: string) {
-    setMapping((prev) => ({
-      ...prev,
-      [targetField]: csvHeader,
-    }));
+    setMapping((prev) => ({ ...prev, [targetField]: csvHeader }));
   }
 
   function isMappingValid(): boolean {
@@ -153,160 +132,138 @@ export default function ImportPage() {
     const hasDate = dateFields.some(
       (f) => mapping[f.key] && mapping[f.key] !== "" && mapping[f.key] !== NOT_PROVIDED
     );
-    if (!hasDate) {
-      warnings.push("At least one date field (Created At, Closed Date, or Pipeline Accepted Date) is required.");
-    }
+    if (!hasDate) warnings.push("At least one date field (Created At, Closed Date, or Pipeline Accepted Date) is required.");
     return warnings;
   }
 
   function handleImportClick() {
-    if (importMode === "replace") {
-      setShowReplaceConfirm(true);
-    } else {
-      doImport();
-    }
+    if (importMode === "replace") setShowReplaceConfirm(true);
+    else doImport();
   }
 
   async function doImport() {
     if (!file || !uploadResult) return;
-    setError("");
-    setImporting(true);
-    setStep("importing");
-    setShowReplaceConfirm(false);
-
+    setError(""); setImporting(true); setStep("importing"); setShowReplaceConfirm(false);
     try {
       const cleanMapping: Record<string, string> = {};
       for (const [key, val] of Object.entries(mapping)) {
-        if (val && val !== "" && val !== NOT_PROVIDED) {
-          cleanMapping[key] = val;
-        }
+        if (val && val !== "" && val !== NOT_PROVIDED) cleanMapping[key] = val;
       }
       const formData = new FormData();
       formData.append("file", file);
       formData.append("mapping", JSON.stringify(cleanMapping));
       formData.append("mode", importMode);
-
-      const res = await fetch("/api/import/execute", {
-        method: "POST",
-        body: formData,
-      });
-
+      const res = await fetch("/api/import/execute", { method: "POST", body: formData });
       const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "Import failed");
-        setStep("mapping");
-        setImporting(false);
-        return;
-      }
-
+      if (!res.ok) { setError(data.error || "Import failed"); setStep("mapping"); setImporting(false); return; }
       setImportResult(data);
       setStep("results");
       fetchHistory();
-    } catch {
-      setError("Import failed. Please try again.");
-      setStep("mapping");
-    } finally {
-      setImporting(false);
-    }
+    } catch { setError("Import failed. Please try again."); setStep("mapping"); }
+    finally { setImporting(false); }
   }
 
   function handleReset() {
-    setStep("upload");
-    setFile(null);
-    setUploadResult(null);
-    setMapping({});
-    setImportResult(null);
-    setError("");
-    setImportMode("append");
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+    setStep("upload"); setFile(null); setUploadResult(null); setMapping({});
+    setImportResult(null); setError(""); setImportMode("append");
+    if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-3">
-            <div className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-primary">
-              <svg className="w-4 h-4 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <span className="text-sm font-semibold text-foreground" data-testid="text-import-title">
-              Import Opportunities
-            </span>
-          </div>
-          <div className="flex items-center gap-3 flex-wrap">
-            <Link
-              href="/app/dashboard"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              data-testid="link-analytics"
-            >
-              Analytics
-            </Link>
-            <Link
-              href="/app"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              data-testid="link-back-dashboard"
-            >
-              Home
-            </Link>
-          </div>
-        </div>
-      </header>
+  const selectStyle = {
+    border: "1px solid var(--stone-200)",
+    borderRadius: "var(--radius-sm, 6px)",
+    color: "var(--stone-700)",
+    background: "var(--stone-50)",
+  };
 
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  return (
+    <div className="min-h-screen" style={{ background: "var(--stone-50)" }}>
+      <main style={{ padding: "28px 40px 60px" }}>
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            CSV Import
+          <h1 className="text-[22px] font-bold tracking-tight" style={{ color: "var(--stone-900)", letterSpacing: "-0.3px" }}>
+            Import Opportunities
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm mt-1" style={{ color: "var(--stone-500)" }}>
             Upload a CSV file to import opportunities into your organization.
           </p>
         </div>
 
         {/* Progress Steps */}
-        <div className="flex items-center gap-2 mb-8 text-sm" data-testid="progress-steps">
+        <div className="flex items-center gap-0 mb-8 pt-2" data-testid="progress-steps">
           <StepIndicator label="Upload" active={step === "upload"} done={step !== "upload"} num={1} />
-          <StepDivider />
+          <StepDivider done={step !== "upload"} />
           <StepIndicator label="Map Columns" active={step === "mapping"} done={step === "importing" || step === "results"} num={2} />
-          <StepDivider />
+          <StepDivider done={step === "importing" || step === "results"} />
           <StepIndicator label="Import" active={step === "importing" || step === "results"} done={step === "results"} num={3} />
         </div>
 
         {error && (
-          <div className="mb-6 rounded-md border border-red-300 bg-red-50 dark:bg-red-950/20 dark:border-red-800 px-4 py-3 text-sm text-red-700 dark:text-red-400" data-testid="text-error">
+          <div
+            className="mb-6 px-4 py-3 text-sm"
+            style={{ border: "1px solid #fca5a5", background: "var(--error-bg)", color: "var(--error)", borderRadius: "var(--radius-md, 10px)" }}
+            data-testid="text-error"
+          >
             {error}
           </div>
         )}
 
         {/* Step 1: Upload */}
         {step === "upload" && (
-          <div className="rounded-md border border-border bg-card p-6" data-testid="section-upload">
-            <h2 className="text-sm font-medium text-foreground mb-4">Select CSV file</h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Your CSV must include columns for: name, amount, outcome, and at least one date (created_at, closed_date, or pipeline_accepted_date). Other columns (role, industry, source, segment, country) are optional.
-            </p>
-            <p className="text-xs text-muted-foreground mb-4">
-              Values like &quot;NA&quot;, &quot;N/A&quot;, &quot;null&quot;, &quot;none&quot;, or empty cells are treated as missing data.
-            </p>
-            <div className="space-y-4">
-              <div>
+          <div className="bg-white" style={{ border: "1px solid var(--stone-200)", borderRadius: "var(--radius-lg, 14px)", overflow: "hidden" }} data-testid="section-upload">
+            <div className="p-6">
+              <h2 className="text-sm font-semibold mb-4" style={{ color: "var(--stone-900)" }}>Select CSV file</h2>
+              <p className="text-sm mb-4" style={{ color: "var(--stone-500)" }}>
+                Your CSV must include columns for: name, amount, outcome, and at least one date (created_at, closed_date, or pipeline_accepted_date). Other columns are optional.
+              </p>
+              <p className="text-xs mb-4" style={{ color: "var(--stone-400)" }}>
+                Values like &quot;NA&quot;, &quot;N/A&quot;, &quot;null&quot;, &quot;none&quot;, or empty cells are treated as missing data.
+              </p>
+              {/* Upload zone */}
+              <label
+                className="block cursor-pointer transition-colors mb-4"
+                style={{
+                  border: "2px dashed var(--stone-300)",
+                  borderRadius: "var(--radius-lg, 14px)",
+                  padding: "56px 40px",
+                  textAlign: "center",
+                  background: file ? "var(--teal-50)" : "var(--stone-50)",
+                  borderColor: file ? "var(--teal-400)" : "var(--stone-300)",
+                }}
+              >
                 <input
                   ref={fileInputRef}
                   type="file"
                   accept=".csv"
                   onChange={(e) => setFile(e.target.files?.[0] || null)}
-                  className="block text-sm text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground file:cursor-pointer cursor-pointer"
+                  className="hidden"
                   data-testid="input-file"
                 />
-              </div>
+                <div
+                  className="w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center"
+                  style={{ background: "var(--teal-100)" }}
+                >
+                  <svg className="w-5 h-5" style={{ color: "var(--teal-600)" }} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                  </svg>
+                </div>
+                {file ? (
+                  <p className="text-[15px] font-semibold" style={{ color: "var(--stone-900)" }}>{file.name}</p>
+                ) : (
+                  <>
+                    <p className="text-[15px] font-semibold mb-1" style={{ color: "var(--stone-900)" }}>
+                      Drop your CSV here or <span style={{ color: "var(--teal-600)" }}>browse</span>
+                    </p>
+                    <p className="text-[13px]" style={{ color: "var(--stone-500)" }}>CSV files up to 10 MB</p>
+                  </>
+                )}
+              </label>
               <button
                 onClick={handleUpload}
                 disabled={!file || uploading}
-                className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center px-5 py-2.5 text-[13px] font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                style={{ background: "var(--teal-600)", borderRadius: "var(--radius-sm, 6px)" }}
                 data-testid="button-upload"
               >
                 {uploading ? "Parsing..." : "Upload & Preview"}
@@ -318,127 +275,111 @@ export default function ImportPage() {
         {/* Step 2: Column Mapping */}
         {step === "mapping" && uploadResult && (
           <div className="space-y-6">
-            <div className="rounded-md border border-border bg-card p-6" data-testid="section-mapping">
-              <div className="flex items-center justify-between gap-4 flex-wrap mb-4">
-                <h2 className="text-sm font-medium text-foreground">
-                  Column Mapping
-                </h2>
-                <span className="text-xs text-muted-foreground" data-testid="text-file-info">
-                  {uploadResult.filename} — {uploadResult.totalRows} rows
-                </span>
-              </div>
-              <p className="text-sm text-muted-foreground mb-2">
-                Map each CSV column to the corresponding opportunity field. Only Name, Amount, and Outcome are required. At least one date field must also be mapped.
-              </p>
-              <p className="text-xs text-muted-foreground mb-4">
-                Optional fields can be set to &quot;Not provided&quot; if your CSV doesn&apos;t include them.
-              </p>
-              {getMappingWarnings().map((w, i) => (
-                <div key={i} className="mb-3 rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 px-3 py-2 text-xs text-amber-700 dark:text-amber-400" data-testid={`mapping-warning-${i}`}>
-                  {w}
+            <div className="bg-white" style={{ border: "1px solid var(--stone-200)", borderRadius: "var(--radius-lg, 14px)", overflow: "hidden" }} data-testid="section-mapping">
+              <div className="p-6">
+                <div className="flex items-center justify-between gap-4 flex-wrap mb-4">
+                  <h2 className="text-sm font-semibold" style={{ color: "var(--stone-900)" }}>Column Mapping</h2>
+                  <span className="text-xs" style={{ color: "var(--stone-500)" }} data-testid="text-file-info">
+                    {uploadResult.filename} — {uploadResult.totalRows} rows
+                  </span>
                 </div>
-              ))}
-              <div className="grid gap-3 sm:grid-cols-2">
-                {TARGET_FIELDS.map((field) => (
-                  <div key={field.key} className="flex flex-col gap-1">
-                    <label className="text-xs font-medium text-foreground">
-                      {field.label}
-                      {field.required && <span className="text-red-500 ml-0.5">*</span>}
-                      {!field.required && <span className="text-muted-foreground ml-1 font-normal">(optional)</span>}
-                    </label>
-                    <select
-                      value={mapping[field.key] || ""}
-                      onChange={(e) => handleMappingChange(field.key, e.target.value)}
-                      className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground"
-                      data-testid={`select-mapping-${field.key}`}
-                    >
-                      <option value="">— Select column —</option>
-                      {!field.required && (
-                        <option value={NOT_PROVIDED}>Not provided</option>
-                      )}
-                      {uploadResult.headers.map((h) => (
-                        <option key={h} value={h}>
-                          {h}
-                        </option>
-                      ))}
-                    </select>
+                <p className="text-sm mb-2" style={{ color: "var(--stone-500)" }}>
+                  Map each CSV column to the corresponding opportunity field. Only Name, Amount, and Outcome are required. At least one date field must also be mapped.
+                </p>
+                <p className="text-xs mb-4" style={{ color: "var(--stone-400)" }}>
+                  Optional fields can be set to &quot;Not provided&quot; if your CSV doesn&apos;t include them.
+                </p>
+                {getMappingWarnings().map((w, i) => (
+                  <div key={i} className="mb-3 px-3 py-2 text-xs" style={{ border: "1px solid #fcd34d", background: "var(--warning-bg)", color: "var(--warning)", borderRadius: "var(--radius-sm, 6px)" }} data-testid={`mapping-warning-${i}`}>
+                    {w}
                   </div>
                 ))}
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {TARGET_FIELDS.map((field) => (
+                    <div key={field.key} className="flex flex-col gap-1">
+                      <label className="text-xs font-semibold" style={{ color: "var(--stone-700)" }}>
+                        {field.label}
+                        {field.required && <span style={{ color: "var(--error)" }} className="ml-0.5">*</span>}
+                        {!field.required && <span className="font-normal ml-1" style={{ color: "var(--stone-400)" }}>(optional)</span>}
+                      </label>
+                      <select
+                        value={mapping[field.key] || ""}
+                        onChange={(e) => handleMappingChange(field.key, e.target.value)}
+                        className="px-3 py-2 text-sm font-medium"
+                        style={selectStyle}
+                        data-testid={`select-mapping-${field.key}`}
+                      >
+                        <option value="">— Select column —</option>
+                        {!field.required && <option value={NOT_PROVIDED}>Not provided</option>}
+                        {uploadResult.headers.map((h) => (
+                          <option key={h} value={h}>{h}</option>
+                        ))}
+                      </select>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* Import Mode */}
-            <div className="rounded-md border border-border bg-card p-6" data-testid="section-import-mode">
-              <h2 className="text-sm font-medium text-foreground mb-3">Import Mode</h2>
-              <div className="flex flex-col gap-3">
-                <label className="flex items-start gap-3 cursor-pointer" data-testid="radio-mode-append">
-                  <input
-                    type="radio"
-                    name="importMode"
-                    value="append"
-                    checked={importMode === "append"}
-                    onChange={() => setImportMode("append")}
-                    className="mt-0.5 text-primary focus:ring-primary/30"
-                  />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Append</p>
-                    <p className="text-xs text-muted-foreground">Add this data alongside your existing opportunities. Previous imports are preserved.</p>
-                  </div>
-                </label>
-                <label className="flex items-start gap-3 cursor-pointer" data-testid="radio-mode-replace">
-                  <input
-                    type="radio"
-                    name="importMode"
-                    value="replace"
-                    checked={importMode === "replace"}
-                    onChange={() => setImportMode("replace")}
-                    className="mt-0.5 text-primary focus:ring-primary/30"
-                  />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Replace</p>
-                    <p className="text-xs text-muted-foreground">Remove all existing opportunities and replace with this file. Previous import history is kept for reference but marked inactive.</p>
-                  </div>
-                </label>
+            <div className="bg-white" style={{ border: "1px solid var(--stone-200)", borderRadius: "var(--radius-lg, 14px)", overflow: "hidden" }} data-testid="section-import-mode">
+              <div className="p-6">
+                <h2 className="text-sm font-semibold mb-3" style={{ color: "var(--stone-900)" }}>Import Mode</h2>
+                <div className="flex flex-col gap-3">
+                  <label className="flex items-start gap-3 cursor-pointer" data-testid="radio-mode-append">
+                    <input type="radio" name="importMode" value="append" checked={importMode === "append"} onChange={() => setImportMode("append")} className="mt-0.5" style={{ accentColor: "var(--teal-600)" }} />
+                    <div>
+                      <p className="text-sm font-semibold" style={{ color: "var(--stone-900)" }}>Append</p>
+                      <p className="text-xs" style={{ color: "var(--stone-500)" }}>Add this data alongside your existing opportunities. Previous imports are preserved.</p>
+                    </div>
+                  </label>
+                  <label className="flex items-start gap-3 cursor-pointer" data-testid="radio-mode-replace">
+                    <input type="radio" name="importMode" value="replace" checked={importMode === "replace"} onChange={() => setImportMode("replace")} className="mt-0.5" style={{ accentColor: "var(--teal-600)" }} />
+                    <div>
+                      <p className="text-sm font-semibold" style={{ color: "var(--stone-900)" }}>Replace</p>
+                      <p className="text-xs" style={{ color: "var(--stone-500)" }}>Remove all existing opportunities and replace with this file.</p>
+                    </div>
+                  </label>
+                </div>
               </div>
             </div>
 
             {/* Preview */}
-            <div className="rounded-md border border-border bg-card p-6" data-testid="section-preview">
-              <h2 className="text-sm font-medium text-foreground mb-4">
-                Preview (first {Math.min(20, uploadResult.preview.length)} rows)
-              </h2>
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border">
-                      <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">#</th>
-                      {uploadResult.headers.map((h) => (
-                        <th key={h} className="px-3 py-2 text-left text-xs font-medium text-muted-foreground whitespace-nowrap">
-                          {h}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {uploadResult.preview.map((row, i) => (
-                      <tr key={i} className="border-b border-border/50">
-                        <td className="px-3 py-2 text-xs text-muted-foreground">{i + 1}</td>
+            <div className="bg-white" style={{ border: "1px solid var(--stone-200)", borderRadius: "var(--radius-lg, 14px)", overflow: "hidden" }} data-testid="section-preview">
+              <div className="p-6">
+                <h2 className="text-sm font-semibold mb-4" style={{ color: "var(--stone-900)" }}>
+                  Preview (first {Math.min(20, uploadResult.preview.length)} rows)
+                </h2>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-[13px]">
+                    <thead>
+                      <tr style={{ borderBottom: "1px solid var(--stone-200)" }}>
+                        <th className="px-3 py-2.5 text-left text-[11px] font-semibold uppercase" style={{ color: "var(--stone-500)", letterSpacing: "0.5px", background: "var(--stone-50)" }}>#</th>
                         {uploadResult.headers.map((h) => (
-                          <td key={h} className="px-3 py-2 text-xs text-foreground whitespace-nowrap max-w-[200px] truncate">
-                            {row[h] || ""}
-                          </td>
+                          <th key={h} className="px-3 py-2.5 text-left text-[11px] font-semibold uppercase whitespace-nowrap" style={{ color: "var(--stone-500)", letterSpacing: "0.5px", background: "var(--stone-50)" }}>{h}</th>
                         ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {uploadResult.preview.map((row, i) => (
+                        <tr key={i} style={{ borderBottom: "1px solid var(--stone-100)" }}>
+                          <td className="px-3 py-2.5 text-xs" style={{ color: "var(--stone-400)" }}>{i + 1}</td>
+                          {uploadResult.headers.map((h) => (
+                            <td key={h} className="px-3 py-2.5 text-xs whitespace-nowrap max-w-[200px] truncate" style={{ color: "var(--stone-700)" }}>{row[h] || ""}</td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
 
             <div className="flex items-center gap-3 flex-wrap">
               <button
                 onClick={handleReset}
-                className="inline-flex items-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground"
+                className="inline-flex items-center px-5 py-2.5 text-[13px] font-semibold transition-colors"
+                style={{ background: "#fff", color: "var(--stone-700)", border: "1px solid var(--stone-200)", borderRadius: "var(--radius-sm, 6px)" }}
                 data-testid="button-back-upload"
               >
                 Back
@@ -446,11 +387,11 @@ export default function ImportPage() {
               <button
                 onClick={handleImportClick}
                 disabled={!isMappingValid()}
-                className={`inline-flex items-center rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed ${
-                  importMode === "replace"
-                    ? "bg-red-600 text-white hover:bg-red-700"
-                    : "bg-primary text-primary-foreground"
-                }`}
+                className="inline-flex items-center px-5 py-2.5 text-[13px] font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                style={{
+                  background: importMode === "replace" ? "var(--error)" : "var(--teal-600)",
+                  borderRadius: "var(--radius-sm, 6px)",
+                }}
                 data-testid="button-import"
               >
                 {importMode === "replace" ? "Replace & Import" : "Import"} {uploadResult.totalRows} Rows
@@ -462,33 +403,21 @@ export default function ImportPage() {
         {/* Replace Confirmation Modal */}
         {showReplaceConfirm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" data-testid="modal-replace-confirm">
-            <div className="rounded-lg border border-border bg-card p-6 shadow-xl max-w-md mx-4">
+            <div className="bg-white p-6 shadow-xl max-w-md mx-4" style={{ border: "1px solid var(--stone-200)", borderRadius: "var(--radius-lg, 14px)" }}>
               <div className="flex items-center gap-3 mb-4">
-                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-red-100 dark:bg-red-950/30">
-                  <svg className="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-full" style={{ background: "var(--error-bg)" }}>
+                  <svg className="w-5 h-5" style={{ color: "var(--error)" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-semibold text-foreground">Replace Existing Data?</h3>
+                <h3 className="text-lg font-bold" style={{ color: "var(--stone-900)" }}>Replace Existing Data?</h3>
               </div>
-              <p className="text-sm text-muted-foreground mb-6">
-                This will remove all existing opportunities and replace them with the data from this file. Previous import history will be kept for reference but marked inactive. This action cannot be undone.
+              <p className="text-sm mb-6" style={{ color: "var(--stone-500)" }}>
+                This will remove all existing opportunities and replace them with the data from this file. This action cannot be undone.
               </p>
               <div className="flex items-center justify-end gap-3">
-                <button
-                  onClick={() => setShowReplaceConfirm(false)}
-                  className="inline-flex items-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground"
-                  data-testid="button-cancel-replace"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={doImport}
-                  className="inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-                  data-testid="button-confirm-replace"
-                >
-                  Yes, Replace All Data
-                </button>
+                <button onClick={() => setShowReplaceConfirm(false)} className="inline-flex items-center px-4 py-2 text-sm font-semibold" style={{ background: "#fff", color: "var(--stone-700)", border: "1px solid var(--stone-200)", borderRadius: "var(--radius-sm, 6px)" }} data-testid="button-cancel-replace">Cancel</button>
+                <button onClick={doImport} className="inline-flex items-center px-4 py-2 text-sm font-semibold text-white" style={{ background: "var(--error)", borderRadius: "var(--radius-sm, 6px)" }} data-testid="button-confirm-replace">Yes, Replace All Data</button>
               </div>
             </div>
           </div>
@@ -496,93 +425,95 @@ export default function ImportPage() {
 
         {/* Step 3: Importing */}
         {step === "importing" && (
-          <div className="rounded-md border border-border bg-card p-6 text-center" data-testid="section-importing">
-            <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 mb-4">
-              <svg className="w-5 h-5 text-primary animate-spin" fill="none" viewBox="0 0 24 24">
+          <div className="bg-white p-6 text-center" style={{ border: "1px solid var(--stone-200)", borderRadius: "var(--radius-lg, 14px)" }} data-testid="section-importing">
+            <div className="inline-flex items-center justify-center w-10 h-10 rounded-full mb-4" style={{ background: "var(--teal-50)" }}>
+              <svg className="w-5 h-5 animate-spin" style={{ color: "var(--teal-600)" }} fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
             </div>
-            <p className="text-sm text-foreground font-medium">Importing opportunities...</p>
-            <p className="text-xs text-muted-foreground mt-1">This may take a moment.</p>
+            <p className="text-sm font-semibold" style={{ color: "var(--stone-900)" }}>Importing opportunities...</p>
+            <p className="text-xs mt-1" style={{ color: "var(--stone-500)" }}>This may take a moment.</p>
           </div>
         )}
 
         {/* Step 4: Results */}
         {step === "results" && importResult && (
           <div className="space-y-6">
-            <div className="rounded-md border border-border bg-card p-6" data-testid="section-results">
-              <h2 className="text-sm font-medium text-foreground mb-4">Import Complete</h2>
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div className="rounded-md border border-border p-4">
-                  <p className="text-xs text-muted-foreground">Total Rows</p>
-                  <p className="text-2xl font-semibold text-foreground mt-1" data-testid="text-total-rows">
-                    {importResult.totalRows}
-                  </p>
+            <div className="bg-white" style={{ border: "1px solid var(--stone-200)", borderRadius: "var(--radius-lg, 14px)", overflow: "hidden" }} data-testid="section-results">
+              <div className="p-6">
+                <div className="flex items-center gap-2.5 mb-5">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+                  <h2 className="text-[15px] font-bold" style={{ color: "var(--stone-900)" }}>Import Complete</h2>
                 </div>
-                <div className="rounded-md border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/20 p-4">
-                  <p className="text-xs text-green-700 dark:text-green-400">Inserted</p>
-                  <p className="text-2xl font-semibold text-green-700 dark:text-green-400 mt-1" data-testid="text-inserted-count">
-                    {importResult.insertedCount}
-                  </p>
-                </div>
-                <div className={`rounded-md border p-4 ${importResult.errorCount > 0 ? "border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/20" : "border-border"}`}>
-                  <p className={`text-xs ${importResult.errorCount > 0 ? "text-red-700 dark:text-red-400" : "text-muted-foreground"}`}>Errors</p>
-                  <p className={`text-2xl font-semibold mt-1 ${importResult.errorCount > 0 ? "text-red-700 dark:text-red-400" : "text-foreground"}`} data-testid="text-error-count">
-                    {importResult.errorCount}
-                  </p>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="bg-white p-5" style={{ border: "1px solid var(--stone-200)", borderRadius: "var(--radius-md, 10px)" }}>
+                    <p className="text-xs font-semibold uppercase mb-1" style={{ color: "var(--stone-500)", letterSpacing: "0.4px" }}>Total Rows</p>
+                    <p className="text-[28px] font-bold" style={{ color: "var(--stone-900)", letterSpacing: "-0.5px" }} data-testid="text-total-rows">{importResult.totalRows}</p>
+                  </div>
+                  <div className="bg-white p-5" style={{ border: "1px solid var(--stone-200)", borderLeft: "3px solid var(--success)", borderRadius: "var(--radius-md, 10px)" }}>
+                    <p className="text-xs font-semibold uppercase mb-1" style={{ color: "var(--stone-500)", letterSpacing: "0.4px" }}>Inserted</p>
+                    <p className="text-[28px] font-bold" style={{ color: "var(--success)", letterSpacing: "-0.5px" }} data-testid="text-inserted-count">{importResult.insertedCount}</p>
+                  </div>
+                  <div className="bg-white p-5" style={{ border: "1px solid var(--stone-200)", borderLeft: importResult.errorCount > 0 ? "3px solid var(--error)" : undefined, borderRadius: "var(--radius-md, 10px)" }}>
+                    <p className="text-xs font-semibold uppercase mb-1" style={{ color: "var(--stone-500)", letterSpacing: "0.4px" }}>Errors</p>
+                    <p className="text-[28px] font-bold" style={{ color: importResult.errorCount > 0 ? "var(--error)" : "var(--stone-900)", letterSpacing: "-0.5px" }} data-testid="text-error-count">{importResult.errorCount}</p>
+                  </div>
                 </div>
               </div>
             </div>
 
             {importResult.errors.length > 0 && (
-              <div className="rounded-md border border-border bg-card p-6" data-testid="section-error-details">
-                <h2 className="text-sm font-medium text-foreground mb-4">
-                  Error Details {importResult.errors.length < importResult.errorCount && `(showing first ${importResult.errors.length})`}
-                </h2>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border">
-                        <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">Row</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">Error</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">Data</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {importResult.errors.map((err, i) => (
-                        <tr key={i} className="border-b border-border/50">
-                          <td className="px-3 py-2 text-xs text-foreground" data-testid={`text-error-row-${i}`}>
-                            {err.row_number}
-                          </td>
-                          <td className="px-3 py-2 text-xs text-red-600 dark:text-red-400" data-testid={`text-error-msg-${i}`}>
-                            {err.error_message}
-                          </td>
-                          <td className="px-3 py-2 text-xs text-muted-foreground font-mono max-w-[300px] truncate">
-                            {JSON.stringify(err.raw_row_json)}
-                          </td>
+              <div className="bg-white" style={{ border: "1px solid var(--stone-200)", borderRadius: "var(--radius-lg, 14px)", overflow: "hidden" }} data-testid="section-error-details">
+                <div className="p-6">
+                  <h2 className="text-sm font-semibold mb-4 flex items-center gap-2" style={{ color: "var(--stone-800)" }}>
+                    Error Details
+                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: "var(--error-bg)", color: "var(--error)" }}>
+                      {importResult.errorCount} rows
+                    </span>
+                  </h2>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full text-[13px]">
+                      <thead>
+                        <tr style={{ borderBottom: "1px solid var(--stone-200)" }}>
+                          <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase" style={{ color: "var(--stone-500)", background: "var(--stone-50)", letterSpacing: "0.5px", width: "60px" }}>Row</th>
+                          <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase" style={{ color: "var(--stone-500)", background: "var(--stone-50)", letterSpacing: "0.5px" }}>Error</th>
+                          <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase" style={{ color: "var(--stone-500)", background: "var(--stone-50)", letterSpacing: "0.5px", width: "240px" }}>Data</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {importResult.errors.map((err, i) => (
+                          <tr key={i} style={{ borderBottom: "1px solid var(--stone-100)" }}>
+                            <td className="px-4 py-3" data-testid={`text-error-row-${i}`}>
+                              <span className="font-mono text-xs px-2 py-0.5 rounded" style={{ background: "var(--stone-100)", color: "var(--stone-400)" }}>{err.row_number}</span>
+                            </td>
+                            <td className="px-4 py-3" data-testid={`text-error-msg-${i}`}>
+                              <span className="text-xs px-2 py-1 rounded inline-block" style={{ background: "var(--error-bg)", color: "var(--error)" }}>{err.error_message}</span>
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className="font-mono text-[11px] max-w-[280px] truncate block" style={{ color: "var(--stone-500)" }}>{JSON.stringify(err.raw_row_json)}</span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             )}
 
             <div className="flex items-center gap-3 flex-wrap">
-              <button
-                onClick={handleReset}
-                className="inline-flex items-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground"
-                data-testid="button-import-another"
-              >
+              <button onClick={handleReset} className="inline-flex items-center px-5 py-2.5 text-[13px] font-semibold" style={{ background: "#fff", color: "var(--stone-700)", border: "1px solid var(--stone-200)", borderRadius: "var(--radius-sm, 6px)" }} data-testid="button-import-another">
                 Import Another File
               </button>
               <Link
                 href={`/app/dashboard${importResult.jobId ? `?dataset=${importResult.jobId}` : ""}`}
-                className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-[13px] font-semibold text-white"
+                style={{ background: "var(--teal-600)", borderRadius: "var(--radius-sm, 6px)" }}
                 data-testid="link-view-analytics"
               >
                 View Analytics
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
               </Link>
             </div>
           </div>
@@ -590,69 +521,54 @@ export default function ImportPage() {
 
         {/* Import History */}
         <div className="mt-12" data-testid="section-import-history">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Import History</h2>
+          <h2 className="text-lg font-bold mb-4" style={{ color: "var(--stone-900)" }}>Import History</h2>
           {historyLoading ? (
             <div className="flex items-center justify-center py-8">
-              <svg className="w-5 h-5 text-primary animate-spin" fill="none" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 animate-spin" style={{ color: "var(--teal-600)" }} fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
             </div>
           ) : importHistory.length === 0 ? (
-            <div className="rounded-md border border-border bg-card p-6 text-center">
-              <p className="text-sm text-muted-foreground">No imports yet. Upload a CSV file above to get started.</p>
+            <div className="bg-white p-6 text-center" style={{ border: "1px solid var(--stone-200)", borderRadius: "var(--radius-lg, 14px)" }}>
+              <p className="text-sm" style={{ color: "var(--stone-500)" }}>No imports yet. Upload a CSV file above to get started.</p>
             </div>
           ) : (
-            <div className="rounded-md border border-border bg-card overflow-hidden">
+            <div className="bg-white overflow-hidden" style={{ border: "1px solid var(--stone-200)", borderRadius: "var(--radius-lg, 14px)" }}>
               <div className="overflow-x-auto">
-                <table className="min-w-full text-sm">
+                <table className="min-w-full text-[13px]">
                   <thead>
-                    <tr className="border-b border-border bg-muted/30">
-                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">File</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Mode</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Status</th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">Rows</th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">Inserted</th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">Errors</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Date</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">Actions</th>
+                    <tr style={{ borderBottom: "1px solid var(--stone-200)" }}>
+                      <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase" style={{ color: "var(--stone-500)", background: "var(--stone-50)", letterSpacing: "0.5px" }}>File</th>
+                      <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase" style={{ color: "var(--stone-500)", background: "var(--stone-50)", letterSpacing: "0.5px" }}>Mode</th>
+                      <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase" style={{ color: "var(--stone-500)", background: "var(--stone-50)", letterSpacing: "0.5px" }}>Status</th>
+                      <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase" style={{ color: "var(--stone-500)", background: "var(--stone-50)", letterSpacing: "0.5px" }}>Rows</th>
+                      <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase" style={{ color: "var(--stone-500)", background: "var(--stone-50)", letterSpacing: "0.5px" }}>Inserted</th>
+                      <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase" style={{ color: "var(--stone-500)", background: "var(--stone-50)", letterSpacing: "0.5px" }}>Errors</th>
+                      <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase" style={{ color: "var(--stone-500)", background: "var(--stone-50)", letterSpacing: "0.5px" }}>Date</th>
+                      <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase" style={{ color: "var(--stone-500)", background: "var(--stone-50)", letterSpacing: "0.5px" }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {importHistory.map((job) => (
-                      <tr key={job.id} className={`border-b border-border/50 ${!job.is_active ? "opacity-50" : ""}`} data-testid={`import-job-${job.id}`}>
-                        <td className="px-4 py-3 text-foreground font-medium whitespace-nowrap max-w-[200px] truncate">
-                          {job.filename}
-                        </td>
+                      <tr key={job.id} style={{ borderBottom: "1px solid var(--stone-100)", opacity: !job.is_active ? 0.5 : 1 }} data-testid={`import-job-${job.id}`}>
+                        <td className="px-4 py-3 font-medium whitespace-nowrap max-w-[200px] truncate" style={{ color: "var(--stone-900)" }}>{job.filename}</td>
                         <td className="px-4 py-3">
-                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                            job.import_mode === "replace"
-                              ? "bg-amber-100 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400"
-                              : "bg-blue-100 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400"
-                          }`}>
-                            {job.import_mode}
-                          </span>
+                          <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{
+                            background: job.import_mode === "replace" ? "var(--warning-bg)" : "var(--info-bg)",
+                            color: job.import_mode === "replace" ? "var(--warning)" : "var(--teal-700)",
+                          }}>{job.import_mode}</span>
                         </td>
-                        <td className="px-4 py-3">
-                          <StatusBadge status={job.status} isActive={job.is_active} />
-                        </td>
-                        <td className="px-4 py-3 text-right text-foreground">{job.row_count}</td>
-                        <td className="px-4 py-3 text-right text-green-600 dark:text-green-400">{job.inserted_count}</td>
-                        <td className={`px-4 py-3 text-right ${job.error_count > 0 ? "text-red-600 dark:text-red-400" : "text-foreground"}`}>
-                          {job.error_count}
-                        </td>
-                        <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
+                        <td className="px-4 py-3"><StatusBadge status={job.status} isActive={job.is_active} /></td>
+                        <td className="px-4 py-3 text-right" style={{ color: "var(--stone-700)" }}>{job.row_count}</td>
+                        <td className="px-4 py-3 text-right" style={{ color: "var(--success)" }}>{job.inserted_count}</td>
+                        <td className="px-4 py-3 text-right" style={{ color: job.error_count > 0 ? "var(--error)" : "var(--stone-700)" }}>{job.error_count}</td>
+                        <td className="px-4 py-3 whitespace-nowrap" style={{ color: "var(--stone-500)" }}>
                           {new Date(job.created_at).toLocaleDateString()} {new Date(job.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                         </td>
                         <td className="px-4 py-3">
                           {job.status === "completed" && job.is_active && (
-                            <Link
-                              href={`/app/dashboard?dataset=${job.id}`}
-                              className="text-xs text-primary hover:underline"
-                              data-testid={`link-analytics-${job.id}`}
-                            >
-                              View Analytics
-                            </Link>
+                            <Link href={`/app/dashboard?dataset=${job.id}`} className="text-xs font-medium" style={{ color: "var(--teal-600)" }} data-testid={`link-analytics-${job.id}`}>View Analytics</Link>
                           )}
                         </td>
                       </tr>
@@ -670,54 +586,40 @@ export default function ImportPage() {
 
 function StatusBadge({ status, isActive }: { status: string; isActive: boolean }) {
   if (!isActive) {
-    return (
-      <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium bg-muted text-muted-foreground">
-        inactive
-      </span>
-    );
+    return <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: "var(--stone-100)", color: "var(--stone-500)" }}>inactive</span>;
   }
-
-  const styles: Record<string, string> = {
-    completed: "bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400",
-    running: "bg-blue-100 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400",
-    pending: "bg-yellow-100 dark:bg-yellow-950/30 text-yellow-700 dark:text-yellow-400",
-    failed: "bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400",
+  const styles: Record<string, { bg: string; color: string }> = {
+    completed: { bg: "var(--success-bg)", color: "var(--success)" },
+    running: { bg: "var(--info-bg)", color: "var(--teal-700)" },
+    pending: { bg: "var(--warning-bg)", color: "var(--warning)" },
+    failed: { bg: "var(--error-bg)", color: "var(--error)" },
   };
-
-  return (
-    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${styles[status] || styles.pending}`}>
-      {status}
-    </span>
-  );
+  const s = styles[status] || styles.pending;
+  return <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold" style={{ background: s.bg, color: s.color }}>{status}</span>;
 }
 
 function StepIndicator({ label, active, done, num }: { label: string; active: boolean; done: boolean; num: number }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2.5">
       <span
-        className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium ${
-          done && !active
-            ? "bg-primary text-primary-foreground"
-            : active
-            ? "bg-primary/20 text-primary border border-primary"
-            : "bg-muted text-muted-foreground"
-        }`}
+        className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold"
+        style={{
+          background: done && !active ? "var(--teal-600)" : active ? "var(--teal-50)" : "#fff",
+          color: done && !active ? "#fff" : active ? "var(--teal-600)" : "var(--stone-400)",
+          border: done && !active ? "2px solid var(--teal-600)" : active ? "2px solid var(--teal-600)" : "2px solid var(--stone-300)",
+        }}
       >
         {done && !active ? (
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-          </svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3}><polyline points="20 6 9 17 4 12" /></svg>
         ) : (
           num
         )}
       </span>
-      <span className={`text-xs ${active ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-        {label}
-      </span>
+      <span className="text-[13px] font-medium" style={{ color: active || done ? "var(--stone-700)" : "var(--stone-400)" }}>{label}</span>
     </div>
   );
 }
 
-function StepDivider() {
-  return <div className="flex-1 h-px bg-border max-w-[60px]" />;
+function StepDivider({ done }: { done?: boolean }) {
+  return <div style={{ width: "48px", height: "2px", background: done ? "var(--teal-400)" : "var(--stone-200)", margin: "0 12px" }} />;
 }

@@ -104,16 +104,21 @@ function fmtCurrency(v: number | null): string {
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
-          <svg className="w-5 h-5 text-primary animate-spin" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-          </svg>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--stone-50)" }}>
+          <div
+            className="inline-flex items-center justify-center w-10 h-10 rounded-full"
+            style={{ background: "var(--teal-50)" }}
+          >
+            <svg className="w-5 h-5 animate-spin" style={{ color: "var(--teal-600)" }} fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <DashboardContent />
     </Suspense>
   );
@@ -349,53 +354,34 @@ function DashboardContent() {
     }
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-3">
-            <div className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-primary">
-              <svg className="w-4 h-4 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <span className="text-sm font-semibold text-foreground" data-testid="text-dashboard-title">
-              Analytics Dashboard
-            </span>
-          </div>
-          <div className="flex items-center gap-3 flex-wrap">
-            <Link
-              href="/app/import"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              data-testid="link-import"
-            >
-              Import
-            </Link>
-            <Link
-              href="/app"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              data-testid="link-home"
-            >
-              Home
-            </Link>
-          </div>
-        </div>
-      </header>
+  const selectStyle = {
+    border: "1px solid var(--stone-200)",
+    borderRadius: "var(--radius-sm, 6px)",
+    color: "var(--stone-700)",
+    background: "var(--stone-50)",
+  };
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  return (
+    <div className="min-h-screen" style={{ background: "var(--stone-50)" }}>
+      <main style={{ padding: "28px 40px 60px" }}>
         {/* Filter Bar */}
-        <div className="rounded-md border border-border bg-card p-4 mb-4" data-testid="filter-bar">
-          <div className="flex flex-wrap items-end gap-4">
+        <div
+          className="bg-white p-4 mb-4"
+          style={{ border: "1px solid var(--stone-200)", borderRadius: "var(--radius-lg, 14px)" }}
+          data-testid="filter-bar"
+        >
+          <div className="flex flex-wrap items-center gap-3">
             {datasets.length > 0 && (
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-muted-foreground" htmlFor="dataset-select">
+              <>
+                <span className="text-xs font-semibold uppercase" style={{ color: "var(--stone-500)", letterSpacing: "0.4px" }}>
                   Dataset
-                </label>
+                </span>
                 <select
                   id="dataset-select"
                   value={selectedDataset}
                   onChange={(e) => handleDatasetChange(e.target.value)}
-                  className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  className="px-3 py-[7px] text-[13px] font-medium appearance-none cursor-pointer focus:outline-none"
+                  style={selectStyle}
                   data-testid="select-dataset"
                 >
                   <option value="">All Data</option>
@@ -405,155 +391,113 @@ function DashboardContent() {
                     </option>
                   ))}
                 </select>
-              </div>
-            )}
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-muted-foreground" htmlFor="date-mode">
-                Date Mode
-              </label>
-              <select
-                id="date-mode"
-                value={dateMode}
-                onChange={(e) => updateFilter({ date_mode: e.target.value })}
-                className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-                data-testid="select-date-mode"
-              >
-                {DATE_MODES.map((m) => (
-                  <option key={m} value={m}>
-                    {DATE_MODE_LABELS[m]}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-muted-foreground" htmlFor="period">
-                Time Period
-              </label>
-              <select
-                id="period"
-                value={period}
-                onChange={(e) => updateFilter({ period: e.target.value })}
-                className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-                data-testid="select-period"
-              >
-                {PERIODS.map((p) => (
-                  <option key={p} value={p}>
-                    {PERIOD_LABELS[p]}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {period === "custom" && (
-              <>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-medium text-muted-foreground" htmlFor="custom-from">
-                    From
-                  </label>
-                  <input
-                    type="date"
-                    id="custom-from"
-                    value={customFrom}
-                    onChange={(e) => updateFilter({ from: e.target.value })}
-                    className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-                    data-testid="input-date-from"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-medium text-muted-foreground" htmlFor="custom-to">
-                    To
-                  </label>
-                  <input
-                    type="date"
-                    id="custom-to"
-                    value={customTo}
-                    onChange={(e) => updateFilter({ to: e.target.value })}
-                    className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-                    data-testid="input-date-to"
-                  />
-                </div>
+                <div className="w-px h-6" style={{ background: "var(--stone-200)" }} />
               </>
             )}
 
+            <span className="text-xs font-semibold uppercase" style={{ color: "var(--stone-500)", letterSpacing: "0.4px" }}>
+              Date Mode
+            </span>
+            <select
+              id="date-mode"
+              value={dateMode}
+              onChange={(e) => updateFilter({ date_mode: e.target.value })}
+              className="px-3 py-[7px] text-[13px] font-medium appearance-none cursor-pointer focus:outline-none"
+              style={selectStyle}
+              data-testid="select-date-mode"
+            >
+              {DATE_MODES.map((m) => (
+                <option key={m} value={m}>
+                  {DATE_MODE_LABELS[m]}
+                </option>
+              ))}
+            </select>
+
+            <div className="w-px h-6" style={{ background: "var(--stone-200)" }} />
+
+            <span className="text-xs font-semibold uppercase" style={{ color: "var(--stone-500)", letterSpacing: "0.4px" }}>
+              Period
+            </span>
+            <select
+              id="period"
+              value={period}
+              onChange={(e) => updateFilter({ period: e.target.value })}
+              className="px-3 py-[7px] text-[13px] font-medium appearance-none cursor-pointer focus:outline-none"
+              style={selectStyle}
+              data-testid="select-period"
+            >
+              {PERIODS.map((p) => (
+                <option key={p} value={p}>
+                  {PERIOD_LABELS[p]}
+                </option>
+              ))}
+            </select>
+
+            {period === "custom" && (
+              <>
+                <input
+                  type="date"
+                  id="custom-from"
+                  value={customFrom}
+                  onChange={(e) => updateFilter({ from: e.target.value })}
+                  className="px-3 py-[7px] text-[13px] font-medium focus:outline-none"
+                  style={selectStyle}
+                  data-testid="input-date-from"
+                />
+                <span className="text-[13px]" style={{ color: "var(--stone-400)" }}>&mdash;</span>
+                <input
+                  type="date"
+                  id="custom-to"
+                  value={customTo}
+                  onChange={(e) => updateFilter({ to: e.target.value })}
+                  className="px-3 py-[7px] text-[13px] font-medium focus:outline-none"
+                  style={selectStyle}
+                  data-testid="input-date-to"
+                />
+              </>
+            )}
+
+            <div className="flex-1" />
+
             <button
               onClick={() => setFiltersOpen((v) => !v)}
-              className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
-                activeDimFilterCount > 0
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border bg-background text-foreground"
-              }`}
+              className="inline-flex items-center gap-1.5 px-3 py-[7px] text-[13px] font-medium cursor-pointer transition-colors"
+              style={{
+                background: activeDimFilterCount > 0 ? "var(--teal-50)" : "#fff",
+                color: activeDimFilterCount > 0 ? "var(--teal-700)" : "var(--stone-600)",
+                border: activeDimFilterCount > 0 ? "1px solid var(--teal-200)" : "1px solid var(--stone-200)",
+                borderRadius: "var(--radius-sm, 6px)",
+              }}
               data-testid="button-toggle-filters"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
               </svg>
               Filters
               {activeDimFilterCount > 0 && (
-                <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-primary text-primary-foreground text-[10px] font-semibold px-1">
+                <span
+                  className="inline-flex items-center justify-center w-[18px] h-[18px] rounded-full text-[10px] font-bold text-white"
+                  style={{ background: "var(--teal-600)" }}
+                >
                   {activeDimFilterCount}
                 </span>
               )}
-              <svg className={`w-3 h-3 transition-transform ${filtersOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
             </button>
           </div>
 
-          {data?.filter && (
-            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground" data-testid="filter-meta">
-              <span>
-                Showing <strong className="text-foreground">{data.filter.includedCount}</strong> opportunities
-              </span>
-              <span>
-                {data.filter.dateModeLabel}: {new Date(data.filter.dateFrom).toLocaleDateString()} &ndash; {new Date(data.filter.dateTo).toLocaleDateString()}
-              </span>
-              {data.filter.excludedNullCount > 0 && (
-                <span>
-                  ({data.filter.excludedNullCount} excluded &mdash; missing {data.filter.dateModeLabel.toLowerCase()})
-                </span>
-              )}
-              {selectedDataset && datasets.length > 0 && (
-                <span data-testid="text-active-dataset">
-                  Dataset: {datasets.find((d) => d.id === selectedDataset)?.filename || "Selected"}
-                </span>
-              )}
-              {data.filter.activeDimensionFilters && (
-                <span data-testid="text-active-dim-filters">
-                  Filtered by: {data.filter.activeDimensionFilters}
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Dimension Filters Panel */}
-        {filtersOpen && (
-          <div className="rounded-md border border-border bg-card p-4 mb-8" data-testid="dimension-filters-panel">
-            <div className="flex items-center justify-between gap-4 flex-wrap mb-3">
-              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Dimension Filters
-              </h3>
-              {activeDimFilterCount > 0 && (
-                <button
-                  onClick={clearAllDimFilters}
-                  className="text-xs text-primary hover:underline"
-                  data-testid="button-clear-all-filters"
-                >
-                  Clear all
-                </button>
-              )}
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {/* Dimension Filters */}
+          {filtersOpen && (
+            <div className="flex flex-wrap gap-6 pt-4 mt-4" style={{ borderTop: "1px solid var(--stone-100)" }} data-testid="dimension-filters-panel">
               {DIMENSION_KEYS.map((dim) => {
                 const options = dimOptions[dim] || [];
                 const selected = dimFilters[dim] || [];
                 return (
                   <div key={dim} data-testid={`dim-filter-${dim}`}>
-                    <p className="text-xs font-medium text-foreground mb-2">{DIMENSION_LABELS[dim]}</p>
+                    <p className="text-[11px] font-semibold uppercase mb-2" style={{ color: "var(--stone-500)", letterSpacing: "0.5px" }}>
+                      {DIMENSION_LABELS[dim]}
+                    </p>
                     {options.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">No values</p>
+                      <p className="text-xs" style={{ color: "var(--stone-400)" }}>No values</p>
                     ) : (
                       <div className="space-y-1 max-h-40 overflow-y-auto pr-1">
                         {options.map((val) => {
@@ -561,16 +505,18 @@ function DashboardContent() {
                           return (
                             <label
                               key={val}
-                              className="flex items-center gap-2 cursor-pointer text-xs text-foreground hover:bg-muted/40 rounded px-1 py-0.5"
+                              className="flex items-center gap-1.5 cursor-pointer text-[13px] px-1 py-0.5 rounded"
+                              style={{ color: "var(--stone-600)" }}
                               data-testid={`dim-option-${dim}-${val}`}
                             >
                               <input
                                 type="checkbox"
                                 checked={isChecked}
                                 onChange={() => toggleDimValue(dim, val)}
-                                className="rounded border-border text-primary focus:ring-primary/30 h-3.5 w-3.5"
+                                className="h-3.5 w-3.5"
+                                style={{ accentColor: "var(--teal-600)" }}
                               />
-                              <span className={val === UNKNOWN_VALUE ? "italic text-muted-foreground" : ""}>
+                              <span className={val === UNKNOWN_VALUE ? "italic" : ""} style={val === UNKNOWN_VALUE ? { color: "var(--stone-400)" } : undefined}>
                                 {val}
                               </span>
                             </label>
@@ -581,16 +527,57 @@ function DashboardContent() {
                   </div>
                 );
               })}
+              {activeDimFilterCount > 0 && (
+                <div className="flex items-end">
+                  <button
+                    onClick={clearAllDimFilters}
+                    className="text-xs font-medium"
+                    style={{ color: "var(--teal-600)" }}
+                    data-testid="button-clear-all-filters"
+                  >
+                    Clear all
+                  </button>
+                </div>
+              )}
             </div>
+          )}
+        </div>
+
+        {/* Results bar */}
+        {data?.filter && (
+          <div
+            className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] mb-5"
+            style={{ color: "var(--stone-500)" }}
+            data-testid="filter-meta"
+          >
+            <span>
+              Showing <strong style={{ color: "var(--stone-800)" }}>{data.filter.includedCount}</strong> opportunities
+            </span>
+            <span>
+              {data.filter.dateModeLabel}: {new Date(data.filter.dateFrom).toLocaleDateString()} &ndash; {new Date(data.filter.dateTo).toLocaleDateString()}
+            </span>
+            {data.filter.excludedNullCount > 0 && (
+              <span>
+                ({data.filter.excludedNullCount} excluded &mdash; missing {data.filter.dateModeLabel.toLowerCase()})
+              </span>
+            )}
+            {selectedDataset && datasets.length > 0 && (
+              <span data-testid="text-active-dataset">
+                Dataset: {datasets.find((d) => d.id === selectedDataset)?.filename || "Selected"}
+              </span>
+            )}
+            {data.filter.activeDimensionFilters && (
+              <span data-testid="text-active-dim-filters">
+                Filtered by: {data.filter.activeDimensionFilters}
+              </span>
+            )}
           </div>
         )}
 
-        {!filtersOpen && <div className="mb-8" />}
-
         {loading && (
           <div className="flex items-center justify-center py-20" data-testid="loading-state">
-            <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10">
-              <svg className="w-5 h-5 text-primary animate-spin" fill="none" viewBox="0 0 24 24">
+            <div className="inline-flex items-center justify-center w-10 h-10 rounded-full" style={{ background: "var(--teal-50)" }}>
+              <svg className="w-5 h-5 animate-spin" style={{ color: "var(--teal-600)" }} fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
@@ -599,25 +586,38 @@ function DashboardContent() {
         )}
 
         {error && (
-          <div className="rounded-md border border-red-300 bg-red-50 dark:bg-red-950/20 dark:border-red-800 px-4 py-3 text-sm text-red-700 dark:text-red-400" data-testid="text-error">
+          <div
+            className="px-4 py-3 text-sm"
+            style={{
+              border: "1px solid #fca5a5",
+              background: "var(--error-bg)",
+              color: "var(--error)",
+              borderRadius: "var(--radius-md, 10px)",
+            }}
+            data-testid="text-error"
+          >
             {error}
           </div>
         )}
 
         {!loading && !error && data && data.totals.count === 0 && (
           <div className="text-center py-20" data-testid="empty-state">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-muted mb-4">
-              <svg className="w-7 h-7 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div
+              className="inline-flex items-center justify-center w-14 h-14 rounded-full mb-4"
+              style={{ background: "var(--stone-100)" }}
+            >
+              <svg className="w-7 h-7" style={{ color: "var(--stone-400)" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-foreground mb-1">No opportunities found</h2>
-            <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+            <h2 className="text-lg font-bold mb-1" style={{ color: "var(--stone-900)" }}>No opportunities found</h2>
+            <p className="text-sm mb-6 max-w-md mx-auto" style={{ color: "var(--stone-500)" }}>
               No data matches the selected filters. Try adjusting the date mode, time period, or dimension filters, or import opportunities from CSV.
             </p>
             <Link
               href="/app/import"
-              className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+              className="inline-flex items-center px-5 py-2.5 text-[13px] font-semibold text-white"
+              style={{ background: "var(--teal-600)", borderRadius: "var(--radius-sm, 6px)" }}
               data-testid="link-import-cta"
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -629,12 +629,15 @@ function DashboardContent() {
         )}
 
         {!loading && !error && data && data.totals.count > 0 && (
-          <div className="space-y-8">
+          <div className="space-y-6">
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+              <h1
+                className="text-[22px] font-bold tracking-tight"
+                style={{ color: "var(--stone-900)", letterSpacing: "-0.3px" }}
+              >
                 Analytics
               </h1>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-sm mt-1" style={{ color: "var(--stone-500)" }}>
                 Performance overview of your opportunities pipeline.
               </p>
             </div>
@@ -652,6 +655,7 @@ function DashboardContent() {
                 value={fmtPct(data.totals.winRate)}
                 sub={data.totals.winRate !== null ? `${data.totals.won} won of ${data.totals.won + data.totals.lost} decided` : "No decided deals yet"}
                 testId="kpi-winrate"
+                highlight
               />
               <KpiCard
                 label="Avg Amount (Won)"
@@ -684,22 +688,26 @@ function DashboardContent() {
               return (
                 <>
                   {topRow.length > 0 && (
-                    <div className={`grid gap-6 ${topRow.length === 1 ? "" : topRow.length === 2 ? "lg:grid-cols-2" : "lg:grid-cols-3"}`}>
+                    <div className={`grid gap-4 ${topRow.length === 1 ? "" : topRow.length === 2 ? "lg:grid-cols-2" : "lg:grid-cols-3"}`}>
                       {topRow.map((b) => (
                         <BreakdownTable key={b.testId} title={b.title} rows={b.rows} testId={b.testId} />
                       ))}
                     </div>
                   )}
                   {bottomRow.length > 0 && (
-                    <div className={`grid gap-6 ${bottomRow.length === 1 ? "" : "lg:grid-cols-2"}`}>
+                    <div className={`grid gap-4 ${bottomRow.length === 1 ? "" : "lg:grid-cols-2"}`}>
                       {bottomRow.map((b) => (
                         <BreakdownTable key={b.testId} title={b.title} rows={b.rows} testId={b.testId} />
                       ))}
                     </div>
                   )}
                   {hidden.length > 0 && (
-                    <div className="rounded-md border border-border bg-muted/30 p-4" data-testid="hidden-breakdowns-note">
-                      <p className="text-xs text-muted-foreground">
+                    <div
+                      className="p-4"
+                      style={{ background: "var(--stone-50)", border: "1px solid var(--stone-200)", borderRadius: "var(--radius-md, 10px)" }}
+                      data-testid="hidden-breakdowns-note"
+                    >
+                      <p className="text-xs" style={{ color: "var(--stone-500)" }}>
                         {hidden.map((b) => b.title).join(", ")} breakdown{hidden.length > 1 ? "s" : ""} hidden:{" "}
                         {hidden.map((b) => `${b.label} not provided in this dataset`).join("; ")}.
                       </p>
@@ -710,17 +718,24 @@ function DashboardContent() {
             })()}
 
             {/* AI Analysis Section */}
-            <div className="rounded-md border border-border bg-card p-6" data-testid="ai-analysis-section">
+            <div
+              className="bg-white p-6"
+              style={{ border: "1px solid var(--stone-200)", borderRadius: "var(--radius-lg, 14px)" }}
+              data-testid="ai-analysis-section"
+            >
               <div className="flex items-center justify-between gap-4 flex-wrap mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-primary/10">
-                    <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div
+                    className="inline-flex items-center justify-center w-8 h-8"
+                    style={{ background: "var(--teal-50)", borderRadius: "var(--radius-sm, 6px)" }}
+                  >
+                    <svg className="w-4 h-4" style={{ color: "var(--teal-600)" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-foreground">AI-Powered Analysis</h3>
-                    <p className="text-xs text-muted-foreground">
+                    <h3 className="text-sm font-semibold" style={{ color: "var(--stone-900)" }}>AI-Powered Analysis</h3>
+                    <p className="text-xs" style={{ color: "var(--stone-500)" }}>
                       Analyzing with {DATE_MODE_LABELS[dateMode]} &middot; {PERIOD_LABELS[period]}
                       {activeDimFilterCount > 0 && ` \u00B7 ${activeDimFilterCount} filter${activeDimFilterCount > 1 ? "s" : ""} active`}
                     </p>
@@ -729,7 +744,8 @@ function DashboardContent() {
                 <button
                   onClick={runAiAnalysis}
                   disabled={aiLoading}
-                  className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="inline-flex items-center px-5 py-2.5 text-[13px] font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  style={{ background: "var(--teal-600)", borderRadius: "var(--radius-sm, 6px)" }}
                   data-testid="button-ai-analyze"
                 >
                   {aiLoading ? (
@@ -752,13 +768,17 @@ function DashboardContent() {
               </div>
 
               {aiError && (
-                <div className="rounded-md border border-red-300 bg-red-50 dark:bg-red-950/20 dark:border-red-800 px-4 py-3 text-sm text-red-700 dark:text-red-400 mb-4" data-testid="text-ai-error">
+                <div
+                  className="px-4 py-3 text-sm mb-4"
+                  style={{ border: "1px solid #fca5a5", background: "var(--error-bg)", color: "var(--error)", borderRadius: "var(--radius-md, 10px)" }}
+                  data-testid="text-ai-error"
+                >
                   {aiError}
                 </div>
               )}
 
               {!aiAnalysis && !aiLoading && !aiError && (
-                <p className="text-sm text-muted-foreground" data-testid="text-ai-placeholder">
+                <p className="text-sm" style={{ color: "var(--stone-500)" }} data-testid="text-ai-placeholder">
                   Click the button above to generate AI-powered insights for the current filters.
                 </p>
               )}
@@ -766,60 +786,88 @@ function DashboardContent() {
               {aiAnalysis && (
                 <div className="space-y-6" data-testid="ai-results">
                   <div data-testid="ai-summary">
-                    <p className="text-sm text-foreground leading-relaxed">{aiAnalysis.summary}</p>
+                    <p className="text-sm leading-relaxed" style={{ color: "var(--stone-700)" }}>{aiAnalysis.summary}</p>
                   </div>
 
                   <div>
-                    <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Key Insights</h4>
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    <h4
+                      className="text-[11px] font-semibold uppercase mb-3"
+                      style={{ color: "var(--stone-400)", letterSpacing: "0.6px" }}
+                    >
+                      Key Insights
+                    </h4>
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                       {aiAnalysis.insights.map((insight, i) => (
                         <div
                           key={i}
-                          className={`rounded-md border px-4 py-3 ${
-                            insight.type === "positive"
-                              ? "border-green-300 bg-green-50 dark:bg-green-950/20 dark:border-green-800"
+                          className="bg-white"
+                          style={{
+                            border: "1px solid var(--stone-200)",
+                            borderRadius: "var(--radius-md, 10px)",
+                            padding: "20px 24px",
+                            borderLeft: insight.type === "positive"
+                              ? "3px solid var(--success)"
                               : insight.type === "negative"
-                                ? "border-red-300 bg-red-50 dark:bg-red-950/20 dark:border-red-800"
-                                : "border-border bg-muted/30"
-                          }`}
+                                ? "3px solid var(--error)"
+                                : "3px solid var(--teal-500)",
+                          }}
                           data-testid={`ai-insight-${i}`}
                         >
-                          <div className="flex items-center gap-2 mb-1">
-                            {insight.type === "positive" && (
-                              <svg className="w-3.5 h-3.5 text-green-600 dark:text-green-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                              </svg>
-                            )}
-                            {insight.type === "negative" && (
-                              <svg className="w-3.5 h-3.5 text-red-600 dark:text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                              </svg>
-                            )}
-                            {insight.type === "neutral" && (
-                              <svg className="w-3.5 h-3.5 text-muted-foreground shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                            )}
-                            <p className="text-xs font-medium text-foreground">{insight.title}</p>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span
+                              className="text-[10px] font-bold uppercase"
+                              style={{
+                                letterSpacing: "0.5px",
+                                color: insight.type === "positive"
+                                  ? "var(--success)"
+                                  : insight.type === "negative"
+                                    ? "var(--error)"
+                                    : "var(--teal-600)",
+                              }}
+                            >
+                              {insight.type === "positive" ? "Strength" : insight.type === "negative" ? "Risk" : "Pattern"}
+                            </span>
                           </div>
-                          <p className="text-xs text-muted-foreground leading-relaxed">{insight.description}</p>
+                          <p className="text-sm font-bold mb-1" style={{ color: "var(--stone-900)" }}>{insight.title}</p>
+                          <p className="text-[13px] leading-relaxed" style={{ color: "var(--stone-500)" }}>{insight.description}</p>
                         </div>
                       ))}
                     </div>
                   </div>
 
                   <div data-testid="ai-recommendations">
-                    <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Recommendations</h4>
-                    <ul className="space-y-2">
+                    <h4
+                      className="text-[11px] font-semibold uppercase mb-3"
+                      style={{ color: "var(--stone-400)", letterSpacing: "0.6px" }}
+                    >
+                      Recommendations
+                    </h4>
+                    <div className="space-y-3">
                       {aiAnalysis.recommendations.map((rec, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-foreground" data-testid={`ai-rec-${i}`}>
-                          <svg className="w-4 h-4 text-primary shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                          <span>{rec}</span>
-                        </li>
+                        <div
+                          key={i}
+                          className="bg-white flex gap-4 items-start"
+                          style={{
+                            border: "1px solid var(--stone-200)",
+                            borderRadius: "var(--radius-md, 10px)",
+                            padding: "20px 24px",
+                          }}
+                          data-testid={`ai-rec-${i}`}
+                        >
+                          <div
+                            className="w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold shrink-0 mt-0.5"
+                            style={{
+                              background: "var(--teal-50)",
+                              color: "var(--teal-700)",
+                              border: "1px solid var(--teal-200)",
+                            }}
+                          >
+                            {i + 1}
+                          </div>
+                          <p className="text-[13px] leading-relaxed" style={{ color: "var(--stone-700)" }}>{rec}</p>
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 </div>
               )}
@@ -831,42 +879,87 @@ function DashboardContent() {
   );
 }
 
-function KpiCard({ label, value, sub, testId }: { label: string; value: string; sub: string; testId: string }) {
+function KpiCard({
+  label,
+  value,
+  sub,
+  testId,
+  highlight,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  testId: string;
+  highlight?: boolean;
+}) {
   return (
-    <div className="rounded-md border border-border bg-card p-5" data-testid={testId}>
-      <p className="text-xs font-medium text-muted-foreground">{label}</p>
-      <p className="text-2xl font-semibold text-foreground mt-1">{value}</p>
-      <p className="text-xs text-muted-foreground mt-1">{sub}</p>
+    <div
+      className="bg-white"
+      style={{
+        border: highlight ? "1px solid var(--teal-200)" : "1px solid var(--stone-200)",
+        borderRadius: "var(--radius-md, 10px)",
+        padding: "20px 24px",
+        background: highlight ? "linear-gradient(135deg, #fff 60%, var(--teal-50))" : "#fff",
+      }}
+      data-testid={testId}
+    >
+      <p
+        className="text-xs font-semibold uppercase"
+        style={{ color: "var(--stone-500)", letterSpacing: "0.4px", marginBottom: "8px" }}
+      >
+        {label}
+      </p>
+      <p
+        className="text-[32px] font-bold leading-tight"
+        style={{ color: highlight ? "var(--teal-700)" : "var(--stone-900)", letterSpacing: "-1px" }}
+      >
+        {value}
+      </p>
+      <p className="text-xs font-medium mt-1.5" style={{ color: "var(--stone-400)" }}>
+        {sub}
+      </p>
     </div>
   );
 }
 
 function BreakdownTable({ title, rows, testId }: { title: string; rows: BreakdownRow[]; testId: string }) {
   return (
-    <div className="rounded-md border border-border bg-card p-5" data-testid={testId}>
-      <h3 className="text-sm font-medium text-foreground mb-3">{title}</h3>
+    <div
+      className="bg-white p-6"
+      style={{ border: "1px solid var(--stone-200)", borderRadius: "var(--radius-lg, 14px)" }}
+      data-testid={testId}
+    >
+      <h3 className="text-sm font-semibold mb-3" style={{ color: "var(--stone-800)" }}>{title}</h3>
       {rows.length === 0 ? (
-        <p className="text-xs text-muted-foreground">No data</p>
+        <p className="text-xs" style={{ color: "var(--stone-400)" }}>No data</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full text-xs">
+          <table className="min-w-full text-[13px]">
             <thead>
-              <tr className="border-b border-border">
-                <th className="text-left py-2 pr-3 font-medium text-muted-foreground">{title.replace("By ", "")}</th>
-                <th className="text-right py-2 px-2 font-medium text-muted-foreground">Count</th>
-                <th className="text-right py-2 px-2 font-medium text-muted-foreground">Win Rate</th>
-                <th className="text-right py-2 pl-2 font-medium text-muted-foreground">Avg Amt</th>
+              <tr style={{ borderBottom: "1px solid var(--stone-200)" }}>
+                <th className="text-left py-2.5 pr-3 font-semibold text-[11px] uppercase" style={{ color: "var(--stone-500)", letterSpacing: "0.5px", background: "var(--stone-50)" }}>
+                  {title.replace("By ", "")}
+                </th>
+                <th className="text-right py-2.5 px-2 font-semibold text-[11px] uppercase" style={{ color: "var(--stone-500)", letterSpacing: "0.5px", background: "var(--stone-50)" }}>Count</th>
+                <th className="text-right py-2.5 px-2 font-semibold text-[11px] uppercase" style={{ color: "var(--stone-500)", letterSpacing: "0.5px", background: "var(--stone-50)" }}>Win Rate</th>
+                <th className="text-right py-2.5 pl-2 font-semibold text-[11px] uppercase" style={{ color: "var(--stone-500)", letterSpacing: "0.5px", background: "var(--stone-50)" }}>Avg Amt</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((row) => (
-                <tr key={row.label} className="border-b border-border/50">
-                  <td className={`py-2 pr-3 font-medium whitespace-nowrap ${row.label === UNKNOWN_VALUE ? "text-muted-foreground italic" : "text-foreground"}`}>
+                <tr key={row.label} style={{ borderBottom: "1px solid var(--stone-100)" }}>
+                  <td
+                    className="py-2.5 pr-3 font-medium whitespace-nowrap"
+                    style={{
+                      color: row.label === UNKNOWN_VALUE ? "var(--stone-400)" : "var(--stone-700)",
+                      fontStyle: row.label === UNKNOWN_VALUE ? "italic" : "normal",
+                    }}
+                  >
                     {row.label}
                   </td>
-                  <td className="py-2 px-2 text-right text-foreground">{row.count}</td>
-                  <td className="py-2 px-2 text-right text-foreground">{fmtPct(row.winRate)}</td>
-                  <td className="py-2 pl-2 text-right text-foreground">{fmtCurrency(row.avgAmountWon)}</td>
+                  <td className="py-2.5 px-2 text-right" style={{ color: "var(--stone-700)" }}>{row.count}</td>
+                  <td className="py-2.5 px-2 text-right" style={{ color: "var(--stone-700)" }}>{fmtPct(row.winRate)}</td>
+                  <td className="py-2.5 pl-2 text-right" style={{ color: "var(--stone-700)" }}>{fmtCurrency(row.avgAmountWon)}</td>
                 </tr>
               ))}
             </tbody>
