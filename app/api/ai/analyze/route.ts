@@ -222,34 +222,62 @@ export async function POST(request: Request) {
     ? `- Your summary MUST mention: the date mode (${dateModeLabel}), the time window (${filter.periodLabel}), the number of opportunities (${total}), and the active dimension filters (${dimFilterDesc})`
     : `- Your summary MUST mention: the date mode (${dateModeLabel}), the time window (${filter.periodLabel}), and the number of opportunities (${total})`;
 
-  const systemPrompt = `You are a senior sales analytics consultant. You receive JSON data about a company's sales opportunities pipeline and provide actionable insights.
+  const systemPrompt = `You are a senior sales analytics consultant. You receive JSON data about a company's sales opportunities pipeline and provide actionable insights organized by deal stage.
 
 The data has been filtered by a specific date mode and time window.${hasDimFilters ? " Additionally, dimension filters have been applied to narrow the dataset." : ""}${datasetId ? " The data comes from a specific imported dataset." : ""} Always state which date mode and time window you are analyzing in your summary.${hasDimFilters ? " Also mention the active dimension filters." : ""}
 
 Respond ONLY with a valid JSON object matching this exact structure:
 {
   "summary": "A 2-3 sentence executive summary of the overall pipeline health. Must mention the date mode, time window, and number of opportunities analyzed.${hasDimFilters ? " Must also mention the active dimension filters." : ""}",
-  "insights": [
-    {
-      "title": "Short insight title",
-      "description": "1-2 sentence explanation with specific numbers from the data.",
-      "type": "positive | negative | neutral"
-    }
-  ],
+  "openPipeline": {
+    "headline": "One sentence summarizing the open pipeline status (count, total value, key risks or opportunities).",
+    "insights": [
+      {
+        "title": "Short insight title",
+        "description": "1-2 sentence explanation with specific numbers from the data.",
+        "type": "strength | risk | pattern"
+      }
+    ]
+  },
+  "closedWon": {
+    "headline": "One sentence summarizing closed-won performance (count, win rate, avg deal size, top patterns).",
+    "insights": [
+      {
+        "title": "Short insight title",
+        "description": "1-2 sentence explanation with specific numbers from the data.",
+        "type": "strength | risk | pattern"
+      }
+    ]
+  },
+  "closedLost": {
+    "headline": "One sentence summarizing closed-lost patterns (count, loss rate, common failure points).",
+    "insights": [
+      {
+        "title": "Short insight title",
+        "description": "1-2 sentence explanation with specific numbers from the data.",
+        "type": "strength | risk | pattern"
+      }
+    ]
+  },
   "recommendations": [
     "Specific actionable recommendation based on the data."
   ]
 }
 
 Rules:
-- Provide exactly 3-5 insights
-- Provide exactly 2-4 recommendations
+- Each stage section (openPipeline, closedWon, closedLost) should have 1-3 insights relevant to THAT stage
+- If a stage has zero deals, still include the section but with a headline noting zero deals and an empty insights array
+- Provide exactly 3-5 recommendations that synthesize findings across all stages
+- Each insight type should be: "strength" (positive signal), "risk" (concern or red flag), or "pattern" (neutral observation worth noting)
 - Reference specific numbers, percentages, and labels from the data
 - Keep language professional and concise
+- Open Pipeline insights should focus on: pipeline value at risk, concentration risks, conversion likelihood based on historical patterns
+- Closed Won insights should focus on: what's working, winning segments/sources/roles, deal size patterns
+- Closed Lost insights should focus on: failure patterns, segments/sources/roles that consistently lose, deal size vs loss correlation
 ${filterMentionRule}${excludedDims.length > 0 ? `\n- Do NOT mention or analyze these excluded dimensions (insufficient data): ${excludedDims.map((d) => d.label).join(", ")}` : ""}
 - Do NOT include any text outside the JSON object`;
 
-  const userPrompt = `${dateContext}\n\nAnalyze this sales pipeline data and provide insights:\n\n${JSON.stringify(analyticsPayload)}`;
+  const userPrompt = `${dateContext}\n\nAnalyze this sales pipeline data and provide stage-grouped insights:\n\n${JSON.stringify(analyticsPayload)}`;
 
   try {
     const response = await openai.responses.create({
@@ -270,7 +298,9 @@ ${filterMentionRule}${excludedDims.length > 0 ? `\n- Do NOT mention or analyze t
 
     if (
       !parsed.summary ||
-      !Array.isArray(parsed.insights) ||
+      !parsed.openPipeline ||
+      !parsed.closedWon ||
+      !parsed.closedLost ||
       !Array.isArray(parsed.recommendations)
     ) {
       return NextResponse.json(

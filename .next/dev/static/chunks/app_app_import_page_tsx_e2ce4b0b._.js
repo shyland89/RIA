@@ -127,9 +127,7 @@ function ImportPage() {
             const autoMapping = {};
             for (const field of TARGET_FIELDS){
                 const match = data.headers.find((h)=>h.toLowerCase().replace(/[_\s-]/g, "") === field.key.replace(/_/g, ""));
-                if (match) {
-                    autoMapping[field.key] = match;
-                }
+                if (match) autoMapping[field.key] = match;
             }
             setMapping(autoMapping);
             setStep("mapping");
@@ -155,17 +153,12 @@ function ImportPage() {
         const warnings = [];
         const dateFields = TARGET_FIELDS.filter((f)=>f.isDate);
         const hasDate = dateFields.some((f)=>mapping[f.key] && mapping[f.key] !== "" && mapping[f.key] !== NOT_PROVIDED);
-        if (!hasDate) {
-            warnings.push("At least one date field (Created At, Closed Date, or Pipeline Accepted Date) is required.");
-        }
+        if (!hasDate) warnings.push("At least one date field (Created At, Closed Date, or Pipeline Accepted Date) is required.");
         return warnings;
     }
     function handleImportClick() {
-        if (importMode === "replace") {
-            setShowReplaceConfirm(true);
-        } else {
-            doImport();
-        }
+        if (importMode === "replace") setShowReplaceConfirm(true);
+        else doImport();
     }
     async function doImport() {
         if (!file || !uploadResult) return;
@@ -176,9 +169,7 @@ function ImportPage() {
         try {
             const cleanMapping = {};
             for (const [key, val] of Object.entries(mapping)){
-                if (val && val !== "" && val !== NOT_PROVIDED) {
-                    cleanMapping[key] = val;
-                }
+                if (val && val !== "" && val !== NOT_PROVIDED) cleanMapping[key] = val;
             }
             const formData = new FormData();
             formData.append("file", file);
@@ -213,282 +204,355 @@ function ImportPage() {
         setImportResult(null);
         setError("");
         setImportMode("append");
-        if (fileInputRef.current) {
-            fileInputRef.current.value = "";
-        }
+        if (fileInputRef.current) fileInputRef.current.value = "";
     }
+    const selectStyle = {
+        border: "1px solid var(--stone-200)",
+        borderRadius: "var(--radius-sm, 6px)",
+        color: "var(--stone-700)",
+        background: "var(--stone-50)"
+    };
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        className: "min-h-screen bg-background",
-        children: [
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("header", {
-                className: "border-b border-border",
-                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                    className: "max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4 flex-wrap",
+        className: "min-h-screen",
+        style: {
+            background: "var(--stone-50)"
+        },
+        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("main", {
+            style: {
+                padding: "28px 40px 60px"
+            },
+            children: [
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "mb-8",
                     children: [
-                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "flex items-center gap-3",
-                            children: [
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    className: "inline-flex items-center justify-center w-8 h-8 rounded-md bg-primary",
-                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
-                                        className: "w-4 h-4 text-primary-foreground",
-                                        fill: "none",
-                                        stroke: "currentColor",
-                                        viewBox: "0 0 24 24",
-                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
-                                            strokeLinecap: "round",
-                                            strokeLinejoin: "round",
-                                            strokeWidth: 2,
-                                            d: "M13 10V3L4 14h7v7l9-11h-7z"
-                                        }, void 0, false, {
-                                            fileName: "[project]/app/app/import/page.tsx",
-                                            lineNumber: 234,
-                                            columnNumber: 17
-                                        }, this)
-                                    }, void 0, false, {
-                                        fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 233,
-                                        columnNumber: 15
-                                    }, this)
-                                }, void 0, false, {
-                                    fileName: "[project]/app/app/import/page.tsx",
-                                    lineNumber: 232,
-                                    columnNumber: 13
-                                }, this),
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                    className: "text-sm font-semibold text-foreground",
-                                    "data-testid": "text-import-title",
-                                    children: "Import Opportunities"
-                                }, void 0, false, {
-                                    fileName: "[project]/app/app/import/page.tsx",
-                                    lineNumber: 237,
-                                    columnNumber: 13
-                                }, this)
-                            ]
-                        }, void 0, true, {
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
+                            className: "text-[22px] font-bold tracking-tight",
+                            style: {
+                                color: "var(--stone-900)",
+                                letterSpacing: "-0.3px"
+                            },
+                            children: "Import Opportunities"
+                        }, void 0, false, {
                             fileName: "[project]/app/app/import/page.tsx",
-                            lineNumber: 231,
+                            lineNumber: 183,
                             columnNumber: 11
                         }, this),
-                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "flex items-center gap-3 flex-wrap",
-                            children: [
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                                    href: "/app/dashboard",
-                                    className: "text-sm text-muted-foreground hover:text-foreground transition-colors",
-                                    "data-testid": "link-analytics",
-                                    children: "Analytics"
-                                }, void 0, false, {
-                                    fileName: "[project]/app/app/import/page.tsx",
-                                    lineNumber: 242,
-                                    columnNumber: 13
-                                }, this),
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                                    href: "/app",
-                                    className: "text-sm text-muted-foreground hover:text-foreground transition-colors",
-                                    "data-testid": "link-back-dashboard",
-                                    children: "Home"
-                                }, void 0, false, {
-                                    fileName: "[project]/app/app/import/page.tsx",
-                                    lineNumber: 249,
-                                    columnNumber: 13
-                                }, this)
-                            ]
-                        }, void 0, true, {
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                            className: "text-sm mt-1",
+                            style: {
+                                color: "var(--stone-500)"
+                            },
+                            children: "Upload a CSV file to import opportunities into your organization."
+                        }, void 0, false, {
                             fileName: "[project]/app/app/import/page.tsx",
-                            lineNumber: 241,
+                            lineNumber: 186,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/app/app/import/page.tsx",
-                    lineNumber: 230,
+                    lineNumber: 182,
                     columnNumber: 9
-                }, this)
-            }, void 0, false, {
-                fileName: "[project]/app/app/import/page.tsx",
-                lineNumber: 229,
-                columnNumber: 7
-            }, this),
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("main", {
-                className: "max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10",
-                children: [
-                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "mb-8",
-                        children: [
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
-                                className: "text-2xl font-semibold tracking-tight text-foreground",
-                                children: "CSV Import"
-                            }, void 0, false, {
-                                fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 262,
-                                columnNumber: 11
-                            }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                className: "text-sm text-muted-foreground mt-1",
-                                children: "Upload a CSV file to import opportunities into your organization."
-                            }, void 0, false, {
-                                fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 265,
-                                columnNumber: 11
-                            }, this)
-                        ]
-                    }, void 0, true, {
-                        fileName: "[project]/app/app/import/page.tsx",
-                        lineNumber: 261,
-                        columnNumber: 9
-                    }, this),
-                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "flex items-center gap-2 mb-8 text-sm",
-                        "data-testid": "progress-steps",
-                        children: [
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(StepIndicator, {
-                                label: "Upload",
-                                active: step === "upload",
-                                done: step !== "upload",
-                                num: 1
-                            }, void 0, false, {
-                                fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 272,
-                                columnNumber: 11
-                            }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(StepDivider, {}, void 0, false, {
-                                fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 273,
-                                columnNumber: 11
-                            }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(StepIndicator, {
-                                label: "Map Columns",
-                                active: step === "mapping",
-                                done: step === "importing" || step === "results",
-                                num: 2
-                            }, void 0, false, {
-                                fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 274,
-                                columnNumber: 11
-                            }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(StepDivider, {}, void 0, false, {
-                                fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 275,
-                                columnNumber: 11
-                            }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(StepIndicator, {
-                                label: "Import",
-                                active: step === "importing" || step === "results",
-                                done: step === "results",
-                                num: 3
-                            }, void 0, false, {
-                                fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 276,
-                                columnNumber: 11
-                            }, this)
-                        ]
-                    }, void 0, true, {
-                        fileName: "[project]/app/app/import/page.tsx",
-                        lineNumber: 271,
-                        columnNumber: 9
-                    }, this),
-                    error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "mb-6 rounded-md border border-red-300 bg-red-50 dark:bg-red-950/20 dark:border-red-800 px-4 py-3 text-sm text-red-700 dark:text-red-400",
-                        "data-testid": "text-error",
-                        children: error
-                    }, void 0, false, {
-                        fileName: "[project]/app/app/import/page.tsx",
-                        lineNumber: 280,
-                        columnNumber: 11
-                    }, this),
-                    step === "upload" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "rounded-md border border-border bg-card p-6",
-                        "data-testid": "section-upload",
+                }, this),
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "flex items-center gap-0 mb-8 pt-2",
+                    "data-testid": "progress-steps",
+                    children: [
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(StepIndicator, {
+                            label: "Upload",
+                            active: step === "upload",
+                            done: step !== "upload",
+                            num: 1
+                        }, void 0, false, {
+                            fileName: "[project]/app/app/import/page.tsx",
+                            lineNumber: 193,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(StepDivider, {
+                            done: step !== "upload"
+                        }, void 0, false, {
+                            fileName: "[project]/app/app/import/page.tsx",
+                            lineNumber: 194,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(StepIndicator, {
+                            label: "Map Columns",
+                            active: step === "mapping",
+                            done: step === "importing" || step === "results",
+                            num: 2
+                        }, void 0, false, {
+                            fileName: "[project]/app/app/import/page.tsx",
+                            lineNumber: 195,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(StepDivider, {
+                            done: step === "importing" || step === "results"
+                        }, void 0, false, {
+                            fileName: "[project]/app/app/import/page.tsx",
+                            lineNumber: 196,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(StepIndicator, {
+                            label: "Import",
+                            active: step === "importing" || step === "results",
+                            done: step === "results",
+                            num: 3
+                        }, void 0, false, {
+                            fileName: "[project]/app/app/import/page.tsx",
+                            lineNumber: 197,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "[project]/app/app/import/page.tsx",
+                    lineNumber: 192,
+                    columnNumber: 9
+                }, this),
+                error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "mb-6 px-4 py-3 text-sm",
+                    style: {
+                        border: "1px solid #fca5a5",
+                        background: "var(--error-bg)",
+                        color: "var(--error)",
+                        borderRadius: "var(--radius-md, 10px)"
+                    },
+                    "data-testid": "text-error",
+                    children: error
+                }, void 0, false, {
+                    fileName: "[project]/app/app/import/page.tsx",
+                    lineNumber: 201,
+                    columnNumber: 11
+                }, this),
+                step === "upload" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "bg-white",
+                    style: {
+                        border: "1px solid var(--stone-200)",
+                        borderRadius: "var(--radius-lg, 14px)",
+                        overflow: "hidden"
+                    },
+                    "data-testid": "section-upload",
+                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "p-6",
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
-                                className: "text-sm font-medium text-foreground mb-4",
+                                className: "text-sm font-semibold mb-4",
+                                style: {
+                                    color: "var(--stone-900)"
+                                },
                                 children: "Select CSV file"
                             }, void 0, false, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 288,
-                                columnNumber: 13
+                                lineNumber: 214,
+                                columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                className: "text-sm text-muted-foreground mb-4",
-                                children: "Your CSV must include columns for: name, amount, outcome, and at least one date (created_at, closed_date, or pipeline_accepted_date). Other columns (role, industry, source, segment, country) are optional."
+                                className: "text-sm mb-4",
+                                style: {
+                                    color: "var(--stone-500)"
+                                },
+                                children: "Your CSV must include columns for: name, amount, outcome, and at least one date (created_at, closed_date, or pipeline_accepted_date). Other columns are optional."
                             }, void 0, false, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 289,
-                                columnNumber: 13
+                                lineNumber: 215,
+                                columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                className: "text-xs text-muted-foreground mb-4",
+                                className: "text-xs mb-4",
+                                style: {
+                                    color: "var(--stone-400)"
+                                },
                                 children: 'Values like "NA", "N/A", "null", "none", or empty cells are treated as missing data.'
                             }, void 0, false, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 292,
-                                columnNumber: 13
+                                lineNumber: 218,
+                                columnNumber: 15
                             }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "space-y-4",
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
+                                className: "block cursor-pointer transition-colors mb-4",
+                                style: {
+                                    border: "2px dashed var(--stone-300)",
+                                    borderRadius: "var(--radius-lg, 14px)",
+                                    padding: "56px 40px",
+                                    textAlign: "center",
+                                    background: file ? "var(--teal-50)" : "var(--stone-50)",
+                                    borderColor: file ? "var(--teal-400)" : "var(--stone-300)"
+                                },
                                 children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                                        ref: fileInputRef,
+                                        type: "file",
+                                        accept: ".csv",
+                                        onChange: (e)=>setFile(e.target.files?.[0] || null),
+                                        className: "hidden",
+                                        "data-testid": "input-file"
+                                    }, void 0, false, {
+                                        fileName: "[project]/app/app/import/page.tsx",
+                                        lineNumber: 233,
+                                        columnNumber: 17
+                                    }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
-                                            ref: fileInputRef,
-                                            type: "file",
-                                            accept: ".csv",
-                                            onChange: (e)=>setFile(e.target.files?.[0] || null),
-                                            className: "block text-sm text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground file:cursor-pointer cursor-pointer",
-                                            "data-testid": "input-file"
-                                        }, void 0, false, {
+                                        className: "w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center",
+                                        style: {
+                                            background: "var(--teal-100)"
+                                        },
+                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
+                                            className: "w-5 h-5",
+                                            style: {
+                                                color: "var(--teal-600)"
+                                            },
+                                            fill: "none",
+                                            stroke: "currentColor",
+                                            viewBox: "0 0 24 24",
+                                            strokeWidth: 2,
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                                                    d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/app/app/import/page.tsx",
+                                                    lineNumber: 246,
+                                                    columnNumber: 21
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("polyline", {
+                                                    points: "17 8 12 3 7 8"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/app/app/import/page.tsx",
+                                                    lineNumber: 247,
+                                                    columnNumber: 21
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("line", {
+                                                    x1: "12",
+                                                    y1: "3",
+                                                    x2: "12",
+                                                    y2: "15"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/app/app/import/page.tsx",
+                                                    lineNumber: 248,
+                                                    columnNumber: 21
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
                                             fileName: "[project]/app/app/import/page.tsx",
-                                            lineNumber: 297,
-                                            columnNumber: 17
+                                            lineNumber: 245,
+                                            columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 296,
-                                        columnNumber: 15
+                                        lineNumber: 241,
+                                        columnNumber: 17
                                     }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                        onClick: handleUpload,
-                                        disabled: !file || uploading,
-                                        className: "inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed",
-                                        "data-testid": "button-upload",
-                                        children: uploading ? "Parsing..." : "Upload & Preview"
+                                    file ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                        className: "text-[15px] font-semibold",
+                                        style: {
+                                            color: "var(--stone-900)"
+                                        },
+                                        children: file.name
                                     }, void 0, false, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 306,
-                                        columnNumber: 15
-                                    }, this)
+                                        lineNumber: 252,
+                                        columnNumber: 19
+                                    }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                className: "text-[15px] font-semibold mb-1",
+                                                style: {
+                                                    color: "var(--stone-900)"
+                                                },
+                                                children: [
+                                                    "Drop your CSV here or ",
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                        style: {
+                                                            color: "var(--teal-600)"
+                                                        },
+                                                        children: "browse"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/app/app/import/page.tsx",
+                                                        lineNumber: 256,
+                                                        columnNumber: 45
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "[project]/app/app/import/page.tsx",
+                                                lineNumber: 255,
+                                                columnNumber: 21
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                                className: "text-[13px]",
+                                                style: {
+                                                    color: "var(--stone-500)"
+                                                },
+                                                children: "CSV files up to 10 MB"
+                                            }, void 0, false, {
+                                                fileName: "[project]/app/app/import/page.tsx",
+                                                lineNumber: 258,
+                                                columnNumber: 21
+                                            }, this)
+                                        ]
+                                    }, void 0, true)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 295,
-                                columnNumber: 13
+                                lineNumber: 222,
+                                columnNumber: 15
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                onClick: handleUpload,
+                                disabled: !file || uploading,
+                                className: "inline-flex items-center px-5 py-2.5 text-[13px] font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors",
+                                style: {
+                                    background: "var(--teal-600)",
+                                    borderRadius: "var(--radius-sm, 6px)"
+                                },
+                                "data-testid": "button-upload",
+                                children: uploading ? "Parsing..." : "Upload & Preview"
+                            }, void 0, false, {
+                                fileName: "[project]/app/app/import/page.tsx",
+                                lineNumber: 262,
+                                columnNumber: 15
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/app/import/page.tsx",
-                        lineNumber: 287,
-                        columnNumber: 11
-                    }, this),
-                    step === "mapping" && uploadResult && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "space-y-6",
-                        children: [
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "rounded-md border border-border bg-card p-6",
-                                "data-testid": "section-mapping",
+                        lineNumber: 213,
+                        columnNumber: 13
+                    }, this)
+                }, void 0, false, {
+                    fileName: "[project]/app/app/import/page.tsx",
+                    lineNumber: 212,
+                    columnNumber: 11
+                }, this),
+                step === "mapping" && uploadResult && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "space-y-6",
+                    children: [
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "bg-white",
+                            style: {
+                                border: "1px solid var(--stone-200)",
+                                borderRadius: "var(--radius-lg, 14px)",
+                                overflow: "hidden"
+                            },
+                            "data-testid": "section-mapping",
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "p-6",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "flex items-center justify-between gap-4 flex-wrap mb-4",
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
-                                                className: "text-sm font-medium text-foreground",
+                                                className: "text-sm font-semibold",
+                                                style: {
+                                                    color: "var(--stone-900)"
+                                                },
                                                 children: "Column Mapping"
                                             }, void 0, false, {
                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                lineNumber: 323,
-                                                columnNumber: 17
+                                                lineNumber: 281,
+                                                columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                className: "text-xs text-muted-foreground",
+                                                className: "text-xs",
+                                                style: {
+                                                    color: "var(--stone-500)"
+                                                },
                                                 "data-testid": "text-file-info",
                                                 children: [
                                                     uploadResult.filename,
@@ -498,39 +562,51 @@ function ImportPage() {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                lineNumber: 326,
-                                                columnNumber: 17
+                                                lineNumber: 282,
+                                                columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 322,
-                                        columnNumber: 15
+                                        lineNumber: 280,
+                                        columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                        className: "text-sm text-muted-foreground mb-2",
+                                        className: "text-sm mb-2",
+                                        style: {
+                                            color: "var(--stone-500)"
+                                        },
                                         children: "Map each CSV column to the corresponding opportunity field. Only Name, Amount, and Outcome are required. At least one date field must also be mapped."
                                     }, void 0, false, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 330,
-                                        columnNumber: 15
+                                        lineNumber: 286,
+                                        columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                        className: "text-xs text-muted-foreground mb-4",
+                                        className: "text-xs mb-4",
+                                        style: {
+                                            color: "var(--stone-400)"
+                                        },
                                         children: 'Optional fields can be set to "Not provided" if your CSV doesn\'t include them.'
                                     }, void 0, false, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 333,
-                                        columnNumber: 15
+                                        lineNumber: 289,
+                                        columnNumber: 17
                                     }, this),
                                     getMappingWarnings().map((w, i)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                            className: "mb-3 rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800 px-3 py-2 text-xs text-amber-700 dark:text-amber-400",
+                                            className: "mb-3 px-3 py-2 text-xs",
+                                            style: {
+                                                border: "1px solid #fcd34d",
+                                                background: "var(--warning-bg)",
+                                                color: "var(--warning)",
+                                                borderRadius: "var(--radius-sm, 6px)"
+                                            },
                                             "data-testid": `mapping-warning-${i}`,
                                             children: w
                                         }, i, false, {
                                             fileName: "[project]/app/app/import/page.tsx",
-                                            lineNumber: 337,
-                                            columnNumber: 17
+                                            lineNumber: 293,
+                                            columnNumber: 19
                                         }, this)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "grid gap-3 sm:grid-cols-2",
@@ -538,35 +614,45 @@ function ImportPage() {
                                                 className: "flex flex-col gap-1",
                                                 children: [
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
-                                                        className: "text-xs font-medium text-foreground",
+                                                        className: "text-xs font-semibold",
+                                                        style: {
+                                                            color: "var(--stone-700)"
+                                                        },
                                                         children: [
                                                             field.label,
                                                             field.required && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                                className: "text-red-500 ml-0.5",
+                                                                style: {
+                                                                    color: "var(--error)"
+                                                                },
+                                                                className: "ml-0.5",
                                                                 children: "*"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 346,
-                                                                columnNumber: 42
+                                                                lineNumber: 302,
+                                                                columnNumber: 44
                                                             }, this),
                                                             !field.required && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                                className: "text-muted-foreground ml-1 font-normal",
+                                                                className: "font-normal ml-1",
+                                                                style: {
+                                                                    color: "var(--stone-400)"
+                                                                },
                                                                 children: "(optional)"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 347,
-                                                                columnNumber: 43
+                                                                lineNumber: 303,
+                                                                columnNumber: 45
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 344,
-                                                        columnNumber: 21
+                                                        lineNumber: 300,
+                                                        columnNumber: 23
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
                                                         value: mapping[field.key] || "",
                                                         onChange: (e)=>handleMappingChange(field.key, e.target.value),
-                                                        className: "rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground",
+                                                        className: "px-3 py-2 text-sm font-medium",
+                                                        style: selectStyle,
                                                         "data-testid": `select-mapping-${field.key}`,
                                                         children: [
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -574,59 +660,74 @@ function ImportPage() {
                                                                 children: "— Select column —"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 355,
-                                                                columnNumber: 23
+                                                                lineNumber: 312,
+                                                                columnNumber: 25
                                                             }, this),
                                                             !field.required && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                                 value: NOT_PROVIDED,
                                                                 children: "Not provided"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 357,
-                                                                columnNumber: 25
+                                                                lineNumber: 313,
+                                                                columnNumber: 45
                                                             }, this),
                                                             uploadResult.headers.map((h)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                                     value: h,
                                                                     children: h
                                                                 }, h, false, {
                                                                     fileName: "[project]/app/app/import/page.tsx",
-                                                                    lineNumber: 360,
-                                                                    columnNumber: 25
+                                                                    lineNumber: 315,
+                                                                    columnNumber: 27
                                                                 }, this))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 349,
-                                                        columnNumber: 21
+                                                        lineNumber: 305,
+                                                        columnNumber: 23
                                                     }, this)
                                                 ]
                                             }, field.key, true, {
                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                lineNumber: 343,
-                                                columnNumber: 19
+                                                lineNumber: 299,
+                                                columnNumber: 21
                                             }, this))
                                     }, void 0, false, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 341,
-                                        columnNumber: 15
+                                        lineNumber: 297,
+                                        columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 321,
-                                columnNumber: 13
-                            }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "rounded-md border border-border bg-card p-6",
-                                "data-testid": "section-import-mode",
+                                lineNumber: 279,
+                                columnNumber: 15
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "[project]/app/app/import/page.tsx",
+                            lineNumber: 278,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "bg-white",
+                            style: {
+                                border: "1px solid var(--stone-200)",
+                                borderRadius: "var(--radius-lg, 14px)",
+                                overflow: "hidden"
+                            },
+                            "data-testid": "section-import-mode",
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "p-6",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
-                                        className: "text-sm font-medium text-foreground mb-3",
+                                        className: "text-sm font-semibold mb-3",
+                                        style: {
+                                            color: "var(--stone-900)"
+                                        },
                                         children: "Import Mode"
                                     }, void 0, false, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 372,
-                                        columnNumber: 15
+                                        lineNumber: 327,
+                                        columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "flex flex-col gap-3",
@@ -641,41 +742,50 @@ function ImportPage() {
                                                         value: "append",
                                                         checked: importMode === "append",
                                                         onChange: ()=>setImportMode("append"),
-                                                        className: "mt-0.5 text-primary focus:ring-primary/30"
+                                                        className: "mt-0.5",
+                                                        style: {
+                                                            accentColor: "var(--teal-600)"
+                                                        }
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 375,
-                                                        columnNumber: 19
+                                                        lineNumber: 330,
+                                                        columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                         children: [
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                                className: "text-sm font-medium text-foreground",
+                                                                className: "text-sm font-semibold",
+                                                                style: {
+                                                                    color: "var(--stone-900)"
+                                                                },
                                                                 children: "Append"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 384,
-                                                                columnNumber: 21
+                                                                lineNumber: 332,
+                                                                columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                                className: "text-xs text-muted-foreground",
+                                                                className: "text-xs",
+                                                                style: {
+                                                                    color: "var(--stone-500)"
+                                                                },
                                                                 children: "Add this data alongside your existing opportunities. Previous imports are preserved."
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 385,
-                                                                columnNumber: 21
+                                                                lineNumber: 333,
+                                                                columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 383,
-                                                        columnNumber: 19
+                                                        lineNumber: 331,
+                                                        columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                lineNumber: 374,
-                                                columnNumber: 17
+                                                lineNumber: 329,
+                                                columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
                                                 className: "flex items-start gap-3 cursor-pointer",
@@ -687,60 +797,84 @@ function ImportPage() {
                                                         value: "replace",
                                                         checked: importMode === "replace",
                                                         onChange: ()=>setImportMode("replace"),
-                                                        className: "mt-0.5 text-primary focus:ring-primary/30"
+                                                        className: "mt-0.5",
+                                                        style: {
+                                                            accentColor: "var(--teal-600)"
+                                                        }
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 389,
-                                                        columnNumber: 19
+                                                        lineNumber: 337,
+                                                        columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                         children: [
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                                className: "text-sm font-medium text-foreground",
+                                                                className: "text-sm font-semibold",
+                                                                style: {
+                                                                    color: "var(--stone-900)"
+                                                                },
                                                                 children: "Replace"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 398,
-                                                                columnNumber: 21
+                                                                lineNumber: 339,
+                                                                columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                                className: "text-xs text-muted-foreground",
-                                                                children: "Remove all existing opportunities and replace with this file. Previous import history is kept for reference but marked inactive."
+                                                                className: "text-xs",
+                                                                style: {
+                                                                    color: "var(--stone-500)"
+                                                                },
+                                                                children: "Remove all existing opportunities and replace with this file."
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 399,
-                                                                columnNumber: 21
+                                                                lineNumber: 340,
+                                                                columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 397,
-                                                        columnNumber: 19
+                                                        lineNumber: 338,
+                                                        columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                lineNumber: 388,
-                                                columnNumber: 17
+                                                lineNumber: 336,
+                                                columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 373,
-                                        columnNumber: 15
+                                        lineNumber: 328,
+                                        columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 371,
-                                columnNumber: 13
-                            }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "rounded-md border border-border bg-card p-6",
-                                "data-testid": "section-preview",
+                                lineNumber: 326,
+                                columnNumber: 15
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "[project]/app/app/import/page.tsx",
+                            lineNumber: 325,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "bg-white",
+                            style: {
+                                border: "1px solid var(--stone-200)",
+                                borderRadius: "var(--radius-lg, 14px)",
+                                overflow: "hidden"
+                            },
+                            "data-testid": "section-preview",
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "p-6",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
-                                        className: "text-sm font-medium text-foreground mb-4",
+                                        className: "text-sm font-semibold mb-4",
+                                        style: {
+                                            color: "var(--stone-900)"
+                                        },
                                         children: [
                                             "Preview (first ",
                                             Math.min(20, uploadResult.preview.length),
@@ -748,849 +882,1224 @@ function ImportPage() {
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 407,
-                                        columnNumber: 15
+                                        lineNumber: 350,
+                                        columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "overflow-x-auto",
                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("table", {
-                                            className: "min-w-full text-sm",
+                                            className: "min-w-full text-[13px]",
                                             children: [
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("thead", {
                                                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
-                                                        className: "border-b border-border",
+                                                        style: {
+                                                            borderBottom: "1px solid var(--stone-200)"
+                                                        },
                                                         children: [
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                                className: "px-3 py-2 text-left text-xs font-medium text-muted-foreground",
+                                                                className: "px-3 py-2.5 text-left text-[11px] font-semibold uppercase",
+                                                                style: {
+                                                                    color: "var(--stone-500)",
+                                                                    letterSpacing: "0.5px",
+                                                                    background: "var(--stone-50)"
+                                                                },
                                                                 children: "#"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 414,
-                                                                columnNumber: 23
+                                                                lineNumber: 357,
+                                                                columnNumber: 25
                                                             }, this),
                                                             uploadResult.headers.map((h)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                                    className: "px-3 py-2 text-left text-xs font-medium text-muted-foreground whitespace-nowrap",
+                                                                    className: "px-3 py-2.5 text-left text-[11px] font-semibold uppercase whitespace-nowrap",
+                                                                    style: {
+                                                                        color: "var(--stone-500)",
+                                                                        letterSpacing: "0.5px",
+                                                                        background: "var(--stone-50)"
+                                                                    },
                                                                     children: h
                                                                 }, h, false, {
                                                                     fileName: "[project]/app/app/import/page.tsx",
-                                                                    lineNumber: 416,
-                                                                    columnNumber: 25
+                                                                    lineNumber: 359,
+                                                                    columnNumber: 27
                                                                 }, this))
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 413,
-                                                        columnNumber: 21
+                                                        lineNumber: 356,
+                                                        columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/app/import/page.tsx",
-                                                    lineNumber: 412,
-                                                    columnNumber: 19
+                                                    lineNumber: 355,
+                                                    columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
                                                     children: uploadResult.preview.map((row, i)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
-                                                            className: "border-b border-border/50",
+                                                            style: {
+                                                                borderBottom: "1px solid var(--stone-100)"
+                                                            },
                                                             children: [
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                                    className: "px-3 py-2 text-xs text-muted-foreground",
+                                                                    className: "px-3 py-2.5 text-xs",
+                                                                    style: {
+                                                                        color: "var(--stone-400)"
+                                                                    },
                                                                     children: i + 1
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/app/import/page.tsx",
-                                                                    lineNumber: 425,
-                                                                    columnNumber: 25
+                                                                    lineNumber: 366,
+                                                                    columnNumber: 27
                                                                 }, this),
                                                                 uploadResult.headers.map((h)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                                        className: "px-3 py-2 text-xs text-foreground whitespace-nowrap max-w-[200px] truncate",
+                                                                        className: "px-3 py-2.5 text-xs whitespace-nowrap max-w-[200px] truncate",
+                                                                        style: {
+                                                                            color: "var(--stone-700)"
+                                                                        },
                                                                         children: row[h] || ""
                                                                     }, h, false, {
                                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                                        lineNumber: 427,
-                                                                        columnNumber: 27
+                                                                        lineNumber: 368,
+                                                                        columnNumber: 29
                                                                     }, this))
                                                             ]
                                                         }, i, true, {
                                                             fileName: "[project]/app/app/import/page.tsx",
-                                                            lineNumber: 424,
-                                                            columnNumber: 23
+                                                            lineNumber: 365,
+                                                            columnNumber: 25
                                                         }, this))
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/app/import/page.tsx",
-                                                    lineNumber: 422,
-                                                    columnNumber: 19
+                                                    lineNumber: 363,
+                                                    columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/app/app/import/page.tsx",
-                                            lineNumber: 411,
-                                            columnNumber: 17
+                                            lineNumber: 354,
+                                            columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 410,
-                                        columnNumber: 15
+                                        lineNumber: 353,
+                                        columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 406,
-                                columnNumber: 13
-                            }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "flex items-center gap-3 flex-wrap",
-                                children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                        onClick: handleReset,
-                                        className: "inline-flex items-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground",
-                                        "data-testid": "button-back-upload",
-                                        children: "Back"
-                                    }, void 0, false, {
-                                        fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 439,
-                                        columnNumber: 15
-                                    }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                        onClick: handleImportClick,
-                                        disabled: !isMappingValid(),
-                                        className: `inline-flex items-center rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed ${importMode === "replace" ? "bg-red-600 text-white hover:bg-red-700" : "bg-primary text-primary-foreground"}`,
-                                        "data-testid": "button-import",
-                                        children: [
-                                            importMode === "replace" ? "Replace & Import" : "Import",
-                                            " ",
-                                            uploadResult.totalRows,
-                                            " Rows"
-                                        ]
-                                    }, void 0, true, {
-                                        fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 446,
-                                        columnNumber: 15
-                                    }, this)
-                                ]
-                            }, void 0, true, {
-                                fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 438,
-                                columnNumber: 13
+                                lineNumber: 349,
+                                columnNumber: 15
                             }, this)
-                        ]
-                    }, void 0, true, {
-                        fileName: "[project]/app/app/import/page.tsx",
-                        lineNumber: 320,
-                        columnNumber: 11
-                    }, this),
-                    showReplaceConfirm && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "fixed inset-0 z-50 flex items-center justify-center bg-black/50",
-                        "data-testid": "modal-replace-confirm",
-                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "rounded-lg border border-border bg-card p-6 shadow-xl max-w-md mx-4",
+                        }, void 0, false, {
+                            fileName: "[project]/app/app/import/page.tsx",
+                            lineNumber: 348,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "flex items-center gap-3 flex-wrap",
                             children: [
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    className: "flex items-center gap-3 mb-4",
-                                    children: [
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                            className: "inline-flex items-center justify-center w-10 h-10 rounded-full bg-red-100 dark:bg-red-950/30",
-                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
-                                                className: "w-5 h-5 text-red-600 dark:text-red-400",
-                                                fill: "none",
-                                                stroke: "currentColor",
-                                                viewBox: "0 0 24 24",
-                                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
-                                                    strokeLinecap: "round",
-                                                    strokeLinejoin: "round",
-                                                    strokeWidth: 2,
-                                                    d: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
-                                                }, void 0, false, {
-                                                    fileName: "[project]/app/app/import/page.tsx",
-                                                    lineNumber: 469,
-                                                    columnNumber: 21
-                                                }, this)
-                                            }, void 0, false, {
-                                                fileName: "[project]/app/app/import/page.tsx",
-                                                lineNumber: 468,
-                                                columnNumber: 19
-                                            }, this)
-                                        }, void 0, false, {
-                                            fileName: "[project]/app/app/import/page.tsx",
-                                            lineNumber: 467,
-                                            columnNumber: 17
-                                        }, this),
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
-                                            className: "text-lg font-semibold text-foreground",
-                                            children: "Replace Existing Data?"
-                                        }, void 0, false, {
-                                            fileName: "[project]/app/app/import/page.tsx",
-                                            lineNumber: 472,
-                                            columnNumber: 17
-                                        }, this)
-                                    ]
-                                }, void 0, true, {
-                                    fileName: "[project]/app/app/import/page.tsx",
-                                    lineNumber: 466,
-                                    columnNumber: 15
-                                }, this),
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                    className: "text-sm text-muted-foreground mb-6",
-                                    children: "This will remove all existing opportunities and replace them with the data from this file. Previous import history will be kept for reference but marked inactive. This action cannot be undone."
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                    onClick: handleReset,
+                                    className: "inline-flex items-center px-5 py-2.5 text-[13px] font-semibold transition-colors",
+                                    style: {
+                                        background: "#fff",
+                                        color: "var(--stone-700)",
+                                        border: "1px solid var(--stone-200)",
+                                        borderRadius: "var(--radius-sm, 6px)"
+                                    },
+                                    "data-testid": "button-back-upload",
+                                    children: "Back"
                                 }, void 0, false, {
                                     fileName: "[project]/app/app/import/page.tsx",
-                                    lineNumber: 474,
+                                    lineNumber: 379,
                                     columnNumber: 15
                                 }, this),
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    className: "flex items-center justify-end gap-3",
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                    onClick: handleImportClick,
+                                    disabled: !isMappingValid(),
+                                    className: "inline-flex items-center px-5 py-2.5 text-[13px] font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors",
+                                    style: {
+                                        background: importMode === "replace" ? "var(--error)" : "var(--teal-600)",
+                                        borderRadius: "var(--radius-sm, 6px)"
+                                    },
+                                    "data-testid": "button-import",
                                     children: [
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                            onClick: ()=>setShowReplaceConfirm(false),
-                                            className: "inline-flex items-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground",
-                                            "data-testid": "button-cancel-replace",
-                                            children: "Cancel"
-                                        }, void 0, false, {
-                                            fileName: "[project]/app/app/import/page.tsx",
-                                            lineNumber: 478,
-                                            columnNumber: 17
-                                        }, this),
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                            onClick: doImport,
-                                            className: "inline-flex items-center rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700",
-                                            "data-testid": "button-confirm-replace",
-                                            children: "Yes, Replace All Data"
-                                        }, void 0, false, {
-                                            fileName: "[project]/app/app/import/page.tsx",
-                                            lineNumber: 485,
-                                            columnNumber: 17
-                                        }, this)
+                                        importMode === "replace" ? "Replace & Import" : "Import",
+                                        " ",
+                                        uploadResult.totalRows,
+                                        " Rows"
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/app/app/import/page.tsx",
-                                    lineNumber: 477,
+                                    lineNumber: 387,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/app/app/import/page.tsx",
-                            lineNumber: 465,
+                            lineNumber: 378,
                             columnNumber: 13
                         }, this)
-                    }, void 0, false, {
-                        fileName: "[project]/app/app/import/page.tsx",
-                        lineNumber: 464,
-                        columnNumber: 11
-                    }, this),
-                    step === "importing" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "rounded-md border border-border bg-card p-6 text-center",
-                        "data-testid": "section-importing",
+                    ]
+                }, void 0, true, {
+                    fileName: "[project]/app/app/import/page.tsx",
+                    lineNumber: 277,
+                    columnNumber: 11
+                }, this),
+                showReplaceConfirm && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "fixed inset-0 z-50 flex items-center justify-center bg-black/50",
+                    "data-testid": "modal-replace-confirm",
+                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "bg-white p-6 shadow-xl max-w-md mx-4",
+                        style: {
+                            border: "1px solid var(--stone-200)",
+                            borderRadius: "var(--radius-lg, 14px)"
+                        },
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 mb-4",
-                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
-                                    className: "w-5 h-5 text-primary animate-spin",
-                                    fill: "none",
-                                    viewBox: "0 0 24 24",
-                                    children: [
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("circle", {
-                                            className: "opacity-25",
-                                            cx: "12",
-                                            cy: "12",
-                                            r: "10",
+                                className: "flex items-center gap-3 mb-4",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "inline-flex items-center justify-center w-10 h-10 rounded-full",
+                                        style: {
+                                            background: "var(--error-bg)"
+                                        },
+                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
+                                            className: "w-5 h-5",
+                                            style: {
+                                                color: "var(--error)"
+                                            },
+                                            fill: "none",
                                             stroke: "currentColor",
-                                            strokeWidth: "4"
+                                            viewBox: "0 0 24 24",
+                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                                                strokeLinecap: "round",
+                                                strokeLinejoin: "round",
+                                                strokeWidth: 2,
+                                                d: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+                                            }, void 0, false, {
+                                                fileName: "[project]/app/app/import/page.tsx",
+                                                lineNumber: 410,
+                                                columnNumber: 21
+                                            }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/app/app/import/page.tsx",
-                                            lineNumber: 502,
-                                            columnNumber: 17
-                                        }, this),
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
-                                            className: "opacity-75",
-                                            fill: "currentColor",
-                                            d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                                        }, void 0, false, {
-                                            fileName: "[project]/app/app/import/page.tsx",
-                                            lineNumber: 503,
-                                            columnNumber: 17
+                                            lineNumber: 409,
+                                            columnNumber: 19
                                         }, this)
-                                    ]
-                                }, void 0, true, {
-                                    fileName: "[project]/app/app/import/page.tsx",
-                                    lineNumber: 501,
-                                    columnNumber: 15
-                                }, this)
-                            }, void 0, false, {
+                                    }, void 0, false, {
+                                        fileName: "[project]/app/app/import/page.tsx",
+                                        lineNumber: 408,
+                                        columnNumber: 17
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
+                                        className: "text-lg font-bold",
+                                        style: {
+                                            color: "var(--stone-900)"
+                                        },
+                                        children: "Replace Existing Data?"
+                                    }, void 0, false, {
+                                        fileName: "[project]/app/app/import/page.tsx",
+                                        lineNumber: 413,
+                                        columnNumber: 17
+                                    }, this)
+                                ]
+                            }, void 0, true, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 500,
-                                columnNumber: 13
+                                lineNumber: 407,
+                                columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                className: "text-sm text-foreground font-medium",
-                                children: "Importing opportunities..."
+                                className: "text-sm mb-6",
+                                style: {
+                                    color: "var(--stone-500)"
+                                },
+                                children: "This will remove all existing opportunities and replace them with the data from this file. This action cannot be undone."
                             }, void 0, false, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 506,
-                                columnNumber: 13
+                                lineNumber: 415,
+                                columnNumber: 15
                             }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                className: "text-xs text-muted-foreground mt-1",
-                                children: "This may take a moment."
-                            }, void 0, false, {
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex items-center justify-end gap-3",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                        onClick: ()=>setShowReplaceConfirm(false),
+                                        className: "inline-flex items-center px-4 py-2 text-sm font-semibold",
+                                        style: {
+                                            background: "#fff",
+                                            color: "var(--stone-700)",
+                                            border: "1px solid var(--stone-200)",
+                                            borderRadius: "var(--radius-sm, 6px)"
+                                        },
+                                        "data-testid": "button-cancel-replace",
+                                        children: "Cancel"
+                                    }, void 0, false, {
+                                        fileName: "[project]/app/app/import/page.tsx",
+                                        lineNumber: 419,
+                                        columnNumber: 17
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                        onClick: doImport,
+                                        className: "inline-flex items-center px-4 py-2 text-sm font-semibold text-white",
+                                        style: {
+                                            background: "var(--error)",
+                                            borderRadius: "var(--radius-sm, 6px)"
+                                        },
+                                        "data-testid": "button-confirm-replace",
+                                        children: "Yes, Replace All Data"
+                                    }, void 0, false, {
+                                        fileName: "[project]/app/app/import/page.tsx",
+                                        lineNumber: 420,
+                                        columnNumber: 17
+                                    }, this)
+                                ]
+                            }, void 0, true, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 507,
-                                columnNumber: 13
+                                lineNumber: 418,
+                                columnNumber: 15
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/app/app/import/page.tsx",
-                        lineNumber: 499,
-                        columnNumber: 11
-                    }, this),
-                    step === "results" && importResult && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "space-y-6",
-                        children: [
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "rounded-md border border-border bg-card p-6",
-                                "data-testid": "section-results",
+                        lineNumber: 406,
+                        columnNumber: 13
+                    }, this)
+                }, void 0, false, {
+                    fileName: "[project]/app/app/import/page.tsx",
+                    lineNumber: 405,
+                    columnNumber: 11
+                }, this),
+                step === "importing" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "bg-white p-6 text-center",
+                    style: {
+                        border: "1px solid var(--stone-200)",
+                        borderRadius: "var(--radius-lg, 14px)"
+                    },
+                    "data-testid": "section-importing",
+                    children: [
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "inline-flex items-center justify-center w-10 h-10 rounded-full mb-4",
+                            style: {
+                                background: "var(--teal-50)"
+                            },
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
+                                className: "w-5 h-5 animate-spin",
+                                style: {
+                                    color: "var(--teal-600)"
+                                },
+                                fill: "none",
+                                viewBox: "0 0 24 24",
                                 children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
-                                        className: "text-sm font-medium text-foreground mb-4",
-                                        children: "Import Complete"
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("circle", {
+                                        className: "opacity-25",
+                                        cx: "12",
+                                        cy: "12",
+                                        r: "10",
+                                        stroke: "currentColor",
+                                        strokeWidth: "4"
                                     }, void 0, false, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 515,
-                                        columnNumber: 15
+                                        lineNumber: 431,
+                                        columnNumber: 17
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                                        className: "opacity-75",
+                                        fill: "currentColor",
+                                        d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                    }, void 0, false, {
+                                        fileName: "[project]/app/app/import/page.tsx",
+                                        lineNumber: 432,
+                                        columnNumber: 17
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/app/app/import/page.tsx",
+                                lineNumber: 430,
+                                columnNumber: 15
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "[project]/app/app/import/page.tsx",
+                            lineNumber: 429,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                            className: "text-sm font-semibold",
+                            style: {
+                                color: "var(--stone-900)"
+                            },
+                            children: "Importing opportunities..."
+                        }, void 0, false, {
+                            fileName: "[project]/app/app/import/page.tsx",
+                            lineNumber: 435,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                            className: "text-xs mt-1",
+                            style: {
+                                color: "var(--stone-500)"
+                            },
+                            children: "This may take a moment."
+                        }, void 0, false, {
+                            fileName: "[project]/app/app/import/page.tsx",
+                            lineNumber: 436,
+                            columnNumber: 13
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "[project]/app/app/import/page.tsx",
+                    lineNumber: 428,
+                    columnNumber: 11
+                }, this),
+                step === "results" && importResult && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "space-y-6",
+                    children: [
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "bg-white",
+                            style: {
+                                border: "1px solid var(--stone-200)",
+                                borderRadius: "var(--radius-lg, 14px)",
+                                overflow: "hidden"
+                            },
+                            "data-testid": "section-results",
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "p-6",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                        className: "flex items-center gap-2.5 mb-5",
+                                        children: [
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
+                                                width: "20",
+                                                height: "20",
+                                                viewBox: "0 0 24 24",
+                                                fill: "none",
+                                                stroke: "var(--success)",
+                                                strokeWidth: "2",
+                                                children: [
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                                                        d: "M22 11.08V12a10 10 0 1 1-5.93-9.14"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/app/app/import/page.tsx",
+                                                        lineNumber: 446,
+                                                        columnNumber: 119
+                                                    }, this),
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("polyline", {
+                                                        points: "22 4 12 14.01 9 11.01"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/app/app/import/page.tsx",
+                                                        lineNumber: 446,
+                                                        columnNumber: 166
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "[project]/app/app/import/page.tsx",
+                                                lineNumber: 446,
+                                                columnNumber: 19
+                                            }, this),
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
+                                                className: "text-[15px] font-bold",
+                                                style: {
+                                                    color: "var(--stone-900)"
+                                                },
+                                                children: "Import Complete"
+                                            }, void 0, false, {
+                                                fileName: "[project]/app/app/import/page.tsx",
+                                                lineNumber: 447,
+                                                columnNumber: 19
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "[project]/app/app/import/page.tsx",
+                                        lineNumber: 445,
+                                        columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "grid gap-4 sm:grid-cols-3",
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                className: "rounded-md border border-border p-4",
+                                                className: "bg-white p-5",
+                                                style: {
+                                                    border: "1px solid var(--stone-200)",
+                                                    borderRadius: "var(--radius-md, 10px)"
+                                                },
                                                 children: [
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                        className: "text-xs text-muted-foreground",
+                                                        className: "text-xs font-semibold uppercase mb-1",
+                                                        style: {
+                                                            color: "var(--stone-500)",
+                                                            letterSpacing: "0.4px"
+                                                        },
                                                         children: "Total Rows"
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 518,
-                                                        columnNumber: 19
+                                                        lineNumber: 451,
+                                                        columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                        className: "text-2xl font-semibold text-foreground mt-1",
+                                                        className: "text-[28px] font-bold",
+                                                        style: {
+                                                            color: "var(--stone-900)",
+                                                            letterSpacing: "-0.5px"
+                                                        },
                                                         "data-testid": "text-total-rows",
                                                         children: importResult.totalRows
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 519,
-                                                        columnNumber: 19
+                                                        lineNumber: 452,
+                                                        columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                lineNumber: 517,
-                                                columnNumber: 17
+                                                lineNumber: 450,
+                                                columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                className: "rounded-md border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950/20 p-4",
+                                                className: "bg-white p-5",
+                                                style: {
+                                                    border: "1px solid var(--stone-200)",
+                                                    borderLeft: "3px solid var(--success)",
+                                                    borderRadius: "var(--radius-md, 10px)"
+                                                },
                                                 children: [
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                        className: "text-xs text-green-700 dark:text-green-400",
+                                                        className: "text-xs font-semibold uppercase mb-1",
+                                                        style: {
+                                                            color: "var(--stone-500)",
+                                                            letterSpacing: "0.4px"
+                                                        },
                                                         children: "Inserted"
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 524,
-                                                        columnNumber: 19
+                                                        lineNumber: 455,
+                                                        columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                        className: "text-2xl font-semibold text-green-700 dark:text-green-400 mt-1",
+                                                        className: "text-[28px] font-bold",
+                                                        style: {
+                                                            color: "var(--success)",
+                                                            letterSpacing: "-0.5px"
+                                                        },
                                                         "data-testid": "text-inserted-count",
                                                         children: importResult.insertedCount
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 525,
-                                                        columnNumber: 19
+                                                        lineNumber: 456,
+                                                        columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                lineNumber: 523,
-                                                columnNumber: 17
+                                                lineNumber: 454,
+                                                columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                className: `rounded-md border p-4 ${importResult.errorCount > 0 ? "border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/20" : "border-border"}`,
+                                                className: "bg-white p-5",
+                                                style: {
+                                                    border: "1px solid var(--stone-200)",
+                                                    borderLeft: importResult.errorCount > 0 ? "3px solid var(--error)" : undefined,
+                                                    borderRadius: "var(--radius-md, 10px)"
+                                                },
                                                 children: [
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                        className: `text-xs ${importResult.errorCount > 0 ? "text-red-700 dark:text-red-400" : "text-muted-foreground"}`,
+                                                        className: "text-xs font-semibold uppercase mb-1",
+                                                        style: {
+                                                            color: "var(--stone-500)",
+                                                            letterSpacing: "0.4px"
+                                                        },
                                                         children: "Errors"
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 530,
-                                                        columnNumber: 19
+                                                        lineNumber: 459,
+                                                        columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                                        className: `text-2xl font-semibold mt-1 ${importResult.errorCount > 0 ? "text-red-700 dark:text-red-400" : "text-foreground"}`,
+                                                        className: "text-[28px] font-bold",
+                                                        style: {
+                                                            color: importResult.errorCount > 0 ? "var(--error)" : "var(--stone-900)",
+                                                            letterSpacing: "-0.5px"
+                                                        },
                                                         "data-testid": "text-error-count",
                                                         children: importResult.errorCount
                                                     }, void 0, false, {
                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 531,
-                                                        columnNumber: 19
+                                                        lineNumber: 460,
+                                                        columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                lineNumber: 529,
-                                                columnNumber: 17
+                                                lineNumber: 458,
+                                                columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 516,
-                                        columnNumber: 15
+                                        lineNumber: 449,
+                                        columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 514,
-                                columnNumber: 13
-                            }, this),
-                            importResult.errors.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "rounded-md border border-border bg-card p-6",
-                                "data-testid": "section-error-details",
+                                lineNumber: 444,
+                                columnNumber: 15
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "[project]/app/app/import/page.tsx",
+                            lineNumber: 443,
+                            columnNumber: 13
+                        }, this),
+                        importResult.errors.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "bg-white",
+                            style: {
+                                border: "1px solid var(--stone-200)",
+                                borderRadius: "var(--radius-lg, 14px)",
+                                overflow: "hidden"
+                            },
+                            "data-testid": "section-error-details",
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "p-6",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
-                                        className: "text-sm font-medium text-foreground mb-4",
+                                        className: "text-sm font-semibold mb-4 flex items-center gap-2",
+                                        style: {
+                                            color: "var(--stone-800)"
+                                        },
                                         children: [
-                                            "Error Details ",
-                                            importResult.errors.length < importResult.errorCount && `(showing first ${importResult.errors.length})`
+                                            "Error Details",
+                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                className: "text-[11px] font-semibold px-2 py-0.5 rounded-full",
+                                                style: {
+                                                    background: "var(--error-bg)",
+                                                    color: "var(--error)"
+                                                },
+                                                children: [
+                                                    importResult.errorCount,
+                                                    " rows"
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "[project]/app/app/import/page.tsx",
+                                                lineNumber: 471,
+                                                columnNumber: 21
+                                            }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 540,
-                                        columnNumber: 17
+                                        lineNumber: 469,
+                                        columnNumber: 19
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: "overflow-x-auto",
                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("table", {
-                                            className: "min-w-full text-sm",
+                                            className: "min-w-full text-[13px]",
                                             children: [
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("thead", {
                                                     children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
-                                                        className: "border-b border-border",
+                                                        style: {
+                                                            borderBottom: "1px solid var(--stone-200)"
+                                                        },
                                                         children: [
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                                className: "px-3 py-2 text-left text-xs font-medium text-muted-foreground",
+                                                                className: "px-4 py-2.5 text-left text-[11px] font-semibold uppercase",
+                                                                style: {
+                                                                    color: "var(--stone-500)",
+                                                                    background: "var(--stone-50)",
+                                                                    letterSpacing: "0.5px",
+                                                                    width: "60px"
+                                                                },
                                                                 children: "Row"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 547,
-                                                                columnNumber: 25
+                                                                lineNumber: 479,
+                                                                columnNumber: 27
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                                className: "px-3 py-2 text-left text-xs font-medium text-muted-foreground",
+                                                                className: "px-4 py-2.5 text-left text-[11px] font-semibold uppercase",
+                                                                style: {
+                                                                    color: "var(--stone-500)",
+                                                                    background: "var(--stone-50)",
+                                                                    letterSpacing: "0.5px"
+                                                                },
                                                                 children: "Error"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 548,
-                                                                columnNumber: 25
+                                                                lineNumber: 480,
+                                                                columnNumber: 27
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                                className: "px-3 py-2 text-left text-xs font-medium text-muted-foreground",
+                                                                className: "px-4 py-2.5 text-left text-[11px] font-semibold uppercase",
+                                                                style: {
+                                                                    color: "var(--stone-500)",
+                                                                    background: "var(--stone-50)",
+                                                                    letterSpacing: "0.5px",
+                                                                    width: "240px"
+                                                                },
                                                                 children: "Data"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 549,
-                                                                columnNumber: 25
+                                                                lineNumber: 481,
+                                                                columnNumber: 27
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 546,
-                                                        columnNumber: 23
+                                                        lineNumber: 478,
+                                                        columnNumber: 25
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/app/import/page.tsx",
-                                                    lineNumber: 545,
-                                                    columnNumber: 21
+                                                    lineNumber: 477,
+                                                    columnNumber: 23
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
                                                     children: importResult.errors.map((err, i)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
-                                                            className: "border-b border-border/50",
+                                                            style: {
+                                                                borderBottom: "1px solid var(--stone-100)"
+                                                            },
                                                             children: [
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                                    className: "px-3 py-2 text-xs text-foreground",
+                                                                    className: "px-4 py-3",
                                                                     "data-testid": `text-error-row-${i}`,
-                                                                    children: err.row_number
+                                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                        className: "font-mono text-xs px-2 py-0.5 rounded",
+                                                                        style: {
+                                                                            background: "var(--stone-100)",
+                                                                            color: "var(--stone-400)"
+                                                                        },
+                                                                        children: err.row_number
+                                                                    }, void 0, false, {
+                                                                        fileName: "[project]/app/app/import/page.tsx",
+                                                                        lineNumber: 488,
+                                                                        columnNumber: 31
+                                                                    }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/app/import/page.tsx",
-                                                                    lineNumber: 555,
-                                                                    columnNumber: 27
+                                                                    lineNumber: 487,
+                                                                    columnNumber: 29
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                                    className: "px-3 py-2 text-xs text-red-600 dark:text-red-400",
+                                                                    className: "px-4 py-3",
                                                                     "data-testid": `text-error-msg-${i}`,
-                                                                    children: err.error_message
+                                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                        className: "text-xs px-2 py-1 rounded inline-block",
+                                                                        style: {
+                                                                            background: "var(--error-bg)",
+                                                                            color: "var(--error)"
+                                                                        },
+                                                                        children: err.error_message
+                                                                    }, void 0, false, {
+                                                                        fileName: "[project]/app/app/import/page.tsx",
+                                                                        lineNumber: 491,
+                                                                        columnNumber: 31
+                                                                    }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/app/import/page.tsx",
-                                                                    lineNumber: 558,
-                                                                    columnNumber: 27
+                                                                    lineNumber: 490,
+                                                                    columnNumber: 29
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                                    className: "px-3 py-2 text-xs text-muted-foreground font-mono max-w-[300px] truncate",
-                                                                    children: JSON.stringify(err.raw_row_json)
+                                                                    className: "px-4 py-3",
+                                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                        className: "font-mono text-[11px] max-w-[280px] truncate block",
+                                                                        style: {
+                                                                            color: "var(--stone-500)"
+                                                                        },
+                                                                        children: JSON.stringify(err.raw_row_json)
+                                                                    }, void 0, false, {
+                                                                        fileName: "[project]/app/app/import/page.tsx",
+                                                                        lineNumber: 494,
+                                                                        columnNumber: 31
+                                                                    }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/app/app/import/page.tsx",
-                                                                    lineNumber: 561,
-                                                                    columnNumber: 27
+                                                                    lineNumber: 493,
+                                                                    columnNumber: 29
                                                                 }, this)
                                                             ]
                                                         }, i, true, {
                                                             fileName: "[project]/app/app/import/page.tsx",
-                                                            lineNumber: 554,
-                                                            columnNumber: 25
+                                                            lineNumber: 486,
+                                                            columnNumber: 27
                                                         }, this))
                                                 }, void 0, false, {
                                                     fileName: "[project]/app/app/import/page.tsx",
-                                                    lineNumber: 552,
-                                                    columnNumber: 21
+                                                    lineNumber: 484,
+                                                    columnNumber: 23
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/app/app/import/page.tsx",
-                                            lineNumber: 544,
-                                            columnNumber: 19
+                                            lineNumber: 476,
+                                            columnNumber: 21
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 543,
-                                        columnNumber: 17
+                                        lineNumber: 475,
+                                        columnNumber: 19
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 539,
-                                columnNumber: 15
-                            }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "flex items-center gap-3 flex-wrap",
-                                children: [
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                        onClick: handleReset,
-                                        className: "inline-flex items-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground",
-                                        "data-testid": "button-import-another",
-                                        children: "Import Another File"
-                                    }, void 0, false, {
-                                        fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 573,
-                                        columnNumber: 15
-                                    }, this),
-                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                                        href: `/app/dashboard${importResult.jobId ? `?dataset=${importResult.jobId}` : ""}`,
-                                        className: "inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground",
-                                        "data-testid": "link-view-analytics",
-                                        children: "View Analytics"
-                                    }, void 0, false, {
-                                        fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 580,
-                                        columnNumber: 15
-                                    }, this)
-                                ]
-                            }, void 0, true, {
-                                fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 572,
-                                columnNumber: 13
+                                lineNumber: 468,
+                                columnNumber: 17
                             }, this)
-                        ]
-                    }, void 0, true, {
-                        fileName: "[project]/app/app/import/page.tsx",
-                        lineNumber: 513,
-                        columnNumber: 11
-                    }, this),
-                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "mt-12",
-                        "data-testid": "section-import-history",
-                        children: [
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
-                                className: "text-lg font-semibold text-foreground mb-4",
-                                children: "Import History"
-                            }, void 0, false, {
-                                fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 593,
-                                columnNumber: 11
-                            }, this),
-                            historyLoading ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "flex items-center justify-center py-8",
-                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
-                                    className: "w-5 h-5 text-primary animate-spin",
-                                    fill: "none",
-                                    viewBox: "0 0 24 24",
+                        }, void 0, false, {
+                            fileName: "[project]/app/app/import/page.tsx",
+                            lineNumber: 467,
+                            columnNumber: 15
+                        }, this),
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "flex items-center gap-3 flex-wrap",
+                            children: [
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                    onClick: handleReset,
+                                    className: "inline-flex items-center px-5 py-2.5 text-[13px] font-semibold",
+                                    style: {
+                                        background: "#fff",
+                                        color: "var(--stone-700)",
+                                        border: "1px solid var(--stone-200)",
+                                        borderRadius: "var(--radius-sm, 6px)"
+                                    },
+                                    "data-testid": "button-import-another",
+                                    children: "Import Another File"
+                                }, void 0, false, {
+                                    fileName: "[project]/app/app/import/page.tsx",
+                                    lineNumber: 506,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                                    href: `/app/dashboard${importResult.jobId ? `?dataset=${importResult.jobId}` : ""}`,
+                                    className: "inline-flex items-center gap-2 px-5 py-2.5 text-[13px] font-semibold text-white",
+                                    style: {
+                                        background: "var(--teal-600)",
+                                        borderRadius: "var(--radius-sm, 6px)"
+                                    },
+                                    "data-testid": "link-view-analytics",
                                     children: [
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("circle", {
-                                            className: "opacity-25",
-                                            cx: "12",
-                                            cy: "12",
-                                            r: "10",
+                                        "View Analytics",
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
+                                            width: "16",
+                                            height: "16",
+                                            viewBox: "0 0 24 24",
+                                            fill: "none",
                                             stroke: "currentColor",
-                                            strokeWidth: "4"
-                                        }, void 0, false, {
+                                            strokeWidth: "2",
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("line", {
+                                                    x1: "5",
+                                                    y1: "12",
+                                                    x2: "19",
+                                                    y2: "12"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/app/app/import/page.tsx",
+                                                    lineNumber: 516,
+                                                    columnNumber: 115
+                                                }, this),
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("polyline", {
+                                                    points: "12 5 19 12 12 19"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/app/app/import/page.tsx",
+                                                    lineNumber: 516,
+                                                    columnNumber: 154
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
                                             fileName: "[project]/app/app/import/page.tsx",
-                                            lineNumber: 597,
-                                            columnNumber: 17
-                                        }, this),
-                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
-                                            className: "opacity-75",
-                                            fill: "currentColor",
-                                            d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                                        }, void 0, false, {
-                                            fileName: "[project]/app/app/import/page.tsx",
-                                            lineNumber: 598,
+                                            lineNumber: 516,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/app/app/import/page.tsx",
-                                    lineNumber: 596,
+                                    lineNumber: 509,
                                     columnNumber: 15
                                 }, this)
-                            }, void 0, false, {
-                                fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 595,
-                                columnNumber: 13
-                            }, this) : importHistory.length === 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "rounded-md border border-border bg-card p-6 text-center",
-                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                    className: "text-sm text-muted-foreground",
-                                    children: "No imports yet. Upload a CSV file above to get started."
-                                }, void 0, false, {
-                                    fileName: "[project]/app/app/import/page.tsx",
-                                    lineNumber: 603,
-                                    columnNumber: 15
-                                }, this)
-                            }, void 0, false, {
-                                fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 602,
-                                columnNumber: 13
-                            }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                className: "rounded-md border border-border bg-card overflow-hidden",
-                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    className: "overflow-x-auto",
-                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("table", {
-                                        className: "min-w-full text-sm",
-                                        children: [
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("thead", {
-                                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
-                                                    className: "border-b border-border bg-muted/30",
-                                                    children: [
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                            className: "px-4 py-3 text-left text-xs font-medium text-muted-foreground",
-                                                            children: "File"
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/app/app/import/page.tsx",
-                                                            lineNumber: 611,
-                                                            columnNumber: 23
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                            className: "px-4 py-3 text-left text-xs font-medium text-muted-foreground",
-                                                            children: "Mode"
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/app/app/import/page.tsx",
-                                                            lineNumber: 612,
-                                                            columnNumber: 23
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                            className: "px-4 py-3 text-left text-xs font-medium text-muted-foreground",
-                                                            children: "Status"
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/app/app/import/page.tsx",
-                                                            lineNumber: 613,
-                                                            columnNumber: 23
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                            className: "px-4 py-3 text-right text-xs font-medium text-muted-foreground",
-                                                            children: "Rows"
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/app/app/import/page.tsx",
-                                                            lineNumber: 614,
-                                                            columnNumber: 23
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                            className: "px-4 py-3 text-right text-xs font-medium text-muted-foreground",
-                                                            children: "Inserted"
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/app/app/import/page.tsx",
-                                                            lineNumber: 615,
-                                                            columnNumber: 23
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                            className: "px-4 py-3 text-right text-xs font-medium text-muted-foreground",
-                                                            children: "Errors"
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/app/app/import/page.tsx",
-                                                            lineNumber: 616,
-                                                            columnNumber: 23
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                            className: "px-4 py-3 text-left text-xs font-medium text-muted-foreground",
-                                                            children: "Date"
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/app/app/import/page.tsx",
-                                                            lineNumber: 617,
-                                                            columnNumber: 23
-                                                        }, this),
-                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
-                                                            className: "px-4 py-3 text-left text-xs font-medium text-muted-foreground",
-                                                            children: "Actions"
-                                                        }, void 0, false, {
-                                                            fileName: "[project]/app/app/import/page.tsx",
-                                                            lineNumber: 618,
-                                                            columnNumber: 23
-                                                        }, this)
-                                                    ]
-                                                }, void 0, true, {
-                                                    fileName: "[project]/app/app/import/page.tsx",
-                                                    lineNumber: 610,
-                                                    columnNumber: 21
-                                                }, this)
-                                            }, void 0, false, {
-                                                fileName: "[project]/app/app/import/page.tsx",
-                                                lineNumber: 609,
-                                                columnNumber: 19
-                                            }, this),
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
-                                                children: importHistory.map((job)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
-                                                        className: `border-b border-border/50 ${!job.is_active ? "opacity-50" : ""}`,
-                                                        "data-testid": `import-job-${job.id}`,
-                                                        children: [
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                                className: "px-4 py-3 text-foreground font-medium whitespace-nowrap max-w-[200px] truncate",
-                                                                children: job.filename
-                                                            }, void 0, false, {
-                                                                fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 624,
-                                                                columnNumber: 25
-                                                            }, this),
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                                className: "px-4 py-3",
-                                                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                                    className: `inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${job.import_mode === "replace" ? "bg-amber-100 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400" : "bg-blue-100 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400"}`,
-                                                                    children: job.import_mode
-                                                                }, void 0, false, {
-                                                                    fileName: "[project]/app/app/import/page.tsx",
-                                                                    lineNumber: 628,
-                                                                    columnNumber: 27
-                                                                }, this)
-                                                            }, void 0, false, {
-                                                                fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 627,
-                                                                columnNumber: 25
-                                                            }, this),
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                                className: "px-4 py-3",
-                                                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(StatusBadge, {
-                                                                    status: job.status,
-                                                                    isActive: job.is_active
-                                                                }, void 0, false, {
-                                                                    fileName: "[project]/app/app/import/page.tsx",
-                                                                    lineNumber: 637,
-                                                                    columnNumber: 27
-                                                                }, this)
-                                                            }, void 0, false, {
-                                                                fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 636,
-                                                                columnNumber: 25
-                                                            }, this),
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                                className: "px-4 py-3 text-right text-foreground",
-                                                                children: job.row_count
-                                                            }, void 0, false, {
-                                                                fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 639,
-                                                                columnNumber: 25
-                                                            }, this),
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                                className: "px-4 py-3 text-right text-green-600 dark:text-green-400",
-                                                                children: job.inserted_count
-                                                            }, void 0, false, {
-                                                                fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 640,
-                                                                columnNumber: 25
-                                                            }, this),
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                                className: `px-4 py-3 text-right ${job.error_count > 0 ? "text-red-600 dark:text-red-400" : "text-foreground"}`,
-                                                                children: job.error_count
-                                                            }, void 0, false, {
-                                                                fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 641,
-                                                                columnNumber: 25
-                                                            }, this),
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                                className: "px-4 py-3 text-muted-foreground whitespace-nowrap",
-                                                                children: [
-                                                                    new Date(job.created_at).toLocaleDateString(),
-                                                                    " ",
-                                                                    new Date(job.created_at).toLocaleTimeString([], {
-                                                                        hour: "2-digit",
-                                                                        minute: "2-digit"
-                                                                    })
-                                                                ]
-                                                            }, void 0, true, {
-                                                                fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 644,
-                                                                columnNumber: 25
-                                                            }, this),
-                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
-                                                                className: "px-4 py-3",
-                                                                children: job.status === "completed" && job.is_active && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                                                                    href: `/app/dashboard?dataset=${job.id}`,
-                                                                    className: "text-xs text-primary hover:underline",
-                                                                    "data-testid": `link-analytics-${job.id}`,
-                                                                    children: "View Analytics"
-                                                                }, void 0, false, {
-                                                                    fileName: "[project]/app/app/import/page.tsx",
-                                                                    lineNumber: 649,
-                                                                    columnNumber: 29
-                                                                }, this)
-                                                            }, void 0, false, {
-                                                                fileName: "[project]/app/app/import/page.tsx",
-                                                                lineNumber: 647,
-                                                                columnNumber: 25
-                                                            }, this)
-                                                        ]
-                                                    }, job.id, true, {
-                                                        fileName: "[project]/app/app/import/page.tsx",
-                                                        lineNumber: 623,
-                                                        columnNumber: 23
-                                                    }, this))
-                                            }, void 0, false, {
-                                                fileName: "[project]/app/app/import/page.tsx",
-                                                lineNumber: 621,
-                                                columnNumber: 19
-                                            }, this)
-                                        ]
-                                    }, void 0, true, {
+                            ]
+                        }, void 0, true, {
+                            fileName: "[project]/app/app/import/page.tsx",
+                            lineNumber: 505,
+                            columnNumber: 13
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "[project]/app/app/import/page.tsx",
+                    lineNumber: 442,
+                    columnNumber: 11
+                }, this),
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                    className: "mt-12",
+                    "data-testid": "section-import-history",
+                    children: [
+                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
+                            className: "text-lg font-bold mb-4",
+                            style: {
+                                color: "var(--stone-900)"
+                            },
+                            children: "Import History"
+                        }, void 0, false, {
+                            fileName: "[project]/app/app/import/page.tsx",
+                            lineNumber: 524,
+                            columnNumber: 11
+                        }, this),
+                        historyLoading ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "flex items-center justify-center py-8",
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
+                                className: "w-5 h-5 animate-spin",
+                                style: {
+                                    color: "var(--teal-600)"
+                                },
+                                fill: "none",
+                                viewBox: "0 0 24 24",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("circle", {
+                                        className: "opacity-25",
+                                        cx: "12",
+                                        cy: "12",
+                                        r: "10",
+                                        stroke: "currentColor",
+                                        strokeWidth: "4"
+                                    }, void 0, false, {
                                         fileName: "[project]/app/app/import/page.tsx",
-                                        lineNumber: 608,
+                                        lineNumber: 528,
+                                        columnNumber: 17
+                                    }, this),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                                        className: "opacity-75",
+                                        fill: "currentColor",
+                                        d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                    }, void 0, false, {
+                                        fileName: "[project]/app/app/import/page.tsx",
+                                        lineNumber: 529,
                                         columnNumber: 17
                                     }, this)
-                                }, void 0, false, {
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/app/app/import/page.tsx",
+                                lineNumber: 527,
+                                columnNumber: 15
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "[project]/app/app/import/page.tsx",
+                            lineNumber: 526,
+                            columnNumber: 13
+                        }, this) : importHistory.length === 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "bg-white p-6 text-center",
+                            style: {
+                                border: "1px solid var(--stone-200)",
+                                borderRadius: "var(--radius-lg, 14px)"
+                            },
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-sm",
+                                style: {
+                                    color: "var(--stone-500)"
+                                },
+                                children: "No imports yet. Upload a CSV file above to get started."
+                            }, void 0, false, {
+                                fileName: "[project]/app/app/import/page.tsx",
+                                lineNumber: 534,
+                                columnNumber: 15
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "[project]/app/app/import/page.tsx",
+                            lineNumber: 533,
+                            columnNumber: 13
+                        }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                            className: "bg-white overflow-hidden",
+                            style: {
+                                border: "1px solid var(--stone-200)",
+                                borderRadius: "var(--radius-lg, 14px)"
+                            },
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "overflow-x-auto",
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("table", {
+                                    className: "min-w-full text-[13px]",
+                                    children: [
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("thead", {
+                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
+                                                style: {
+                                                    borderBottom: "1px solid var(--stone-200)"
+                                                },
+                                                children: [
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                        className: "px-4 py-3 text-left text-[11px] font-semibold uppercase",
+                                                        style: {
+                                                            color: "var(--stone-500)",
+                                                            background: "var(--stone-50)",
+                                                            letterSpacing: "0.5px"
+                                                        },
+                                                        children: "File"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/app/app/import/page.tsx",
+                                                        lineNumber: 542,
+                                                        columnNumber: 23
+                                                    }, this),
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                        className: "px-4 py-3 text-left text-[11px] font-semibold uppercase",
+                                                        style: {
+                                                            color: "var(--stone-500)",
+                                                            background: "var(--stone-50)",
+                                                            letterSpacing: "0.5px"
+                                                        },
+                                                        children: "Mode"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/app/app/import/page.tsx",
+                                                        lineNumber: 543,
+                                                        columnNumber: 23
+                                                    }, this),
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                        className: "px-4 py-3 text-left text-[11px] font-semibold uppercase",
+                                                        style: {
+                                                            color: "var(--stone-500)",
+                                                            background: "var(--stone-50)",
+                                                            letterSpacing: "0.5px"
+                                                        },
+                                                        children: "Status"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/app/app/import/page.tsx",
+                                                        lineNumber: 544,
+                                                        columnNumber: 23
+                                                    }, this),
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                        className: "px-4 py-3 text-right text-[11px] font-semibold uppercase",
+                                                        style: {
+                                                            color: "var(--stone-500)",
+                                                            background: "var(--stone-50)",
+                                                            letterSpacing: "0.5px"
+                                                        },
+                                                        children: "Rows"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/app/app/import/page.tsx",
+                                                        lineNumber: 545,
+                                                        columnNumber: 23
+                                                    }, this),
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                        className: "px-4 py-3 text-right text-[11px] font-semibold uppercase",
+                                                        style: {
+                                                            color: "var(--stone-500)",
+                                                            background: "var(--stone-50)",
+                                                            letterSpacing: "0.5px"
+                                                        },
+                                                        children: "Inserted"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/app/app/import/page.tsx",
+                                                        lineNumber: 546,
+                                                        columnNumber: 23
+                                                    }, this),
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                        className: "px-4 py-3 text-right text-[11px] font-semibold uppercase",
+                                                        style: {
+                                                            color: "var(--stone-500)",
+                                                            background: "var(--stone-50)",
+                                                            letterSpacing: "0.5px"
+                                                        },
+                                                        children: "Errors"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/app/app/import/page.tsx",
+                                                        lineNumber: 547,
+                                                        columnNumber: 23
+                                                    }, this),
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                        className: "px-4 py-3 text-left text-[11px] font-semibold uppercase",
+                                                        style: {
+                                                            color: "var(--stone-500)",
+                                                            background: "var(--stone-50)",
+                                                            letterSpacing: "0.5px"
+                                                        },
+                                                        children: "Date"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/app/app/import/page.tsx",
+                                                        lineNumber: 548,
+                                                        columnNumber: 23
+                                                    }, this),
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
+                                                        className: "px-4 py-3 text-left text-[11px] font-semibold uppercase",
+                                                        style: {
+                                                            color: "var(--stone-500)",
+                                                            background: "var(--stone-50)",
+                                                            letterSpacing: "0.5px"
+                                                        },
+                                                        children: "Actions"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/app/app/import/page.tsx",
+                                                        lineNumber: 549,
+                                                        columnNumber: 23
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "[project]/app/app/import/page.tsx",
+                                                lineNumber: 541,
+                                                columnNumber: 21
+                                            }, this)
+                                        }, void 0, false, {
+                                            fileName: "[project]/app/app/import/page.tsx",
+                                            lineNumber: 540,
+                                            columnNumber: 19
+                                        }, this),
+                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
+                                            children: importHistory.map((job)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tr", {
+                                                    style: {
+                                                        borderBottom: "1px solid var(--stone-100)",
+                                                        opacity: !job.is_active ? 0.5 : 1
+                                                    },
+                                                    "data-testid": `import-job-${job.id}`,
+                                                    children: [
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                            className: "px-4 py-3 font-medium whitespace-nowrap max-w-[200px] truncate",
+                                                            style: {
+                                                                color: "var(--stone-900)"
+                                                            },
+                                                            children: job.filename
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/app/app/import/page.tsx",
+                                                            lineNumber: 555,
+                                                            columnNumber: 25
+                                                        }, this),
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                            className: "px-4 py-3",
+                                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                className: "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
+                                                                style: {
+                                                                    background: job.import_mode === "replace" ? "var(--warning-bg)" : "var(--info-bg)",
+                                                                    color: job.import_mode === "replace" ? "var(--warning)" : "var(--teal-700)"
+                                                                },
+                                                                children: job.import_mode
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/app/app/import/page.tsx",
+                                                                lineNumber: 557,
+                                                                columnNumber: 27
+                                                            }, this)
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/app/app/import/page.tsx",
+                                                            lineNumber: 556,
+                                                            columnNumber: 25
+                                                        }, this),
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                            className: "px-4 py-3",
+                                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(StatusBadge, {
+                                                                status: job.status,
+                                                                isActive: job.is_active
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/app/app/import/page.tsx",
+                                                                lineNumber: 562,
+                                                                columnNumber: 51
+                                                            }, this)
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/app/app/import/page.tsx",
+                                                            lineNumber: 562,
+                                                            columnNumber: 25
+                                                        }, this),
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                            className: "px-4 py-3 text-right",
+                                                            style: {
+                                                                color: "var(--stone-700)"
+                                                            },
+                                                            children: job.row_count
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/app/app/import/page.tsx",
+                                                            lineNumber: 563,
+                                                            columnNumber: 25
+                                                        }, this),
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                            className: "px-4 py-3 text-right",
+                                                            style: {
+                                                                color: "var(--success)"
+                                                            },
+                                                            children: job.inserted_count
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/app/app/import/page.tsx",
+                                                            lineNumber: 564,
+                                                            columnNumber: 25
+                                                        }, this),
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                            className: "px-4 py-3 text-right",
+                                                            style: {
+                                                                color: job.error_count > 0 ? "var(--error)" : "var(--stone-700)"
+                                                            },
+                                                            children: job.error_count
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/app/app/import/page.tsx",
+                                                            lineNumber: 565,
+                                                            columnNumber: 25
+                                                        }, this),
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                            className: "px-4 py-3 whitespace-nowrap",
+                                                            style: {
+                                                                color: "var(--stone-500)"
+                                                            },
+                                                            children: [
+                                                                new Date(job.created_at).toLocaleDateString(),
+                                                                " ",
+                                                                new Date(job.created_at).toLocaleTimeString([], {
+                                                                    hour: "2-digit",
+                                                                    minute: "2-digit"
+                                                                })
+                                                            ]
+                                                        }, void 0, true, {
+                                                            fileName: "[project]/app/app/import/page.tsx",
+                                                            lineNumber: 566,
+                                                            columnNumber: 25
+                                                        }, this),
+                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
+                                                            className: "px-4 py-3",
+                                                            children: job.status === "completed" && job.is_active && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
+                                                                href: `/app/dashboard?dataset=${job.id}`,
+                                                                className: "text-xs font-medium",
+                                                                style: {
+                                                                    color: "var(--teal-600)"
+                                                                },
+                                                                "data-testid": `link-analytics-${job.id}`,
+                                                                children: "View Analytics"
+                                                            }, void 0, false, {
+                                                                fileName: "[project]/app/app/import/page.tsx",
+                                                                lineNumber: 571,
+                                                                columnNumber: 29
+                                                            }, this)
+                                                        }, void 0, false, {
+                                                            fileName: "[project]/app/app/import/page.tsx",
+                                                            lineNumber: 569,
+                                                            columnNumber: 25
+                                                        }, this)
+                                                    ]
+                                                }, job.id, true, {
+                                                    fileName: "[project]/app/app/import/page.tsx",
+                                                    lineNumber: 554,
+                                                    columnNumber: 23
+                                                }, this))
+                                        }, void 0, false, {
+                                            fileName: "[project]/app/app/import/page.tsx",
+                                            lineNumber: 552,
+                                            columnNumber: 19
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
                                     fileName: "[project]/app/app/import/page.tsx",
-                                    lineNumber: 607,
-                                    columnNumber: 15
+                                    lineNumber: 539,
+                                    columnNumber: 17
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/app/app/import/page.tsx",
-                                lineNumber: 606,
-                                columnNumber: 13
+                                lineNumber: 538,
+                                columnNumber: 15
                             }, this)
-                        ]
-                    }, void 0, true, {
-                        fileName: "[project]/app/app/import/page.tsx",
-                        lineNumber: 592,
-                        columnNumber: 9
-                    }, this)
-                ]
-            }, void 0, true, {
-                fileName: "[project]/app/app/import/page.tsx",
-                lineNumber: 260,
-                columnNumber: 7
-            }, this)
-        ]
-    }, void 0, true, {
+                        }, void 0, false, {
+                            fileName: "[project]/app/app/import/page.tsx",
+                            lineNumber: 537,
+                            columnNumber: 13
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "[project]/app/app/import/page.tsx",
+                    lineNumber: 523,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "[project]/app/app/import/page.tsx",
+            lineNumber: 181,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
         fileName: "[project]/app/app/import/page.tsx",
-        lineNumber: 228,
+        lineNumber: 180,
         columnNumber: 5
     }, this);
 }
@@ -1599,83 +2108,116 @@ _c = ImportPage;
 function StatusBadge({ status, isActive }) {
     if (!isActive) {
         return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-            className: "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium bg-muted text-muted-foreground",
+            className: "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
+            style: {
+                background: "var(--stone-100)",
+                color: "var(--stone-500)"
+            },
             children: "inactive"
         }, void 0, false, {
             fileName: "[project]/app/app/import/page.tsx",
-            lineNumber: 674,
-            columnNumber: 7
+            lineNumber: 589,
+            columnNumber: 12
         }, this);
     }
     const styles = {
-        completed: "bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-400",
-        running: "bg-blue-100 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400",
-        pending: "bg-yellow-100 dark:bg-yellow-950/30 text-yellow-700 dark:text-yellow-400",
-        failed: "bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-400"
+        completed: {
+            bg: "var(--success-bg)",
+            color: "var(--success)"
+        },
+        running: {
+            bg: "var(--info-bg)",
+            color: "var(--teal-700)"
+        },
+        pending: {
+            bg: "var(--warning-bg)",
+            color: "var(--warning)"
+        },
+        failed: {
+            bg: "var(--error-bg)",
+            color: "var(--error)"
+        }
     };
+    const s = styles[status] || styles.pending;
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-        className: `inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${styles[status] || styles.pending}`,
+        className: "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
+        style: {
+            background: s.bg,
+            color: s.color
+        },
         children: status
     }, void 0, false, {
         fileName: "[project]/app/app/import/page.tsx",
-        lineNumber: 688,
-        columnNumber: 5
+        lineNumber: 598,
+        columnNumber: 10
     }, this);
 }
 _c1 = StatusBadge;
 function StepIndicator({ label, active, done, num }) {
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        className: "flex items-center gap-2",
+        className: "flex items-center gap-2.5",
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                className: `inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium ${done && !active ? "bg-primary text-primary-foreground" : active ? "bg-primary/20 text-primary border border-primary" : "bg-muted text-muted-foreground"}`,
+                className: "inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold",
+                style: {
+                    background: done && !active ? "var(--teal-600)" : active ? "var(--teal-50)" : "#fff",
+                    color: done && !active ? "#fff" : active ? "var(--teal-600)" : "var(--stone-400)",
+                    border: done && !active ? "2px solid var(--teal-600)" : active ? "2px solid var(--teal-600)" : "2px solid var(--stone-300)"
+                },
                 children: done && !active ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
-                    className: "w-3 h-3",
+                    width: "14",
+                    height: "14",
+                    viewBox: "0 0 24 24",
                     fill: "none",
                     stroke: "currentColor",
-                    viewBox: "0 0 24 24",
-                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
-                        strokeLinecap: "round",
-                        strokeLinejoin: "round",
-                        strokeWidth: 3,
-                        d: "M5 13l4 4L19 7"
+                    strokeWidth: 3,
+                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("polyline", {
+                        points: "20 6 9 17 4 12"
                     }, void 0, false, {
                         fileName: "[project]/app/app/import/page.tsx",
-                        lineNumber: 708,
-                        columnNumber: 13
+                        lineNumber: 613,
+                        columnNumber: 109
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/app/app/import/page.tsx",
-                    lineNumber: 707,
+                    lineNumber: 613,
                     columnNumber: 11
                 }, this) : num
             }, void 0, false, {
                 fileName: "[project]/app/app/import/page.tsx",
-                lineNumber: 697,
+                lineNumber: 604,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                className: `text-xs ${active ? "text-foreground font-medium" : "text-muted-foreground"}`,
+                className: "text-[13px] font-medium",
+                style: {
+                    color: active || done ? "var(--stone-700)" : "var(--stone-400)"
+                },
                 children: label
             }, void 0, false, {
                 fileName: "[project]/app/app/import/page.tsx",
-                lineNumber: 714,
+                lineNumber: 618,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/app/app/import/page.tsx",
-        lineNumber: 696,
+        lineNumber: 603,
         columnNumber: 5
     }, this);
 }
 _c2 = StepIndicator;
-function StepDivider() {
+function StepDivider({ done }) {
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        className: "flex-1 h-px bg-border max-w-[60px]"
+        style: {
+            width: "48px",
+            height: "2px",
+            background: done ? "var(--teal-400)" : "var(--stone-200)",
+            margin: "0 12px"
+        }
     }, void 0, false, {
         fileName: "[project]/app/app/import/page.tsx",
-        lineNumber: 722,
+        lineNumber: 624,
         columnNumber: 10
     }, this);
 }

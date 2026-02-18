@@ -1,9 +1,9 @@
 {
   "app": {
-    "[project]/app/app/page": [
+    "[project]/app/app/dashboard/page": [
       "static/media/fba5a26ea33df6a3-s.p.1bbdebe6.woff2"
     ],
-    "[project]/app/login/page": [
+    "[project]/app/app/page": [
       "static/media/fba5a26ea33df6a3-s.p.1bbdebe6.woff2"
     ],
     "[project]/app/page": [
