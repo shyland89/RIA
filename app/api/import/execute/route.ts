@@ -3,6 +3,13 @@ import { getUserOrg, isUserOrgError } from "@/lib/get-user-org";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { parse } from "csv-parse/sync";
+import {
+  classifyEnrichmentValues,
+  extractUniqueValues,
+  applyIndustryCluster,
+  applySourceGroup,
+  type EnrichmentMapping,
+} from "@/lib/enrichment";
 
 const REQUIRED_FIELDS = ["name", "amount", "outcome"] as const;
 const OPTIONAL_DIMENSION_FIELDS = ["role", "industry", "source", "segment", "country"] as const;
@@ -44,6 +51,7 @@ export async function POST(request: Request) {
   const formData = await request.formData();
   const file = formData.get("file") as File | null;
   const mappingJson = formData.get("mapping") as string | null;
+  const enrichmentMappingJson = formData.get("enrichment_mapping") as string | null;
   const importMode = (formData.get("mode") as string) || "append";
 
   if (!file || !mappingJson) {
@@ -57,10 +65,17 @@ export async function POST(request: Request) {
   try {
     mapping = JSON.parse(mappingJson);
   } catch {
-    return NextResponse.json(
-      { error: "Invalid mapping format" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Invalid mapping format" }, { status: 400 });
+  }
+
+  // Parse user-reviewed enrichment mapping if provided
+  let userEnrichmentMapping: EnrichmentMapping | null = null;
+  if (enrichmentMappingJson) {
+    try {
+      userEnrichmentMapping = JSON.parse(enrichmentMappingJson);
+    } catch {
+      // Not fatal — will re-classify
+    }
   }
 
   for (const field of REQUIRED_FIELDS) {
@@ -90,11 +105,35 @@ export async function POST(request: Request) {
       bom: true,
     });
   } catch (e: any) {
-    return NextResponse.json(
-      { error: `CSV parse error: ${e.message}` },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: `CSV parse error: ${e.message}` }, { status: 400 });
   }
+
+  // ─── Enrichment Classification ─────────────────────────────────────────────
+  // Use the user-reviewed mapping if provided; otherwise classify fresh.
+  let enrichmentMapping: EnrichmentMapping = { industry: {}, source: {} };
+
+  const apiKey = process.env.OPENAI_API_KEY;
+
+  if (userEnrichmentMapping) {
+    enrichmentMapping = userEnrichmentMapping;
+  } else if (apiKey) {
+    const uniqueIndustries = extractUniqueValues(records, mapping.industry);
+    const uniqueSources = extractUniqueValues(records, mapping.source);
+
+    if (uniqueIndustries.length > 0 || uniqueSources.length > 0) {
+      try {
+        enrichmentMapping = await classifyEnrichmentValues(
+          uniqueIndustries,
+          uniqueSources,
+          apiKey
+        );
+      } catch (err) {
+        console.error("Enrichment classification error (non-fatal):", err);
+        // Continue without enrichment — enrichment fields will be null
+      }
+    }
+  }
+  // ──────────────────────────────────────────────────────────────────────────
 
   const { data: job, error: jobError } = await admin
     .from("import_jobs")
@@ -110,6 +149,7 @@ export async function POST(request: Request) {
       is_active: true,
       import_mode: importMode === "replace" ? "replace" : "append",
       mapping_config: mapping,
+      enrichment_mapping: enrichmentMapping,
       started_at: new Date().toISOString(),
     })
     .select("id")
@@ -229,18 +269,25 @@ export async function POST(request: Request) {
       continue;
     }
 
+    const normalizedIndustry = normalizeDimension(industryStr);
+    const normalizedSource = normalizeDimension(sourceStr);
+
     const insertData: any = {
       org_id: orgId,
       import_job_id: jobId,
       name: name || null,
       role: normalizeDimension(roleStr),
-      industry: normalizeDimension(industryStr),
-      source: normalizeDimension(sourceStr),
+      industry: normalizedIndustry,
+      source: normalizedSource,
       amount,
       outcome,
       segment: normalizeDimension(segmentStr),
       country: normalizeDimension(countryStr),
+      // Enriched fields
+      industry_cluster: applyIndustryCluster(normalizedIndustry, enrichmentMapping.industry),
+      source_group: applySourceGroup(normalizedSource, enrichmentMapping.source),
     };
+
     if (createdAt) insertData.created_at = createdAt;
     if (closedDate) insertData.closed_date = closedDate;
     if (pipelineAcceptedDate) insertData.pipeline_accepted_date = pipelineAcceptedDate;
@@ -270,7 +317,7 @@ export async function POST(request: Request) {
     await admin.from("import_errors").insert(errorInserts);
   }
 
-  const finalStatus = insertedCount > 0 ? "completed" : (errors.length > 0 ? "failed" : "completed");
+  const finalStatus = insertedCount > 0 ? "completed" : errors.length > 0 ? "failed" : "completed";
 
   await admin
     .from("import_jobs")
@@ -290,5 +337,6 @@ export async function POST(request: Request) {
     skippedCount,
     totalRows: records.length,
     errors: errors.slice(0, 50),
+    enrichmentMapping, // returned so UI can display what was applied
   });
 }

@@ -1,9 +1,12 @@
 {
-  "/api/ai/analyze/route": "app/api/ai/analyze/route.js",
+  "/_not-found/page": "app/_not-found/page.js",
   "/api/analytics/dimensions/route": "app/api/analytics/dimensions/route.js",
   "/api/analytics/summary/route": "app/api/analytics/summary/route.js",
+  "/api/import/execute/route": "app/api/import/execute/route.js",
   "/api/import/jobs/route": "app/api/import/jobs/route.js",
+  "/api/import/upload/route": "app/api/import/upload/route.js",
   "/app/dashboard/page": "app/app/dashboard/page.js",
+  "/app/import/page": "app/app/import/page.js",
   "/app/page": "app/app/page.js",
   "/page": "app/page.js"
 }

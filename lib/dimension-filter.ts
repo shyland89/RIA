@@ -1,4 +1,12 @@
-export const DIMENSION_KEYS = ["segment", "country", "source", "industry", "role"] as const;
+export const DIMENSION_KEYS = [
+  "segment",
+  "country",
+  "source",
+  "industry",
+  "role",
+  "industry_cluster",
+  "source_group",
+] as const;
 export type DimensionKey = (typeof DIMENSION_KEYS)[number];
 
 export const DIMENSION_LABELS: Record<DimensionKey, string> = {
@@ -7,7 +15,12 @@ export const DIMENSION_LABELS: Record<DimensionKey, string> = {
   source: "Source",
   industry: "Industry",
   role: "Champion Role",
+  industry_cluster: "Industry Cluster",
+  source_group: "Source Group",
 };
+
+export const ENRICHED_DIMENSION_KEYS: DimensionKey[] = ["industry_cluster", "source_group"];
+export const RAW_DIMENSION_KEYS: DimensionKey[] = ["segment", "country", "source", "industry", "role"];
 
 export const UNKNOWN_VALUE = "Unknown";
 
@@ -38,9 +51,10 @@ export function parseDimensionFiltersFromBody(
   return filters;
 }
 
-export function applyDimensionFiltersInMemory<
-  T extends Record<string, any>
->(items: T[], filters: DimensionFilters): T[] {
+export function applyDimensionFiltersInMemory<T extends Record<string, any>>(
+  items: T[],
+  filters: DimensionFilters
+): T[] {
   let filtered = items;
   for (const [key, values] of Object.entries(filters)) {
     if (!values || values.length === 0) continue;

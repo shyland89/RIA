@@ -48,9 +48,11 @@ __turbopack_context__.s([
     "createClient",
     ()=>createClient
 ]);
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$server$2d$only$2f$empty$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/server-only/empty.js [app-route] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$supabase$2f$ssr$2f$dist$2f$module$2f$index$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_context__.i("[project]/node_modules/@supabase/ssr/dist/module/index.js [app-route] (ecmascript) <locals>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$supabase$2f$ssr$2f$dist$2f$module$2f$createServerClient$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/@supabase/ssr/dist/module/createServerClient.js [app-route] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$headers$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/headers.js [app-route] (ecmascript)");
+;
 ;
 ;
 async function createClient() {
@@ -64,8 +66,7 @@ async function createClient() {
                 try {
                     cookiesToSet.forEach(({ name, value, options })=>cookieStore.set(name, value, options));
                 } catch  {
-                // The `setAll` method was called from a Server Component.
-                // This can be ignored if you have middleware refreshing user sessions.
+                // Called from a Server Component — safe to ignore.
                 }
             }
         }
@@ -239,6 +240,10 @@ __turbopack_context__.s([
     ()=>DIMENSION_KEYS,
     "DIMENSION_LABELS",
     ()=>DIMENSION_LABELS,
+    "ENRICHED_DIMENSION_KEYS",
+    ()=>ENRICHED_DIMENSION_KEYS,
+    "RAW_DIMENSION_KEYS",
+    ()=>RAW_DIMENSION_KEYS,
     "UNKNOWN_VALUE",
     ()=>UNKNOWN_VALUE,
     "applyDimensionFiltersInMemory",
@@ -259,15 +264,30 @@ const DIMENSION_KEYS = [
     "country",
     "source",
     "industry",
-    "role"
+    "role",
+    "industry_cluster",
+    "source_group"
 ];
 const DIMENSION_LABELS = {
     segment: "Segment",
     country: "Country",
     source: "Source",
     industry: "Industry",
-    role: "Champion Role"
+    role: "Champion Role",
+    industry_cluster: "Industry Cluster",
+    source_group: "Source Group"
 };
+const ENRICHED_DIMENSION_KEYS = [
+    "industry_cluster",
+    "source_group"
+];
+const RAW_DIMENSION_KEYS = [
+    "segment",
+    "country",
+    "source",
+    "industry",
+    "role"
+];
 const UNKNOWN_VALUE = "Unknown";
 function parseDimensionFiltersFromSearchParams(params) {
     const filters = {};
@@ -404,7 +424,7 @@ async function GET(request) {
     }).eq("org_id", orgId).is(filter.dateField, null);
     if (datasetId) nullQuery = nullQuery.eq("import_job_id", datasetId);
     const { count: nullDateCount } = await nullQuery;
-    let query = admin.from("opportunities").select("name, role, industry, source, segment, country, amount, outcome, closed_date, pipeline_accepted_date, created_at").eq("org_id", orgId).not(filter.dateField, "is", null).gte(filter.dateField, filter.dateFrom).lte(filter.dateField, filter.dateTo);
+    let query = admin.from("opportunities").select("name, role, industry, source, segment, country, amount, outcome, closed_date, pipeline_accepted_date, created_at, industry_cluster, source_group").eq("org_id", orgId).not(filter.dateField, "is", null).gte(filter.dateField, filter.dateFrom).lte(filter.dateField, filter.dateTo);
     if (datasetId) query = query.eq("import_job_id", datasetId);
     const { data: opportunities, error } = await query;
     if (error) {
@@ -440,7 +460,9 @@ async function GET(request) {
         industry: computeCoverage("industry"),
         source: computeCoverage("source"),
         segment: computeCoverage("segment"),
-        country: computeCoverage("country")
+        country: computeCoverage("country"),
+        industry_cluster: computeCoverage("industry_cluster"),
+        source_group: computeCoverage("source_group")
     };
     return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
         totals: {
@@ -451,11 +473,15 @@ async function GET(request) {
             winRate,
             avgAmountWon
         },
+        // Raw dimensions
         byRole: buildBreakdown(opps, "role"),
         byIndustry: buildBreakdown(opps, "industry"),
         bySource: buildBreakdown(opps, "source"),
         bySegment: buildBreakdown(opps, "segment"),
         byCountry: buildBreakdown(opps, "country"),
+        // Enriched dimensions
+        byIndustryCluster: buildBreakdown(opps, "industry_cluster"),
+        bySourceGroup: buildBreakdown(opps, "source_group"),
         coverage,
         filter: {
             dateMode: filter.dateField,

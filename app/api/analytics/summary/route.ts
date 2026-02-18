@@ -23,6 +23,8 @@ type Opportunity = {
   closed_date: string | null;
   pipeline_accepted_date: string | null;
   created_at: string;
+  industry_cluster: string | null;
+  source_group: string | null;
 };
 
 type BreakdownRow = {
@@ -39,7 +41,8 @@ function buildBreakdown(opps: Opportunity[], field: keyof Opportunity): Breakdow
   const groups = new Map<string, Opportunity[]>();
   for (const opp of opps) {
     const rawVal = opp[field];
-    const key = (rawVal === null || rawVal === undefined || rawVal === "") ? UNKNOWN_VALUE : String(rawVal);
+    const key =
+      rawVal === null || rawVal === undefined || rawVal === "" ? UNKNOWN_VALUE : String(rawVal);
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key)!.push(opp);
   }
@@ -111,7 +114,9 @@ export async function GET(request: NextRequest) {
 
   let query = admin
     .from("opportunities")
-    .select("name, role, industry, source, segment, country, amount, outcome, closed_date, pipeline_accepted_date, created_at")
+    .select(
+      "name, role, industry, source, segment, country, amount, outcome, closed_date, pipeline_accepted_date, created_at, industry_cluster, source_group"
+    )
     .eq("org_id", orgId)
     .not(filter.dateField, "is", null)
     .gte(filter.dateField, filter.dateFrom)
@@ -145,9 +150,15 @@ export async function GET(request: NextRequest) {
   const COVERAGE_MIN_PCT = 0.2;
 
   function computeCoverage(field: keyof Opportunity) {
-    const nonNull = opps.filter((o) => o[field] !== null && o[field] !== undefined && o[field] !== "").length;
+    const nonNull = opps.filter(
+      (o) => o[field] !== null && o[field] !== undefined && o[field] !== ""
+    ).length;
     const pct = total > 0 ? nonNull / total : 0;
-    return { nonNullCount: nonNull, percentage: pct, sufficient: nonNull >= COVERAGE_MIN_COUNT && pct >= COVERAGE_MIN_PCT };
+    return {
+      nonNullCount: nonNull,
+      percentage: pct,
+      sufficient: nonNull >= COVERAGE_MIN_COUNT && pct >= COVERAGE_MIN_PCT,
+    };
   }
 
   const coverage = {
@@ -156,6 +167,8 @@ export async function GET(request: NextRequest) {
     source: computeCoverage("source"),
     segment: computeCoverage("segment"),
     country: computeCoverage("country"),
+    industry_cluster: computeCoverage("industry_cluster"),
+    source_group: computeCoverage("source_group"),
   };
 
   return NextResponse.json({
@@ -167,11 +180,15 @@ export async function GET(request: NextRequest) {
       winRate,
       avgAmountWon,
     },
+    // Raw dimensions
     byRole: buildBreakdown(opps, "role"),
     byIndustry: buildBreakdown(opps, "industry"),
     bySource: buildBreakdown(opps, "source"),
     bySegment: buildBreakdown(opps, "segment"),
     byCountry: buildBreakdown(opps, "country"),
+    // Enriched dimensions
+    byIndustryCluster: buildBreakdown(opps, "industry_cluster"),
+    bySourceGroup: buildBreakdown(opps, "source_group"),
     coverage,
     filter: {
       dateMode: filter.dateField,

@@ -110,6 +110,10 @@ __turbopack_context__.s([
     ()=>DIMENSION_KEYS,
     "DIMENSION_LABELS",
     ()=>DIMENSION_LABELS,
+    "ENRICHED_DIMENSION_KEYS",
+    ()=>ENRICHED_DIMENSION_KEYS,
+    "RAW_DIMENSION_KEYS",
+    ()=>RAW_DIMENSION_KEYS,
     "UNKNOWN_VALUE",
     ()=>UNKNOWN_VALUE,
     "applyDimensionFiltersInMemory",
@@ -130,15 +134,30 @@ const DIMENSION_KEYS = [
     "country",
     "source",
     "industry",
-    "role"
+    "role",
+    "industry_cluster",
+    "source_group"
 ];
 const DIMENSION_LABELS = {
     segment: "Segment",
     country: "Country",
     source: "Source",
     industry: "Industry",
-    role: "Champion Role"
+    role: "Champion Role",
+    industry_cluster: "Industry Cluster",
+    source_group: "Source Group"
 };
+const ENRICHED_DIMENSION_KEYS = [
+    "industry_cluster",
+    "source_group"
+];
+const RAW_DIMENSION_KEYS = [
+    "segment",
+    "country",
+    "source",
+    "industry",
+    "role"
+];
 const UNKNOWN_VALUE = "Unknown";
 function parseDimensionFiltersFromSearchParams(params) {
     const filters = {};
