@@ -358,241 +358,203 @@ function DashboardContent() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-3">
-            <div className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-primary">
-              <svg className="w-4 h-4 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {/* Page header — no inner nav links, sidebar handles navigation */}
+      <header
+        className="sticky top-0 z-10 border-b border-border bg-background/95"
+        style={{ backdropFilter: "blur(8px)" }}
+      >
+        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            <div
+              className="inline-flex items-center justify-center w-7 h-7"
+              style={{
+                background: "var(--teal-50)",
+                borderRadius: "6px",
+                border: "1px solid var(--teal-200)",
+              }}
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "var(--teal-600)" }}>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <span className="text-sm font-semibold text-foreground" data-testid="text-dashboard-title">
-              Analytics Dashboard
+            <span className="text-[13px] font-semibold text-foreground" data-testid="text-dashboard-title">
+              Analytics
             </span>
           </div>
-          <div className="flex items-center gap-3 flex-wrap">
-            <Link
-              href="/app/import"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              data-testid="link-import"
-            >
-              Import
-            </Link>
-            <Link
-              href="/app"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              data-testid="link-home"
-            >
-              Home
-            </Link>
-          </div>
+          {data && (
+            <span className="text-[12px] text-muted-foreground">
+              {data.filter.includedCount} opportunities · {data.filter.dateFrom} – {data.filter.dateTo}
+            </span>
+          )}
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <main className="max-w-6xl mx-auto px-6 py-8">
         {/* Filter Bar */}
-        <div className="rounded-md border border-border bg-card p-4 mb-4" data-testid="filter-bar">
-          <div className="flex flex-wrap items-end gap-4">
+        <div
+          className="rounded-lg border border-border bg-card p-4 mb-6"
+          style={{ boxShadow: "var(--shadow-xs)" }}
+          data-testid="filter-bar"
+        >
+          <div className="flex flex-wrap items-end gap-3">
             {datasets.length > 0 && (
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-muted-foreground" htmlFor="dataset-select">
+              <div className="flex flex-col gap-1">
+                <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide" htmlFor="dataset-select">
                   Dataset
                 </label>
                 <select
                   id="dataset-select"
                   value={selectedDataset}
                   onChange={(e) => handleDatasetChange(e.target.value)}
-                  className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  className="rounded-md border border-border bg-background px-3 py-1.5 text-[13px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 h-8"
                   data-testid="select-dataset"
                 >
                   <option value="">All Data</option>
                   {datasets.map((ds) => (
                     <option key={ds.id} value={ds.id}>
-                      {ds.filename} ({ds.inserted_count} rows)
+                      {ds.filename} ({ds.inserted_count})
                     </option>
                   ))}
                 </select>
               </div>
             )}
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-muted-foreground" htmlFor="date-mode">
+            <div className="flex flex-col gap-1">
+              <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
                 Date Mode
               </label>
               <select
-                id="date-mode"
                 value={dateMode}
                 onChange={(e) => updateFilter({ date_mode: e.target.value })}
-                className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="rounded-md border border-border bg-background px-3 py-1.5 text-[13px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 h-8"
                 data-testid="select-date-mode"
               >
                 {DATE_MODES.map((m) => (
-                  <option key={m} value={m}>
-                    {DATE_MODE_LABELS[m]}
-                  </option>
+                  <option key={m} value={m}>{DATE_MODE_LABELS[m]}</option>
                 ))}
               </select>
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-medium text-muted-foreground" htmlFor="period">
+            <div className="flex flex-col gap-1">
+              <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
                 Time Period
               </label>
               <select
-                id="period"
                 value={period}
                 onChange={(e) => updateFilter({ period: e.target.value })}
-                className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                className="rounded-md border border-border bg-background px-3 py-1.5 text-[13px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 h-8"
                 data-testid="select-period"
               >
                 {PERIODS.map((p) => (
-                  <option key={p} value={p}>
-                    {PERIOD_LABELS[p]}
-                  </option>
+                  <option key={p} value={p}>{PERIOD_LABELS[p]}</option>
                 ))}
               </select>
             </div>
 
             {period === "custom" && (
               <>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-medium text-muted-foreground" htmlFor="custom-from">
-                    From
-                  </label>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">From</label>
                   <input
                     type="date"
-                    id="custom-from"
                     value={customFrom}
                     onChange={(e) => updateFilter({ from: e.target.value })}
-                    className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-                    data-testid="input-date-from"
+                    className="rounded-md border border-border bg-background px-3 py-1.5 text-[13px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 h-8"
+                    data-testid="input-from"
                   />
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-medium text-muted-foreground" htmlFor="custom-to">
-                    To
-                  </label>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">To</label>
                   <input
                     type="date"
-                    id="custom-to"
                     value={customTo}
                     onChange={(e) => updateFilter({ to: e.target.value })}
-                    className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-                    data-testid="input-date-to"
+                    className="rounded-md border border-border bg-background px-3 py-1.5 text-[13px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 h-8"
+                    data-testid="input-to"
                   />
                 </div>
               </>
             )}
 
-            <button
-              onClick={() => setFiltersOpen((v) => !v)}
-              className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-2 text-sm font-medium transition-colors ${
-                activeDimFilterCount > 0
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border bg-background text-foreground"
-              }`}
-              data-testid="button-toggle-filters"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-              </svg>
-              Filters
-              {activeDimFilterCount > 0 && (
-                <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-primary text-primary-foreground text-[10px] font-semibold px-1">
-                  {activeDimFilterCount}
-                </span>
-              )}
-              <svg className={`w-3 h-3 transition-transform ${filtersOpen ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
+            <div className="ml-auto flex items-end">
+              <button
+                onClick={() => setFiltersOpen((v) => !v)}
+                className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-[13px] font-medium text-foreground h-8 transition-colors hover:bg-muted"
+                data-testid="button-filters"
+              >
+                <svg className="w-3.5 h-3.5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
+                </svg>
+                Filters
+                {activeDimFilterCount > 0 && (
+                  <span
+                    className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold text-white"
+                    style={{ background: "var(--teal-600)" }}
+                  >
+                    {activeDimFilterCount}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
 
-          {data?.filter && (
-            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground" data-testid="filter-meta">
-              <span>
-                Showing <strong className="text-foreground">{data.filter.includedCount}</strong> opportunities
-              </span>
-              <span>
-                {data.filter.dateModeLabel}: {new Date(data.filter.dateFrom).toLocaleDateString()} &ndash; {new Date(data.filter.dateTo).toLocaleDateString()}
-              </span>
-              {data.filter.excludedNullCount > 0 && (
-                <span>
-                  ({data.filter.excludedNullCount} excluded &mdash; missing {data.filter.dateModeLabel.toLowerCase()})
+          {/* Dimension Filters Panel */}
+          {filtersOpen && (
+            <div className="mt-4 pt-4 border-t border-border" data-testid="dim-filters">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+                  Dimension Filters
                 </span>
-              )}
-              {selectedDataset && datasets.length > 0 && (
-                <span data-testid="text-active-dataset">
-                  Dataset: {datasets.find((d) => d.id === selectedDataset)?.filename || "Selected"}
-                </span>
-              )}
-              {data.filter.activeDimensionFilters && (
-                <span data-testid="text-active-dim-filters">
-                  Filtered by: {data.filter.activeDimensionFilters}
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Dimension Filters Panel */}
-        {filtersOpen && (
-          <div className="rounded-md border border-border bg-card p-4 mb-8" data-testid="dimension-filters-panel">
-            <div className="flex items-center justify-between gap-4 flex-wrap mb-3">
-              <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Dimension Filters
-              </h3>
-              {activeDimFilterCount > 0 && (
-                <button
-                  onClick={clearAllDimFilters}
-                  className="text-xs text-primary hover:underline"
-                  data-testid="button-clear-all-filters"
-                >
-                  Clear all
-                </button>
-              )}
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-              {DIMENSION_KEYS.map((dim) => {
-                const options = dimOptions[dim] || [];
-                const selected = dimFilters[dim] || [];
-                return (
-                  <div key={dim} data-testid={`dim-filter-${dim}`}>
-                    <p className="text-xs font-medium text-foreground mb-2">{DIMENSION_LABELS[dim]}</p>
-                    {options.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">No values</p>
-                    ) : (
-                      <div className="space-y-1 max-h-40 overflow-y-auto pr-1">
-                        {options.map((val) => {
-                          const isChecked = selected.includes(val);
+                {activeDimFilterCount > 0 && (
+                  <button
+                    onClick={clearAllDimFilters}
+                    className="text-[12px] text-muted-foreground hover:text-foreground transition-colors"
+                    data-testid="button-clear-filters"
+                  >
+                    Clear all
+                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                {DIMENSION_KEYS.map((dim) => {
+                  const opts = dimOptions[dim] || [];
+                  if (opts.length === 0) return null;
+                  return (
+                    <div key={dim}>
+                      <div className="text-[11px] font-medium text-muted-foreground mb-1.5">
+                        {DIMENSION_LABELS[dim]}
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        {opts.map((val) => {
+                          const checked = dimFilters[dim]?.includes(val) ?? false;
                           return (
                             <label
                               key={val}
-                              className="flex items-center gap-2 cursor-pointer text-xs text-foreground hover:bg-muted/40 rounded px-1 py-0.5"
-                              data-testid={`dim-option-${dim}-${val}`}
+                              className="flex items-center gap-2 cursor-pointer group"
+                              data-testid={`filter-${dim}-${val}`}
                             >
                               <input
                                 type="checkbox"
-                                checked={isChecked}
+                                checked={checked}
                                 onChange={() => toggleDimValue(dim, val)}
-                                className="rounded border-border text-primary focus:ring-primary/30 h-3.5 w-3.5"
+                                className="w-3.5 h-3.5 rounded accent-primary"
                               />
-                              <span className={val === UNKNOWN_VALUE ? "italic text-muted-foreground" : ""}>
+                              <span className="text-[12px] text-muted-foreground group-hover:text-foreground transition-colors truncate">
                                 {val}
                               </span>
                             </label>
                           );
                         })}
                       </div>
-                    )}
-                  </div>
-                );
-              })}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
-        {!filtersOpen && <div className="mb-8" />}
+        {!filtersOpen && <div className="mb-2" />}
 
         {loading && (
           <div className="flex items-center justify-center py-20" data-testid="loading-state">
@@ -606,25 +568,36 @@ function DashboardContent() {
         )}
 
         {error && (
-          <div className="rounded-md border border-red-300 bg-red-50 dark:bg-red-950/20 dark:border-red-800 px-4 py-3 text-sm text-red-700 dark:text-red-400" data-testid="text-error">
+          <div
+            className="rounded-md px-4 py-3 text-[13px] mb-4"
+            style={{
+              background: "var(--error-bg)",
+              border: "1px solid var(--error-border)",
+              color: "var(--error)",
+            }}
+            data-testid="text-error"
+          >
             {error}
           </div>
         )}
 
         {!loading && !error && data && data.totals.count === 0 && (
           <div className="text-center py-20" data-testid="empty-state">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-muted mb-4">
-              <svg className="w-7 h-7 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div
+              className="inline-flex items-center justify-center w-12 h-12 rounded-full mb-4"
+              style={{ background: "var(--zinc-100)" }}
+            >
+              <svg className="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-foreground mb-1">No opportunities found</h2>
-            <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+            <h2 className="text-[16px] font-semibold text-foreground mb-1">No opportunities found</h2>
+            <p className="text-[13px] text-muted-foreground mb-6 max-w-md mx-auto">
               No data matches the selected filters. Try adjusting the date mode, time period, or dimension filters, or import opportunities from CSV.
             </p>
             <Link
               href="/app/import"
-              className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+              className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-[13px] font-medium text-primary-foreground"
               data-testid="link-import-cta"
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -637,21 +610,13 @@ function DashboardContent() {
 
         {!loading && !error && data && data.totals.count > 0 && (
           <div className="space-y-8">
-            <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-                Analytics
-              </h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                Performance overview of your opportunities pipeline.
-              </p>
-            </div>
 
             {/* KPI Cards */}
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-testid="kpi-cards">
               <KpiCard
                 label="Total Opportunities"
                 value={String(data.totals.count)}
-                sub={`${data.totals.open} open \u00B7 ${data.totals.won} won \u00B7 ${data.totals.lost} lost`}
+                sub={`${data.totals.open} open · ${data.totals.won} won · ${data.totals.lost} lost`}
                 testId="kpi-total"
               />
               <KpiCard
@@ -686,27 +651,40 @@ function DashboardContent() {
               ];
               const visible = breakdowns.filter((b) => !c || c[b.dim]?.sufficient !== false);
               const hidden = breakdowns.filter((b) => c && c[b.dim]?.sufficient === false);
-              const topRow = visible.slice(0, 3);
-              const bottomRow = visible.slice(3);
+
+              // Fixed layout: Role + Industry side by side, Source full width, Segment + Country side by side
+              const role = visible.find((b) => b.dim === "role");
+              const industry = visible.find((b) => b.dim === "industry");
+              const source = visible.find((b) => b.dim === "source");
+              const segment = visible.find((b) => b.dim === "segment");
+              const country = visible.find((b) => b.dim === "country");
+
               return (
                 <>
-                  {topRow.length > 0 && (
-                    <div className={`grid gap-6 ${topRow.length === 1 ? "" : topRow.length === 2 ? "lg:grid-cols-2" : "lg:grid-cols-3"}`}>
-                      {topRow.map((b) => (
-                        <BreakdownTable key={b.testId} title={b.title} rows={b.rows} testId={b.testId} />
-                      ))}
+                  {/* Row 1: Role + Industry + Source - 3 columns */}
+                  {(role || industry || source) && (
+                    <div className="grid gap-5 lg:grid-cols-3">
+                      {role && <BreakdownTable title={role.title} rows={role.rows} testId={role.testId} />}
+                      {industry && <BreakdownTable title={industry.title} rows={industry.rows} testId={industry.testId} />}
+                      {source && <BreakdownTable title={source.title} rows={source.rows} testId={source.testId} />}
                     </div>
                   )}
-                  {bottomRow.length > 0 && (
-                    <div className={`grid gap-6 ${bottomRow.length === 1 ? "" : "lg:grid-cols-2"}`}>
-                      {bottomRow.map((b) => (
-                        <BreakdownTable key={b.testId} title={b.title} rows={b.rows} testId={b.testId} />
-                      ))}
+
+                  {/* Row 2: Segment + Country */}
+                  {(segment || country) && (
+                    <div className={`grid gap-5 ${segment && country ? "lg:grid-cols-2" : ""}`}>
+                      {segment && <BreakdownTable title={segment.title} rows={segment.rows} testId={segment.testId} />}
+                      {country && <BreakdownTable title={country.title} rows={country.rows} testId={country.testId} />}
                     </div>
                   )}
+
                   {hidden.length > 0 && (
-                    <div className="rounded-md border border-border bg-muted/30 p-4" data-testid="hidden-breakdowns-note">
-                      <p className="text-xs text-muted-foreground">
+                    <div
+                      className="rounded-md px-4 py-3"
+                      style={{ background: "var(--zinc-100)", border: "1px solid var(--zinc-200)" }}
+                      data-testid="hidden-breakdowns-note"
+                    >
+                      <p className="text-[12px] text-muted-foreground">
                         {hidden.map((b) => b.title).join(", ")} breakdown{hidden.length > 1 ? "s" : ""} hidden:{" "}
                         {hidden.map((b) => `${b.label} not provided in this dataset`).join("; ")}.
                       </p>
@@ -717,31 +695,47 @@ function DashboardContent() {
             })()}
 
             {/* AI Analysis Section */}
-            <div className="rounded-md border border-border bg-card p-6" data-testid="ai-analysis-section">
-              <div className="flex items-center justify-between gap-4 flex-wrap mb-4">
+            <div
+              className="rounded-lg border border-border bg-card"
+              style={{ boxShadow: "var(--shadow-sm)" }}
+              data-testid="ai-analysis-section"
+            >
+              {/* AI Section Header */}
+              <div
+                className="flex items-center justify-between gap-4 px-5 py-4"
+                style={{ borderBottom: "1px solid var(--border)" }}
+              >
                 <div className="flex items-center gap-3">
-                  <div className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-primary/10">
-                    <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div
+                    className="inline-flex items-center justify-center w-7 h-7 shrink-0"
+                    style={{
+                      background: "var(--teal-50)",
+                      borderRadius: "6px",
+                      border: "1px solid var(--teal-200)",
+                    }}
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "var(--teal-600)" }}>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-foreground">AI-Powered Analysis</h3>
-                    <p className="text-xs text-muted-foreground">
-                      Analyzing with {DATE_MODE_LABELS[dateMode]} &middot; {PERIOD_LABELS[period]}
-                      {activeDimFilterCount > 0 && ` \u00B7 ${activeDimFilterCount} filter${activeDimFilterCount > 1 ? "s" : ""} active`}
+                    <h3 className="text-[13px] font-semibold text-foreground">AI-Powered Analysis</h3>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      {DATE_MODE_LABELS[dateMode]} · {PERIOD_LABELS[period]}
+                      {activeDimFilterCount > 0 && ` · ${activeDimFilterCount} filter${activeDimFilterCount > 1 ? "s" : ""} active`}
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={runAiAnalysis}
                   disabled={aiLoading}
-                  className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="inline-flex items-center gap-1.5 rounded-md px-3.5 py-2 text-[13px] font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  style={{ background: "var(--teal-600)" }}
                   data-testid="button-ai-analyze"
                 >
                   {aiLoading ? (
                     <>
-                      <svg className="w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                       </svg>
@@ -749,7 +743,7 @@ function DashboardContent() {
                     </>
                   ) : (
                     <>
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
                       Analyze with AI
@@ -758,82 +752,109 @@ function DashboardContent() {
                 </button>
               </div>
 
-              {aiError && (
-                <div className="rounded-md border border-red-300 bg-red-50 dark:bg-red-950/20 dark:border-red-800 px-4 py-3 text-sm text-red-700 dark:text-red-400 mb-4" data-testid="text-ai-error">
-                  {aiError}
-                </div>
-              )}
-
-              {!aiAnalysis && !aiLoading && !aiError && (
-                <p className="text-sm text-muted-foreground" data-testid="text-ai-placeholder">
-                  Click the button above to generate AI-powered insights for the current filters.
-                </p>
-              )}
-
-              {aiAnalysis && (
-                <div className="space-y-6" data-testid="ai-results">
-                  {/* Summary */}
-                  <div data-testid="ai-summary">
-                    <p className="text-sm text-foreground leading-relaxed">{aiAnalysis.summary}</p>
+              {/* AI Content */}
+              <div className="p-5">
+                {aiError && (
+                  <div
+                    className="rounded-md px-4 py-3 text-[13px] mb-4"
+                    style={{
+                      background: "var(--error-bg)",
+                      border: "1px solid var(--error-border)",
+                      color: "var(--error)",
+                    }}
+                    data-testid="text-ai-error"
+                  >
+                    {aiError}
                   </div>
+                )}
 
-                  {/* Stage Sections */}
-                  <div className="space-y-5">
-                    <AiStageCard
-                      title="Open Pipeline"
-                      section={aiAnalysis.openPipeline}
-                      accentColor="blue"
-                      icon={
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      }
-                      testId="ai-stage-open"
-                    />
-                    <AiStageCard
-                      title="Closed Won"
-                      section={aiAnalysis.closedWon}
-                      accentColor="green"
-                      icon={
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      }
-                      testId="ai-stage-won"
-                    />
-                    <AiStageCard
-                      title="Closed Lost"
-                      section={aiAnalysis.closedLost}
-                      accentColor="red"
-                      icon={
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      }
-                      testId="ai-stage-lost"
-                    />
-                  </div>
+                {!aiAnalysis && !aiLoading && !aiError && (
+                  <p className="text-[13px] text-muted-foreground" data-testid="text-ai-placeholder">
+                    Click the button above to generate AI-powered insights for the current filters.
+                  </p>
+                )}
 
-                  {/* Recommendations */}
-                  <div data-testid="ai-recommendations">
-                    <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Recommendations</h4>
-                    <div className="space-y-2">
-                      {aiAnalysis.recommendations.map((rec, i) => (
-                        <div
-                          key={i}
-                          className="flex items-start gap-3 rounded-md border border-border bg-muted/20 px-4 py-3"
-                          data-testid={`ai-rec-${i}`}
-                        >
-                          <span className="inline-flex items-center justify-center min-w-[24px] h-6 rounded-full bg-primary text-primary-foreground text-xs font-semibold">
-                            {i + 1}
-                          </span>
-                          <p className="text-sm text-foreground leading-relaxed">{rec}</p>
-                        </div>
-                      ))}
+                {aiAnalysis && (
+                  <div className="space-y-5" data-testid="ai-results">
+                    {/* Summary */}
+                    <div
+                      className="rounded-md px-4 py-3"
+                      style={{ background: "var(--zinc-50)", border: "1px solid var(--zinc-200)" }}
+                      data-testid="ai-summary"
+                    >
+                      <p className="text-[13px] text-foreground leading-relaxed">{aiAnalysis.summary}</p>
+                    </div>
+
+                    {/* Stage Sections */}
+                    <div className="space-y-4">
+                      <AiStageCard
+                        title="Open Pipeline"
+                        section={aiAnalysis.openPipeline}
+                        variant="blue"
+                        icon={
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        }
+                        testId="ai-stage-open"
+                      />
+                      <AiStageCard
+                        title="Closed Won"
+                        section={aiAnalysis.closedWon}
+                        variant="green"
+                        icon={
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        }
+                        testId="ai-stage-won"
+                      />
+                      <AiStageCard
+                        title="Closed Lost"
+                        section={aiAnalysis.closedLost}
+                        variant="red"
+                        icon={
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        }
+                        testId="ai-stage-lost"
+                      />
+                    </div>
+
+                    {/* Recommendations */}
+                    <div data-testid="ai-recommendations">
+                      <h4
+                        className="text-[11px] font-semibold uppercase tracking-wide mb-3"
+                        style={{ color: "var(--zinc-500)" }}
+                      >
+                        Recommendations
+                      </h4>
+                      <div className="space-y-2 max-w-2xl mx-auto">
+                        {aiAnalysis.recommendations.map((rec, i) => (
+                          <div
+                            key={i}
+                            className="flex items-start gap-3 rounded-md px-4 py-3"
+                            style={{
+                              background: "var(--zinc-50)",
+                              border: "1px solid var(--zinc-200)",
+                            }}
+                            data-testid={`ai-rec-${i}`}
+                          >
+                            <span
+                              className="inline-flex items-center justify-center w-5 h-5 rounded text-[11px] font-bold text-white shrink-0 mt-0.5"
+                              style={{ background: "var(--teal-600)", lineHeight: "1" }}
+                            >
+                              {i + 1}
+                            </span>
+                            <p className="text-[13px] text-foreground leading-relaxed">{rec}</p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -844,98 +865,135 @@ function DashboardContent() {
 
 /* ─── Stage Section Card ─── */
 
-const ACCENT_STYLES = {
+const STAGE_VARIANTS = {
   blue: {
-    header: "border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-900",
-    iconBg: "bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400",
-    title: "text-blue-900 dark:text-blue-200",
-    headline: "text-blue-800 dark:text-blue-300",
+    headerBg: "#EFF6FF",
+    headerBorder: "#BFDBFE",
+    iconBg: "#DBEAFE",
+    iconColor: "#2563EB",
+    titleColor: "#1E3A8A",
+    headlineColor: "#1D4ED8",
   },
   green: {
-    header: "border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-900",
-    iconBg: "bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400",
-    title: "text-green-900 dark:text-green-200",
-    headline: "text-green-800 dark:text-green-300",
+    headerBg: "var(--success-bg)",
+    headerBorder: "var(--success-border)",
+    iconBg: "#DCFCE7",
+    iconColor: "#16A34A",
+    titleColor: "#14532D",
+    headlineColor: "#15803D",
   },
   red: {
-    header: "border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900",
-    iconBg: "bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400",
-    title: "text-red-900 dark:text-red-200",
-    headline: "text-red-800 dark:text-red-300",
+    headerBg: "var(--error-bg)",
+    headerBorder: "var(--error-border)",
+    iconBg: "#FEE2E2",
+    iconColor: "#DC2626",
+    titleColor: "#7F1D1D",
+    headlineColor: "#B91C1C",
   },
 };
 
-const INSIGHT_TYPE_STYLES: Record<string, { border: string; label: string; labelColor: string }> = {
+const INSIGHT_VARIANTS = {
   strength: {
-    border: "border-l-green-500",
+    dot: "var(--insight-strength)",
     label: "STRENGTH",
-    labelColor: "text-green-600 dark:text-green-400",
+    labelColor: "var(--insight-strength)",
+    bg: "var(--insight-strength-bg)",
+    border: "var(--insight-strength-border)",
   },
   risk: {
-    border: "border-l-red-500",
+    dot: "var(--insight-risk)",
     label: "RISK",
-    labelColor: "text-red-600 dark:text-red-400",
+    labelColor: "var(--insight-risk)",
+    bg: "var(--insight-risk-bg)",
+    border: "var(--insight-risk-border)",
   },
   pattern: {
-    border: "border-l-blue-500",
+    dot: "var(--insight-pattern)",
     label: "PATTERN",
-    labelColor: "text-blue-600 dark:text-blue-400",
+    labelColor: "var(--insight-pattern)",
+    bg: "var(--insight-pattern-bg)",
+    border: "var(--insight-pattern-border)",
   },
 };
 
 function AiStageCard({
   title,
   section,
-  accentColor,
+  variant,
   icon,
   testId,
 }: {
   title: string;
   section: AiStageSection;
-  accentColor: "blue" | "green" | "red";
+  variant: "blue" | "green" | "red";
   icon: React.ReactNode;
   testId: string;
 }) {
-  const styles = ACCENT_STYLES[accentColor];
+  const v = STAGE_VARIANTS[variant];
 
   return (
-    <div className="rounded-md border border-border overflow-hidden" data-testid={testId}>
+    <div
+      className="rounded-lg overflow-hidden"
+      style={{ border: `1px solid ${v.headerBorder}` }}
+      data-testid={testId}
+    >
       {/* Section Header */}
-      <div className={`px-4 py-3 border-b ${styles.header}`}>
+      <div
+        className="px-4 py-3"
+        style={{ background: v.headerBg, borderBottom: `1px solid ${v.headerBorder}` }}
+      >
         <div className="flex items-center gap-2 mb-1">
-          <div className={`inline-flex items-center justify-center w-6 h-6 rounded-md ${styles.iconBg}`}>
+          <div
+            className="inline-flex items-center justify-center w-6 h-6 rounded-md shrink-0"
+            style={{ background: v.iconBg, color: v.iconColor }}
+          >
             {icon}
           </div>
-          <h4 className={`text-sm font-semibold ${styles.title}`}>{title}</h4>
+          <h4 className="text-[13px] font-semibold" style={{ color: v.titleColor }}>{title}</h4>
         </div>
-        <p className={`text-xs leading-relaxed ${styles.headline}`}>{section.headline}</p>
+        <p className="text-[12px] leading-relaxed" style={{ color: v.headlineColor }}>{section.headline}</p>
       </div>
 
       {/* Insights */}
       {section.insights.length > 0 ? (
-        <div className="divide-y divide-border/50">
+        <div className="bg-card">
           {section.insights.map((insight, i) => {
-            const typeStyle = INSIGHT_TYPE_STYLES[insight.type] || INSIGHT_TYPE_STYLES.pattern;
+            const s = INSIGHT_VARIANTS[insight.type] || INSIGHT_VARIANTS.pattern;
             return (
               <div
                 key={i}
-                className={`px-4 py-3 border-l-[3px] ${typeStyle.border}`}
+                className="px-4 py-3 flex gap-3"
+                style={{
+                  borderBottom: i < section.insights.length - 1 ? "1px solid var(--border)" : "none",
+                }}
                 data-testid={`${testId}-insight-${i}`}
               >
-                <div className="flex items-center gap-2 mb-0.5">
-                  <span className={`text-[10px] font-semibold tracking-wide ${typeStyle.labelColor}`}>
-                    {typeStyle.label}
-                  </span>
+                {/* Type indicator dot */}
+                <div className="pt-1 shrink-0">
+                  <div
+                    className="w-1.5 h-1.5 rounded-full mt-1"
+                    style={{ background: s.dot }}
+                  />
                 </div>
-                <p className="text-xs font-medium text-foreground">{insight.title}</p>
-                <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">{insight.description}</p>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span
+                      className="text-[10px] font-bold tracking-wider"
+                      style={{ color: s.labelColor }}
+                    >
+                      {s.label}
+                    </span>
+                  </div>
+                  <p className="text-[13px] font-medium text-foreground leading-snug">{insight.title}</p>
+                  <p className="text-[12px] text-muted-foreground leading-relaxed mt-0.5">{insight.description}</p>
+                </div>
               </div>
             );
           })}
         </div>
       ) : (
-        <div className="px-4 py-3">
-          <p className="text-xs text-muted-foreground">No deals in this stage for the selected filters.</p>
+        <div className="px-4 py-3 bg-card">
+          <p className="text-[12px] text-muted-foreground">No deals in this stage for the selected filters.</p>
         </div>
       )}
     </div>
@@ -944,12 +1002,42 @@ function AiStageCard({
 
 /* ─── Shared Components ─── */
 
-function KpiCard({ label, value, sub, testId }: { label: string; value: string; sub: string; testId: string }) {
+function KpiCard({
+  label,
+  value,
+  sub,
+  testId,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  testId: string;
+}) {
   return (
-    <div className="rounded-md border border-border bg-card p-5" data-testid={testId}>
-      <p className="text-xs font-medium text-muted-foreground">{label}</p>
-      <p className="text-2xl font-semibold text-foreground mt-1">{value}</p>
-      <p className="text-xs text-muted-foreground mt-1">{sub}</p>
+    <div
+      className="rounded-lg bg-card p-5"
+      style={{
+        border: "1px solid var(--border)",
+        boxShadow: "var(--shadow-xs)",
+      }}
+      data-testid={testId}
+    >
+      <p
+        className="text-[11px] font-semibold uppercase tracking-wide"
+        style={{ color: "var(--zinc-400)" }}
+      >
+        {label}
+      </p>
+      <p
+        className="text-[28px] font-semibold tracking-tight mt-2 leading-none"
+        style={{
+          color: "var(--zinc-900)",
+          letterSpacing: "-0.5px",
+        }}
+      >
+        {value}
+      </p>
+      <p className="text-[12px] text-muted-foreground mt-2">{sub}</p>
     </div>
   );
 }
@@ -974,7 +1062,7 @@ function BreakdownTable({ title, rows, testId }: { title: string; rows: Breakdow
             <tbody>
               {rows.map((row) => (
                 <tr key={row.label} className="border-b border-border/50">
-                  <td className={`py-2 pr-3 font-medium whitespace-nowrap ${row.label === UNKNOWN_VALUE ? "text-muted-foreground italic" : "text-foreground"}`}>
+                  <td className={`py-2 pr-3 font-medium ${row.label === UNKNOWN_VALUE ? "text-muted-foreground italic" : "text-foreground"}`}>
                     {row.label}
                   </td>
                   <td className="py-2 px-2 text-right text-foreground">{row.count}</td>

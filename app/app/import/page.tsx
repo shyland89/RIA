@@ -2,7 +2,30 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { INDUSTRY_CLUSTERS, SOURCE_GROUP_LABELS } from "@/lib/enrichment";
+
+// Inline constants to avoid any import chain issues
+const INDUSTRY_CLUSTERS = [
+  "Technology & Software",
+  "Financial Services",
+  "Professional Services",
+  "Healthcare & Life Sciences",
+  "Retail & E-commerce",
+  "Manufacturing & Industrial",
+  "Media & Advertising",
+  "Logistics & Transport",
+  "Construction & Real Estate",
+  "Hospitality & Travel",
+  "Public Sector & Education",
+  "Telecommunications",
+  "Energy & Utilities",
+  "Other",
+] as const;
+
+const SOURCE_GROUP_OPTIONS = [
+  { value: "inbound", label: "Inbound" },
+  { value: "outbound", label: "Outbound" },
+  { value: "other", label: "Other" },
+];
 
 type UploadResult = {
   headers: string[];
@@ -49,6 +72,7 @@ type EnrichmentMapping = {
 };
 
 const NOT_PROVIDED = "__not_provided__";
+const NULL_TOKENS = ["na", "n/a", "null", "none", "-", ""];
 
 const TARGET_FIELDS = [
   { key: "name", label: "Name", required: true },
@@ -65,6 +89,20 @@ const TARGET_FIELDS = [
 ];
 
 type Step = "upload" | "mapping" | "enrichment" | "importing" | "results";
+
+function extractUniqueValuesFromPreview(
+  preview: Record<string, string>[],
+  columnName: string
+): string[] {
+  const seen = new Set<string>();
+  for (const row of preview) {
+    const val = row[columnName]?.trim();
+    if (val && !NULL_TOKENS.includes(val.toLowerCase())) {
+      seen.add(val);
+    }
+  }
+  return Array.from(seen).sort();
+}
 
 export default function ImportPage() {
   const [step, setStep] = useState<Step>("upload");
@@ -86,7 +124,10 @@ export default function ImportPage() {
     source: {},
   });
   const [enrichmentLoading, setEnrichmentLoading] = useState(false);
-  const [enrichmentError, setEnrichmentError] = useState("");
+  const [enrichmentClassified, setEnrichmentClassified] = useState(false);
+  // Unique raw values extracted from preview for the mapping UI
+  const [uniqueIndustries, setUniqueIndustries] = useState<string[]>([]);
+  const [uniqueSources, setUniqueSources] = useState<string[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -165,7 +206,7 @@ export default function ImportPage() {
     return warnings;
   }
 
-  // ─── Enrichment Preview ────────────────────────────────────────────────────
+  // ─── Proceed to enrichment step ───────────────────────────────────────────
 
   async function handleProceedToEnrichment() {
     if (!uploadResult) return;
@@ -175,56 +216,54 @@ export default function ImportPage() {
     const hasSource =
       mapping.source && mapping.source !== "" && mapping.source !== NOT_PROVIDED;
 
-    // If neither field is mapped, skip enrichment step
+    // If neither field mapped, skip enrichment entirely
     if (!hasIndustry && !hasSource) {
-      handleImportClick();
+      doImport();
       return;
     }
 
-    setEnrichmentLoading(true);
-    setEnrichmentError("");
+    // Extract unique values from preview to populate the UI immediately
+    const industries = hasIndustry
+      ? extractUniqueValuesFromPreview(uploadResult.preview, mapping.industry)
+      : [];
+    const sources = hasSource
+      ? extractUniqueValuesFromPreview(uploadResult.preview, mapping.source)
+      : [];
+
+    setUniqueIndustries(industries);
+    setUniqueSources(sources);
+
+    // Initialise mapping with empty strings so the UI shows all rows
+    const initialIndustry: Record<string, string> = {};
+    for (const i of industries) initialIndustry[i] = "Other";
+
+    const initialSource: Record<string, string> = {};
+    for (const s of sources) initialSource[s] = "other";
+
+    setEnrichmentMapping({ industry: initialIndustry, source: initialSource });
+    setEnrichmentClassified(false);
     setStep("enrichment");
 
-    try {
-      // Collect unique values from preview (full classification happens at import,
-      // but preview gives us enough to show the user a representative sample)
-      const industries = hasIndustry
-        ? [
-            ...new Set(
-              uploadResult.preview
-                .map((r) => r[mapping.industry]?.trim())
-                .filter((v): v is string => !!v && v !== "")
-            ),
-          ]
-        : [];
-
-      const sources = hasSource
-        ? [
-            ...new Set(
-              uploadResult.preview
-                .map((r) => r[mapping.source]?.trim())
-                .filter((v): v is string => !!v && v !== "")
-            ),
-          ]
-        : [];
-
-      const res = await fetch("/api/import/classify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ industries, sources }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        setEnrichmentError(data.error || "Classification failed");
-        return;
+    // Try to auto-classify in background — UI is already usable without it
+    if (industries.length > 0 || sources.length > 0) {
+      setEnrichmentLoading(true);
+      try {
+        const res = await fetch("/api/import/classify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ industries, sources }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setEnrichmentMapping(data.enrichmentMapping);
+          setEnrichmentClassified(true);
+        }
+        // If classification fails, the user still has the default mapping to work with
+      } catch {
+        // Silent — user can adjust the defaults manually
+      } finally {
+        setEnrichmentLoading(false);
       }
-
-      setEnrichmentMapping(data.enrichmentMapping);
-    } catch {
-      setEnrichmentError("Classification failed. You can adjust manually or skip.");
-    } finally {
-      setEnrichmentLoading(false);
     }
   }
 
@@ -293,7 +332,9 @@ export default function ImportPage() {
     setError("");
     setImportMode("append");
     setEnrichmentMapping({ industry: {}, source: {} });
-    setEnrichmentError("");
+    setEnrichmentClassified(false);
+    setUniqueIndustries([]);
+    setUniqueSources([]);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
@@ -428,7 +469,10 @@ export default function ImportPage() {
                   </p>
                 ) : (
                   <>
-                    <p className="text-[15px] font-semibold mb-1" style={{ color: "var(--stone-900)" }}>
+                    <p
+                      className="text-[15px] font-semibold mb-1"
+                      style={{ color: "var(--stone-900)" }}
+                    >
                       Drop your CSV here or{" "}
                       <span style={{ color: "var(--teal-600)" }}>browse</span>
                     </p>
@@ -477,8 +521,7 @@ export default function ImportPage() {
                   </span>
                 </div>
                 <p className="text-sm mb-2" style={{ color: "var(--stone-500)" }}>
-                  Map each CSV column to the corresponding opportunity field. Only Name, Amount, and
-                  Outcome are required. At least one date field must also be mapped.
+                  Map each CSV column to the corresponding opportunity field.
                 </p>
                 <p className="text-xs mb-4" style={{ color: "var(--stone-400)" }}>
                   Optional fields can be set to &quot;Not provided&quot; if your CSV doesn&apos;t
@@ -502,7 +545,10 @@ export default function ImportPage() {
                 <div className="grid gap-3 sm:grid-cols-2">
                   {TARGET_FIELDS.map((field) => (
                     <div key={field.key} className="flex flex-col gap-1">
-                      <label className="text-xs font-semibold" style={{ color: "var(--stone-700)" }}>
+                      <label
+                        className="text-xs font-semibold"
+                        style={{ color: "var(--stone-700)" }}
+                      >
                         {field.label}
                         {field.required && (
                           <span style={{ color: "var(--error)" }} className="ml-0.5">
@@ -510,7 +556,10 @@ export default function ImportPage() {
                           </span>
                         )}
                         {!field.required && (
-                          <span className="font-normal ml-1" style={{ color: "var(--stone-400)" }}>
+                          <span
+                            className="font-normal ml-1"
+                            style={{ color: "var(--stone-400)" }}
+                          >
                             (optional)
                           </span>
                         )}
@@ -523,7 +572,9 @@ export default function ImportPage() {
                         data-testid={`select-mapping-${field.key}`}
                       >
                         <option value="">— Select column —</option>
-                        {!field.required && <option value={NOT_PROVIDED}>Not provided</option>}
+                        {!field.required && (
+                          <option value={NOT_PROVIDED}>Not provided</option>
+                        )}
                         {uploadResult.headers.map((h) => (
                           <option key={h} value={h}>
                             {h}
@@ -547,7 +598,10 @@ export default function ImportPage() {
               data-testid="section-import-mode"
             >
               <div className="p-6">
-                <h2 className="text-sm font-semibold mb-3" style={{ color: "var(--stone-900)" }}>
+                <h2
+                  className="text-sm font-semibold mb-3"
+                  style={{ color: "var(--stone-900)" }}
+                >
                   Import Mode
                 </h2>
                 <div className="flex flex-col gap-3">
@@ -565,12 +619,14 @@ export default function ImportPage() {
                       style={{ accentColor: "var(--teal-600)" }}
                     />
                     <div>
-                      <p className="text-sm font-semibold" style={{ color: "var(--stone-900)" }}>
+                      <p
+                        className="text-sm font-semibold"
+                        style={{ color: "var(--stone-900)" }}
+                      >
                         Append
                       </p>
                       <p className="text-xs" style={{ color: "var(--stone-500)" }}>
-                        Add this data alongside your existing opportunities. Previous imports are
-                        preserved.
+                        Add this data alongside your existing opportunities.
                       </p>
                     </div>
                   </label>
@@ -588,7 +644,10 @@ export default function ImportPage() {
                       style={{ accentColor: "var(--teal-600)" }}
                     />
                     <div>
-                      <p className="text-sm font-semibold" style={{ color: "var(--stone-900)" }}>
+                      <p
+                        className="text-sm font-semibold"
+                        style={{ color: "var(--stone-900)" }}
+                      >
                         Replace
                       </p>
                       <p className="text-xs" style={{ color: "var(--stone-500)" }}>
@@ -611,7 +670,10 @@ export default function ImportPage() {
               data-testid="section-preview"
             >
               <div className="p-6">
-                <h2 className="text-sm font-semibold mb-4" style={{ color: "var(--stone-900)" }}>
+                <h2
+                  className="text-sm font-semibold mb-4"
+                  style={{ color: "var(--stone-900)" }}
+                >
                   Preview (first {Math.min(20, uploadResult.preview.length)} rows)
                 </h2>
                 <div className="overflow-x-auto">
@@ -646,7 +708,10 @@ export default function ImportPage() {
                     <tbody>
                       {uploadResult.preview.map((row, i) => (
                         <tr key={i} style={{ borderBottom: "1px solid var(--stone-100)" }}>
-                          <td className="px-3 py-2.5 text-xs" style={{ color: "var(--stone-400)" }}>
+                          <td
+                            className="px-3 py-2.5 text-xs"
+                            style={{ color: "var(--stone-400)" }}
+                          >
                             {i + 1}
                           </td>
                           {uploadResult.headers.map((h) => (
@@ -684,7 +749,10 @@ export default function ImportPage() {
                 onClick={handleProceedToEnrichment}
                 disabled={!isMappingValid()}
                 className="inline-flex items-center px-5 py-2.5 text-[13px] font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                style={{ background: "var(--teal-600)", borderRadius: "var(--radius-sm, 6px)" }}
+                style={{
+                  background: "var(--teal-600)",
+                  borderRadius: "var(--radius-sm, 6px)",
+                }}
                 data-testid="button-proceed-enrichment"
               >
                 Continue →
@@ -696,262 +764,242 @@ export default function ImportPage() {
         {/* Step 3: Enrichment Review */}
         {step === "enrichment" && (
           <div className="space-y-6" data-testid="section-enrichment">
+            {/* Header */}
             <div
               className="bg-white"
               style={{
                 border: "1px solid var(--stone-200)",
                 borderRadius: "var(--radius-lg, 14px)",
-                overflow: "hidden",
               }}
             >
-              <div className="p-6">
-                <div className="flex items-start gap-3 mb-2">
-                  <div
-                    className="inline-flex items-center justify-center w-8 h-8 rounded-md shrink-0"
-                    style={{ background: "var(--teal-50)" }}
+              <div className="p-6 flex items-start gap-3">
+                <div
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-md shrink-0 mt-0.5"
+                  style={{ background: "var(--teal-50)" }}
+                >
+                  <svg
+                    className="w-4 h-4"
+                    style={{ color: "var(--teal-600)" }}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    <svg
-                      className="w-4 h-4"
-                      style={{ color: "var(--teal-600)" }}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                    />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <h2
+                      className="text-sm font-semibold"
+                      style={{ color: "var(--stone-900)" }}
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                      />
-                    </svg>
-                  </div>
-                  <div>
-                    <h2 className="text-sm font-semibold" style={{ color: "var(--stone-900)" }}>
                       Review AI-Inferred Groups
                     </h2>
-                    <p className="text-xs mt-0.5" style={{ color: "var(--stone-500)" }}>
-                      We&apos;ve classified your industry and source values into standard groups.
-                      Review and adjust before importing — these groupings will appear as additional
-                      dimensions in your analytics.
-                    </p>
+                    {enrichmentLoading && (
+                      <svg
+                        className="w-4 h-4 animate-spin"
+                        style={{ color: "var(--teal-600)" }}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                        />
+                      </svg>
+                    )}
+                    {!enrichmentLoading && enrichmentClassified && (
+                      <span
+                        className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                        style={{
+                          background: "var(--teal-50)",
+                          color: "var(--teal-700)",
+                          border: "1px solid var(--teal-200)",
+                        }}
+                      >
+                        AI classified
+                      </span>
+                    )}
+                    {!enrichmentLoading && !enrichmentClassified && (
+                      <span
+                        className="text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                        style={{
+                          background: "var(--warning-bg)",
+                          color: "var(--warning)",
+                          border: "1px solid #fcd34d",
+                        }}
+                      >
+                        Manual review
+                      </span>
+                    )}
                   </div>
+                  <p className="text-xs mt-0.5" style={{ color: "var(--stone-500)" }}>
+                    {enrichmentLoading
+                      ? "Classifying your values — you can adjust once complete, or proceed now with the defaults."
+                      : enrichmentClassified
+                      ? "Review and adjust the inferred groupings before importing."
+                      : "Auto-classification unavailable. Assign groups manually below, or proceed with defaults."}
+                  </p>
                 </div>
               </div>
             </div>
 
-            {enrichmentLoading && (
+            {/* Industry Cluster Mapping */}
+            {uniqueIndustries.length > 0 && (
               <div
-                className="bg-white p-8 text-center"
+                className="bg-white"
                 style={{
                   border: "1px solid var(--stone-200)",
                   borderRadius: "var(--radius-lg, 14px)",
+                  overflow: "hidden",
                 }}
+                data-testid="section-industry-enrichment"
               >
                 <div
-                  className="inline-flex items-center justify-center w-10 h-10 rounded-full mb-3"
-                  style={{ background: "var(--teal-50)" }}
+                  className="px-6 py-4"
+                  style={{ borderBottom: "1px solid var(--stone-100)" }}
                 >
-                  <svg
-                    className="w-5 h-5 animate-spin"
-                    style={{ color: "var(--teal-600)" }}
-                    fill="none"
-                    viewBox="0 0 24 24"
+                  <h3
+                    className="text-sm font-semibold"
+                    style={{ color: "var(--stone-900)" }}
                   >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                    />
-                  </svg>
+                    Industry → Cluster
+                  </h3>
+                  <p className="text-xs mt-0.5" style={{ color: "var(--stone-500)" }}>
+                    NACE-based groupings used for cross-segment analysis.
+                  </p>
                 </div>
-                <p className="text-sm font-semibold" style={{ color: "var(--stone-900)" }}>
-                  Classifying your data...
-                </p>
-                <p className="text-xs mt-1" style={{ color: "var(--stone-500)" }}>
-                  This takes a few seconds.
-                </p>
+                <div className="divide-y" style={{ borderColor: "var(--stone-100)" }}>
+                  {uniqueIndustries.map((raw) => (
+                    <div
+                      key={raw}
+                      className="flex items-center gap-4 px-6 py-3"
+                      data-testid={`industry-row-${raw}`}
+                    >
+                      <span
+                        className="text-sm font-medium shrink-0 truncate"
+                        style={{ color: "var(--stone-900)", width: "200px" }}
+                        title={raw}
+                      >
+                        {raw}
+                      </span>
+                      <svg
+                        className="w-4 h-4 shrink-0"
+                        style={{ color: "var(--stone-400)" }}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                      <select
+                        value={enrichmentMapping.industry[raw] || "Other"}
+                        onChange={(e) => updateIndustryCluster(raw, e.target.value)}
+                        className="flex-1 px-3 py-1.5 text-sm"
+                        style={selectStyle}
+                        data-testid={`select-industry-cluster-${raw}`}
+                      >
+                        {INDUSTRY_CLUSTERS.map((c) => (
+                          <option key={c} value={c}>
+                            {c}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
-            {enrichmentError && (
+            {/* Source Group Mapping */}
+            {uniqueSources.length > 0 && (
               <div
-                className="px-4 py-3 text-sm"
+                className="bg-white"
                 style={{
-                  border: "1px solid #fca5a5",
-                  background: "var(--error-bg)",
-                  color: "var(--error)",
-                  borderRadius: "var(--radius-md, 10px)",
+                  border: "1px solid var(--stone-200)",
+                  borderRadius: "var(--radius-lg, 14px)",
+                  overflow: "hidden",
                 }}
+                data-testid="section-source-enrichment"
               >
-                {enrichmentError}
+                <div
+                  className="px-6 py-4"
+                  style={{ borderBottom: "1px solid var(--stone-100)" }}
+                >
+                  <h3
+                    className="text-sm font-semibold"
+                    style={{ color: "var(--stone-900)" }}
+                  >
+                    Source → Group
+                  </h3>
+                  <p className="text-xs mt-0.5" style={{ color: "var(--stone-500)" }}>
+                    Inbound vs outbound classification for motion analysis.
+                  </p>
+                </div>
+                <div className="divide-y" style={{ borderColor: "var(--stone-100)" }}>
+                  {uniqueSources.map((raw) => (
+                    <div
+                      key={raw}
+                      className="flex items-center gap-4 px-6 py-3"
+                      data-testid={`source-row-${raw}`}
+                    >
+                      <span
+                        className="text-sm font-medium shrink-0 truncate"
+                        style={{ color: "var(--stone-900)", width: "200px" }}
+                        title={raw}
+                      >
+                        {raw}
+                      </span>
+                      <svg
+                        className="w-4 h-4 shrink-0"
+                        style={{ color: "var(--stone-400)" }}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                      <select
+                        value={enrichmentMapping.source[raw] || "other"}
+                        onChange={(e) => updateSourceGroup(raw, e.target.value)}
+                        className="flex-1 px-3 py-1.5 text-sm"
+                        style={selectStyle}
+                        data-testid={`select-source-group-${raw}`}
+                      >
+                        {SOURCE_GROUP_OPTIONS.map(({ value, label }) => (
+                          <option key={value} value={value}>
+                            {label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  ))}
+                </div>
               </div>
-            )}
-
-            {!enrichmentLoading && (
-              <>
-                {/* Industry Cluster Mapping */}
-                {Object.keys(enrichmentMapping.industry).length > 0 && (
-                  <div
-                    className="bg-white"
-                    style={{
-                      border: "1px solid var(--stone-200)",
-                      borderRadius: "var(--radius-lg, 14px)",
-                      overflow: "hidden",
-                    }}
-                    data-testid="section-industry-enrichment"
-                  >
-                    <div
-                      className="px-6 py-4"
-                      style={{ borderBottom: "1px solid var(--stone-100)" }}
-                    >
-                      <h3 className="text-sm font-semibold" style={{ color: "var(--stone-900)" }}>
-                        Industry → Cluster
-                      </h3>
-                      <p className="text-xs mt-0.5" style={{ color: "var(--stone-500)" }}>
-                        NACE-based groupings. Used for cross-segment analysis.
-                      </p>
-                    </div>
-                    <div className="divide-y" style={{ borderColor: "var(--stone-100)" }}>
-                      {Object.entries(enrichmentMapping.industry).map(([raw, cluster]) => (
-                        <div
-                          key={raw}
-                          className="flex items-center gap-4 px-6 py-3"
-                          data-testid={`industry-row-${raw}`}
-                        >
-                          <span
-                            className="text-sm font-medium w-48 shrink-0 truncate"
-                            style={{ color: "var(--stone-900)" }}
-                            title={raw}
-                          >
-                            {raw}
-                          </span>
-                          <svg
-                            className="w-4 h-4 shrink-0"
-                            style={{ color: "var(--stone-400)" }}
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 5l7 7-7 7"
-                            />
-                          </svg>
-                          <select
-                            value={cluster}
-                            onChange={(e) => updateIndustryCluster(raw, e.target.value)}
-                            className="flex-1 px-3 py-1.5 text-sm"
-                            style={selectStyle}
-                            data-testid={`select-industry-cluster-${raw}`}
-                          >
-                            {INDUSTRY_CLUSTERS.map((c) => (
-                              <option key={c} value={c}>
-                                {c}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Source Group Mapping */}
-                {Object.keys(enrichmentMapping.source).length > 0 && (
-                  <div
-                    className="bg-white"
-                    style={{
-                      border: "1px solid var(--stone-200)",
-                      borderRadius: "var(--radius-lg, 14px)",
-                      overflow: "hidden",
-                    }}
-                    data-testid="section-source-enrichment"
-                  >
-                    <div
-                      className="px-6 py-4"
-                      style={{ borderBottom: "1px solid var(--stone-100)" }}
-                    >
-                      <h3 className="text-sm font-semibold" style={{ color: "var(--stone-900)" }}>
-                        Source → Group
-                      </h3>
-                      <p className="text-xs mt-0.5" style={{ color: "var(--stone-500)" }}>
-                        Inbound vs outbound classification for motion analysis.
-                      </p>
-                    </div>
-                    <div className="divide-y" style={{ borderColor: "var(--stone-100)" }}>
-                      {Object.entries(enrichmentMapping.source).map(([raw, group]) => (
-                        <div
-                          key={raw}
-                          className="flex items-center gap-4 px-6 py-3"
-                          data-testid={`source-row-${raw}`}
-                        >
-                          <span
-                            className="text-sm font-medium w-48 shrink-0 truncate"
-                            style={{ color: "var(--stone-900)" }}
-                            title={raw}
-                          >
-                            {raw}
-                          </span>
-                          <svg
-                            className="w-4 h-4 shrink-0"
-                            style={{ color: "var(--stone-400)" }}
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 5l7 7-7 7"
-                            />
-                          </svg>
-                          <select
-                            value={group}
-                            onChange={(e) => updateSourceGroup(raw, e.target.value)}
-                            className="flex-1 px-3 py-1.5 text-sm"
-                            style={selectStyle}
-                            data-testid={`select-source-group-${raw}`}
-                          >
-                            {Object.entries(SOURCE_GROUP_LABELS).map(([val, label]) => (
-                              <option key={val} value={val}>
-                                {label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {Object.keys(enrichmentMapping.industry).length === 0 &&
-                  Object.keys(enrichmentMapping.source).length === 0 &&
-                  !enrichmentError && (
-                    <div
-                      className="bg-white p-6 text-center"
-                      style={{
-                        border: "1px solid var(--stone-200)",
-                        borderRadius: "var(--radius-lg, 14px)",
-                      }}
-                    >
-                      <p className="text-sm" style={{ color: "var(--stone-500)" }}>
-                        No industry or source data found in the preview rows. Groups will be inferred
-                        from the full dataset during import.
-                      </p>
-                    </div>
-                  )}
-              </>
             )}
 
             <div className="flex items-center gap-3 flex-wrap">
@@ -969,17 +1017,33 @@ export default function ImportPage() {
                 Back
               </button>
               <button
+                onClick={() => {
+                  setEnrichmentMapping({ industry: {}, source: {} });
+                  if (importMode === "replace") setShowReplaceConfirm(true);
+                  else doImport();
+                }}
+                className="inline-flex items-center px-5 py-2.5 text-[13px] font-semibold transition-colors"
+                style={{
+                  background: "#fff",
+                  color: "var(--stone-500)",
+                  border: "1px solid var(--stone-200)",
+                  borderRadius: "var(--radius-sm, 6px)",
+                }}
+                data-testid="button-skip-enrichment"
+              >
+                Skip grouping
+              </button>
+              <button
                 onClick={handleImportClick}
-                disabled={enrichmentLoading}
-                className="inline-flex items-center px-5 py-2.5 text-[13px] font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="inline-flex items-center px-5 py-2.5 text-[13px] font-semibold text-white transition-colors"
                 style={{
                   background: importMode === "replace" ? "var(--error)" : "var(--teal-600)",
                   borderRadius: "var(--radius-sm, 6px)",
                 }}
                 data-testid="button-import"
               >
-                {importMode === "replace" ? "Replace & Import" : "Import"} {uploadResult?.totalRows}{" "}
-                Rows
+                {importMode === "replace" ? "Replace & Import" : "Import"}{" "}
+                {uploadResult?.totalRows} Rows
               </button>
             </div>
           </div>
@@ -1023,8 +1087,8 @@ export default function ImportPage() {
                 </h3>
               </div>
               <p className="text-sm mb-6" style={{ color: "var(--stone-500)" }}>
-                This will remove all existing opportunities and replace them with the data from this
-                file. This action cannot be undone.
+                This will remove all existing opportunities and replace them with the data from
+                this file. This action cannot be undone.
               </p>
               <div className="flex items-center justify-end gap-3">
                 <button
@@ -1043,7 +1107,10 @@ export default function ImportPage() {
                 <button
                   onClick={doImport}
                   className="inline-flex items-center px-4 py-2 text-sm font-semibold text-white"
-                  style={{ background: "var(--error)", borderRadius: "var(--radius-sm, 6px)" }}
+                  style={{
+                    background: "var(--error)",
+                    borderRadius: "var(--radius-sm, 6px)",
+                  }}
                   data-testid="button-confirm-replace"
                 >
                   Yes, Replace All Data
@@ -1053,7 +1120,7 @@ export default function ImportPage() {
           </div>
         )}
 
-        {/* Step: Importing */}
+        {/* Importing */}
         {step === "importing" && (
           <div
             className="bg-white p-6 text-center"
@@ -1097,7 +1164,7 @@ export default function ImportPage() {
           </div>
         )}
 
-        {/* Step: Results */}
+        {/* Results */}
         {step === "results" && importResult && (
           <div className="space-y-6">
             <div
@@ -1199,7 +1266,6 @@ export default function ImportPage() {
                   </div>
                 </div>
 
-                {/* Enrichment summary */}
                 {importResult.enrichmentMapping &&
                   (Object.keys(importResult.enrichmentMapping.industry).length > 0 ||
                     Object.keys(importResult.enrichmentMapping.source).length > 0) && (
@@ -1210,14 +1276,17 @@ export default function ImportPage() {
                         border: "1px solid var(--teal-200)",
                       }}
                     >
-                      <p className="text-xs font-semibold" style={{ color: "var(--teal-800)" }}>
+                      <p
+                        className="text-xs font-semibold"
+                        style={{ color: "var(--teal-800)" }}
+                      >
                         Enrichment applied
                       </p>
                       <p className="text-xs mt-0.5" style={{ color: "var(--teal-700)" }}>
                         {Object.keys(importResult.enrichmentMapping.industry).length > 0 &&
-                          `${Object.keys(importResult.enrichmentMapping.industry).length} industry values → clusters. `}
+                          `${Object.keys(importResult.enrichmentMapping.industry).length} industry values mapped to clusters. `}
                         {Object.keys(importResult.enrichmentMapping.source).length > 0 &&
-                          `${Object.keys(importResult.enrichmentMapping.source).length} source values → inbound/outbound.`}
+                          `${Object.keys(importResult.enrichmentMapping.source).length} source values mapped to inbound/outbound.`}
                         {" "}These appear as &ldquo;Industry Cluster&rdquo; and &ldquo;Source Group&rdquo; in your analytics.
                       </p>
                     </div>
@@ -1289,7 +1358,10 @@ export default function ImportPage() {
                       <tbody>
                         {importResult.errors.map((err, i) => (
                           <tr key={i} style={{ borderBottom: "1px solid var(--stone-100)" }}>
-                            <td className="px-4 py-3" data-testid={`text-error-row-${i}`}>
+                            <td
+                              className="px-4 py-3"
+                              data-testid={`text-error-row-${i}`}
+                            >
                               <span
                                 className="font-mono text-xs px-2 py-0.5 rounded"
                                 style={{
@@ -1300,10 +1372,16 @@ export default function ImportPage() {
                                 {err.row_number}
                               </span>
                             </td>
-                            <td className="px-4 py-3" data-testid={`text-error-msg-${i}`}>
+                            <td
+                              className="px-4 py-3"
+                              data-testid={`text-error-msg-${i}`}
+                            >
                               <span
                                 className="text-xs px-2 py-1 rounded inline-block"
-                                style={{ background: "var(--error-bg)", color: "var(--error)" }}
+                                style={{
+                                  background: "var(--error-bg)",
+                                  color: "var(--error)",
+                                }}
                               >
                                 {err.error_message}
                               </span>
@@ -1342,7 +1420,10 @@ export default function ImportPage() {
               <Link
                 href={`/app/dashboard${importResult.jobId ? `?dataset=${importResult.jobId}` : ""}`}
                 className="inline-flex items-center gap-2 px-5 py-2.5 text-[13px] font-semibold text-white"
-                style={{ background: "var(--teal-600)", borderRadius: "var(--radius-sm, 6px)" }}
+                style={{
+                  background: "var(--teal-600)",
+                  borderRadius: "var(--radius-sm, 6px)",
+                }}
                 data-testid="link-view-analytics"
               >
                 View Analytics
@@ -1414,23 +1495,32 @@ export default function ImportPage() {
                 <table className="min-w-full text-[13px]">
                   <thead>
                     <tr style={{ borderBottom: "1px solid var(--stone-200)" }}>
-                      {["File", "Mode", "Status", "Rows", "Inserted", "Errors", "Date", "Actions"].map(
-                        (h) => (
-                          <th
-                            key={h}
-                            className={`px-4 py-3 text-[11px] font-semibold uppercase ${
-                              ["Rows", "Inserted", "Errors"].includes(h) ? "text-right" : "text-left"
-                            }`}
-                            style={{
-                              color: "var(--stone-500)",
-                              background: "var(--stone-50)",
-                              letterSpacing: "0.5px",
-                            }}
-                          >
-                            {h}
-                          </th>
-                        )
-                      )}
+                      {[
+                        "File",
+                        "Mode",
+                        "Status",
+                        "Rows",
+                        "Inserted",
+                        "Errors",
+                        "Date",
+                        "Actions",
+                      ].map((h) => (
+                        <th
+                          key={h}
+                          className={`px-4 py-3 text-[11px] font-semibold uppercase ${
+                            ["Rows", "Inserted", "Errors"].includes(h)
+                              ? "text-right"
+                              : "text-left"
+                          }`}
+                          style={{
+                            color: "var(--stone-500)",
+                            background: "var(--stone-50)",
+                            letterSpacing: "0.5px",
+                          }}
+                        >
+                          {h}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
@@ -1469,16 +1559,23 @@ export default function ImportPage() {
                         <td className="px-4 py-3">
                           <StatusBadge status={job.status} isActive={job.is_active} />
                         </td>
-                        <td className="px-4 py-3 text-right" style={{ color: "var(--stone-700)" }}>
+                        <td
+                          className="px-4 py-3 text-right"
+                          style={{ color: "var(--stone-700)" }}
+                        >
                           {job.row_count}
                         </td>
-                        <td className="px-4 py-3 text-right" style={{ color: "var(--success)" }}>
+                        <td
+                          className="px-4 py-3 text-right"
+                          style={{ color: "var(--success)" }}
+                        >
                           {job.inserted_count}
                         </td>
                         <td
                           className="px-4 py-3 text-right"
                           style={{
-                            color: job.error_count > 0 ? "var(--error)" : "var(--stone-700)",
+                            color:
+                              job.error_count > 0 ? "var(--error)" : "var(--stone-700)",
                           }}
                         >
                           {job.error_count}
@@ -1563,8 +1660,7 @@ function StepIndicator({
         className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold"
         style={{
           background: done && !active ? "var(--teal-600)" : active ? "var(--teal-50)" : "#fff",
-          color:
-            done && !active ? "#fff" : active ? "var(--teal-600)" : "var(--stone-400)",
+          color: done && !active ? "#fff" : active ? "var(--teal-600)" : "var(--stone-400)",
           border:
             done && !active
               ? "2px solid var(--teal-600)"
@@ -1605,7 +1701,8 @@ function StepDivider({ done }: { done?: boolean }) {
         width: "40px",
         height: "2px",
         background: done ? "var(--teal-400)" : "var(--stone-200)",
-        margin: "0 10px",
+        margin: "0 0 0 10px",
+        marginRight: "10px",
       }}
     />
   );

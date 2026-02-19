@@ -286,9 +286,12 @@ Important:
 - If an industry is genuinely ambiguous, use "Other"
 - Return empty objects {} for sections with no inputs`;
     try {
-        const response = await openai.responses.create({
-            model: "gpt-5.2",
-            input: [
+        const response = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            response_format: {
+                type: "json_object"
+            },
+            messages: [
                 {
                     role: "system",
                     content: systemPrompt
@@ -297,21 +300,17 @@ Important:
                     role: "user",
                     content: userPrompt
                 }
-            ],
-            text: {
-                format: {
-                    type: "json_object"
-                }
-            }
+            ]
         });
-        const parsed = JSON.parse(response.output_text);
+        const content = response.choices[0]?.message?.content;
+        if (!content) throw new Error("Empty response from OpenAI");
+        const parsed = JSON.parse(content);
         const industryMapping = {};
         if (parsed.industry && typeof parsed.industry === "object") {
             for (const [raw, cluster] of Object.entries(parsed.industry)){
                 if (INDUSTRY_CLUSTERS.includes(cluster)) {
                     industryMapping[raw] = cluster;
                 } else {
-                    // LLM returned an invalid cluster — fall back to Other
                     industryMapping[raw] = "Other";
                 }
             }

@@ -155,10 +155,10 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
-// Validate ../../../app/api/import/Classify/route.ts
+// Validate ../../../app/api/import/classify/route.ts
 {
-  type __IsExpected<Specific extends RouteHandlerConfig<"/api/import/Classify">> = Specific
-  const handler = {} as typeof import("../../../app/api/import/Classify/route.js")
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/import/classify">> = Specific
+  const handler = {} as typeof import("../../../app/api/import/classify/route.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check

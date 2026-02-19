@@ -138,18 +138,19 @@ Important:
 - Return empty objects {} for sections with no inputs`;
 
   try {
-    const response = await openai.responses.create({
-      model: "gpt-5.2",
-      input: [
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      response_format: { type: "json_object" },
+      messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      text: {
-        format: { type: "json_object" },
-      },
     });
 
-    const parsed = JSON.parse(response.output_text);
+    const content = response.choices[0]?.message?.content;
+    if (!content) throw new Error("Empty response from OpenAI");
+
+    const parsed = JSON.parse(content);
 
     const industryMapping: IndustryMapping = {};
     if (parsed.industry && typeof parsed.industry === "object") {
@@ -157,7 +158,6 @@ Important:
         if (INDUSTRY_CLUSTERS.includes(cluster as IndustryCluster)) {
           industryMapping[raw] = cluster as IndustryCluster;
         } else {
-          // LLM returned an invalid cluster — fall back to Other
           industryMapping[raw] = "Other";
         }
       }
@@ -188,7 +188,6 @@ Important:
     // Full fallback — return Other for all industries, other for unresolved sources
     const industryFallback: IndustryMapping = {};
     for (const i of uniqueIndustries) industryFallback[i] = "Other";
-
     for (const s of sourcesNeedingLLM) sourceMapping[s] = "other";
 
     return { industry: industryFallback, source: sourceMapping };
@@ -197,7 +196,7 @@ Important:
 
 /**
  * Apply enrichment mapping to a row's raw field values.
- * Returns null if the raw value isn't in the mapping (e.g. field was null).
+ * Returns null if the raw value isn't in the mapping.
  */
 export function applyIndustryCluster(
   rawIndustry: string | null | undefined,
